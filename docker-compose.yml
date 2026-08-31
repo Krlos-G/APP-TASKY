@@ -1,5 +1,7 @@
-# PostgreSQL de desenvolvimento do Tasky.
+# Ambiente de desenvolvimento do Tasky.
+#
 # Uso: docker compose up -d   |   docker compose down   |   docker compose down -v (apaga os dados)
+#      docker compose logs -f backend   |   docker compose restart backend
 
 services:
   db:
@@ -13,7 +15,9 @@ services:
       # Fixa o layout classico do diretorio de dados, independente do default da imagem.
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      # 5433 no host de proposito: a 5432 costuma estar ocupada por uma
+      # instalacao nativa do PostgreSQL, e o conflito e silencioso.
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - tasky-pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -23,6 +27,37 @@ services:
       retries: 10
       start_period: 10s
 
+  # O backend roda em container tambem no desenvolvimento.
+  #
+  # Motivo: nesta maquina o software de seguranca corporativo impede o java.exe
+  # de abrir conexoes de loopback, e sem isso o Tomcat nao sobe no Windows
+  # ("Unable to establish loopback connection"). Dentro do container a rede e
+  # Linux e o problema desaparece. O codigo e montado como volume, entao editar
+  # no Windows reflete aqui sem reconstruir imagem.
+  backend:
+    image: maven:3.9.16-eclipse-temurin-21
+    container_name: tasky-backend
+    working_dir: /workspace/backend
+    command: mvn spring-boot:run
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Variavel de ambiente tem precedencia sobre o .env lido pelo
+      # spring.config.import, entao aqui apontamos para o servico da rede
+      # interna em vez do localhost:5433 do host.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - ./:/workspace
+      # Cache do repositorio Maven: sem isto, cada subida rebaixaria tudo.
+      - tasky-m2:/root/.m2
+
 volumes:
   tasky-pgdata:
     name: tasky-pgdata
+  tasky-m2:
+    name: tasky-m2

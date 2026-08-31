@@ -17,7 +17,7 @@ PC, sincronizados. Nasceu para ajudar a montar e, principalmente, a **seguir** u
 - **JDK 21** com `JAVA_HOME` configurado
 - **Maven 3.9+** (ou use o `mvnw` que acompanha o projeto)
 - **Node 24 LTS** e npm
-- **Docker** rodando (necessário para o banco local e para os testes com Testcontainers)
+- **Docker** rodando (necessário para o banco, para o backend e para os testes com Testcontainers)
 
 Confira tudo de uma vez:
 
@@ -35,21 +35,26 @@ cp .env.example .env
 
 Edite o `.env` e defina uma senha para o PostgreSQL. Esse arquivo não é versionado.
 
-**2. Suba o banco:**
+**2. Suba o banco e o backend:**
 
 ```
 docker compose up -d
 ```
 
-**3. Suba o backend** (porta 8080):
+Isso sobe o PostgreSQL (porta **5433** no host) e o backend (porta **8080**). O Flyway aplica as
+migrações automaticamente. A primeira subida demora alguns minutos, baixando as dependências Maven;
+as seguintes são rápidas, porque o repositório fica num volume.
 
-```
-cd backend && ./mvnw spring-boot:run
-```
+Acompanhe com `docker compose logs -f backend`.
 
-O Flyway aplica as migrações automaticamente na subida.
+> **Por que o backend roda em container também no desenvolvimento?** Em máquinas com software de
+> segurança que intercepta rede (Kaspersky, FortiClient e similares), o `java.exe` pode ser impedido
+> de abrir conexões de loopback — e o Tomcat não sobe, falhando com *"Unable to establish loopback
+> connection"*. Dentro do container a rede é Linux e o problema não existe. Onde o Java funciona
+> normalmente, `cd backend && ./mvnw spring-boot:run` continua sendo uma alternativa válida, desde
+> que o `SPRING_DATASOURCE_URL` aponte para `localhost:5433`.
 
-**4. Suba o frontend** (porta 4200):
+**3. Suba o frontend** (porta 4200):
 
 ```
 cd frontend && npm install && npm start
@@ -74,8 +79,10 @@ Os testes do backend sobem um PostgreSQL real via Testcontainers — o Docker pr
 
 | Comando | O que faz |
 |---|---|
-| `docker compose down` | Para o banco, preservando os dados |
-| `docker compose down -v` | Para o banco e **apaga** os dados (recria o schema do zero na próxima subida) |
+| `docker compose logs -f backend` | Acompanha o log do backend |
+| `docker compose restart backend` | Reinicia só o backend |
+| `docker compose down` | Para tudo, preservando os dados |
+| `docker compose down -v` | Para tudo e **apaga** os dados (recria o schema do zero na próxima subida) |
 | `cd frontend && npm run build` | Build de produção em `frontend/dist/` |
 
 Com o backend no ar, a documentação da API fica em <http://localhost:8080/swagger-ui.html> e o
