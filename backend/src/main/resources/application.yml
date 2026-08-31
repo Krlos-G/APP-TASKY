@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: tasky-backend
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/tasky}
+    username: ${SPRING_DATASOURCE_USERNAME:tasky}
+    password: ${SPRING_DATASOURCE_PASSWORD:tasky}
+
+  jpa:
+    # O Flyway e a unica fonte do schema. O Hibernate apenas confere se as
+    # entidades batem com as tabelas - qualquer divergencia quebra o boot.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
