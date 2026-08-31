@@ -1,0 +1,19 @@
+.pagina {
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+  }
+
+  &__nota {
+    margin: 0 0 1rem;
+    color: var(--cor-texto-fraco);
+  }
+
+  &__aviso {
+    padding: 1rem;
+    border: 1px dashed var(--cor-borda);
+    border-radius: var(--raio);
+    color: var(--cor-texto-fraco);
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,44 @@
+/* Estilos globais do Tasky. */
+
+:root {
+  --cor-fundo: #f7f7f8;
+  --cor-superficie: #ffffff;
+  --cor-borda: #e3e3e7;
+  --cor-texto: #1b1b1f;
+  --cor-texto-fraco: #6b6b76;
+  --cor-primaria: #4f46e5;
+  --cor-primaria-fraca: #eef2ff;
+
+  --raio: 12px;
+  --altura-tab-bar: 60px;
+  --largura-lateral: 220px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cor-fundo: #131316;
+    --cor-superficie: #1c1c21;
+    --cor-borda: #2e2e35;
+    --cor-texto: #f2f2f5;
+    --cor-texto-fraco: #a0a0ad;
+    --cor-primaria: #8b85f0;
+    --cor-primaria-fraca: #26263a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,108 @@
+.app {
+  min-height: 100dvh;
+}
+
+.conteudo {
+  padding: 1rem;
+  /* Espaco para a tab bar fixa nao cobrir o conteudo, respeitando a
+     area segura do iPhone (home indicator). */
+  padding-bottom: calc(var(--altura-tab-bar) + env(safe-area-inset-bottom) + 1rem);
+}
+
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--cor-superficie);
+  border-top: 1px solid var(--cor-borda);
+  padding-bottom: env(safe-area-inset-bottom);
+
+  &__marca {
+    display: none;
+  }
+
+  &__lista {
+    display: flex;
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      flex: 1;
+    }
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: var(--altura-tab-bar);
+    text-decoration: none;
+    color: var(--cor-texto-fraco);
+    font-size: 0.7rem;
+
+    &--ativo {
+      color: var(--cor-primaria);
+      font-weight: 600;
+    }
+  }
+
+  &__icone {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+}
+
+/* Desktop: a navegacao vira uma coluna lateral fixa. */
+@media (min-width: 768px) {
+  .app {
+    display: grid;
+    grid-template-columns: var(--largura-lateral) 1fr;
+  }
+
+  .conteudo {
+    padding: 2rem;
+  }
+
+  .nav {
+    position: sticky;
+    top: 0;
+    bottom: auto;
+    height: 100dvh;
+    border-top: none;
+    border-right: 1px solid var(--cor-borda);
+    padding: 1.25rem 0.75rem;
+
+    &__marca {
+      display: block;
+      padding: 0 0.75rem 1.25rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--cor-primaria);
+    }
+
+    &__lista {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    &__item {
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 0.75rem;
+      height: auto;
+      padding: 0.7rem 0.75rem;
+      border-radius: var(--raio);
+      font-size: 0.95rem;
+
+      &--ativo {
+        background: var(--cor-primaria-fraca);
+      }
+    }
+  }
+}
