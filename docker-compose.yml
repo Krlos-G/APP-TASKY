@@ -1,0 +1,28 @@
+# PostgreSQL de desenvolvimento do Tasky.
+# Uso: docker compose up -d   |   docker compose down   |   docker compose down -v (apaga os dados)
+
+services:
+  db:
+    image: postgres:18.6-alpine
+    container_name: tasky-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?defina POSTGRES_DB no .env}
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      # Fixa o layout classico do diretorio de dados, independente do default da imagem.
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - tasky-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  tasky-pgdata:
+    name: tasky-pgdata
