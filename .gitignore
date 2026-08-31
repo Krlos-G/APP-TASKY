@@ -1,0 +1,55 @@
+# ---------- Segredos ----------
+.env
+.env.local
+*.env.local
+
+# ---------- Java / Maven ----------
+target/
+*.class
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+dependency-reduced-pom.xml
+
+# ---------- Node / Angular ----------
+node_modules/
+dist/
+tmp/
+out-tsc/
+.angular/
+coverage/
+*.tsbuildinfo
+.npm/
+npm-debug.log*
+yarn-error.log*
+
+# ---------- IDEs ----------
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+!.vscode/extensions.json
+.settings/
+.project
+.classpath
+.factorypath
+
+# ---------- Sistema operacional ----------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# ---------- Logs e temporários ----------
+*.log
+logs/
+*.pid
+*.seed
+
+# ---------- Testes / ferramentas ----------
+playwright-report/
+test-results/
+.nyc_output/

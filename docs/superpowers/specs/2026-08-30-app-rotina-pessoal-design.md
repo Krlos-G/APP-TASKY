@@ -1,8 +1,10 @@
 # App de Rotina Pessoal — Documento de Design
 
-- **Data:** 2026-08-30
+- **Data:** 2026-08-30 (revisado em 2026-08-31 — versões de stack atualizadas, ver seção 15)
 - **Autor:** Carlos (carlosgabrielcaetanobarbosa@gmail.com), em conjunto com Claude
-- **Status:** aprovado para planejamento — próximo passo é o plano de implementação da Fatia 1
+- **Repositório:** https://github.com/Krlos-G/APP-TASKY — projeto **Tasky**
+- **Status:** aprovado; plano da Fatia 1 escrito em
+  `docs/superpowers/plans/2026-08-31-fatia-1-fundacao-plan.md`
 
 ---
 
@@ -47,9 +49,10 @@ Camada de engajamento priorizada pelo autor: **lembretes no horário** + **strea
 
 ### Caminho escolhido — PWA + backend Spring Boot
 
-- **Front:** Angular como **PWA** (Progressive Web App). No iPhone o usuário faz "Adicionar à Tela
-  de Início" e ganha um ícone/app; no PC é só abrir no navegador. Layout responsivo serve os dois.
-- **Back:** Spring Boot 3 (Java 21, **Maven**) + **PostgreSQL** + Hibernate/Spring Data JPA.
+- **Front:** Angular **22** como **PWA** (Progressive Web App). No iPhone o usuário faz "Adicionar
+  à Tela de Início" e ganha um ícone/app; no PC é só abrir no navegador. Layout responsivo serve os
+  dois. Testes com **Vitest**.
+- **Back:** Spring Boot **4.1.1** (Java 21, **Maven**) + **PostgreSQL** + Hibernate/Spring Data JPA.
   API REST. **Flyway** para versionar o schema.
 - **Sincronização:** trivial — é cliente/servidor; o Postgres é a fonte única da verdade.
 - **Notificações:** Web Push (padrão VAPID), com o backend agendando e disparando.
@@ -101,12 +104,12 @@ isso é **exatamente a stack que o autor já domina** (Angular + Spring Boot + P
 ### Decisões estruturais
 
 - **1 repositório Git**, com `/frontend` (Angular) e `/backend` (Spring Boot).
-- **Front:** Angular + `@angular/pwa` (service worker `ngsw` + manifest). O serviço `SwPush` do
+- **Front:** Angular 22 + `@angular/pwa` (service worker `ngsw` + manifest). O serviço `SwPush` do
   Angular cuida da assinatura de push e de receber as mensagens. Estado com `signals` + services;
   sem biblioteca de estado pesada no início.
-- **Back:** Spring Boot 3 (Web, Data JPA, Security, Validation), Flyway, PostgreSQL. Push com a lib
-  `nl.martijndwars:web-push`. Agendador = `@Scheduled(fixedDelay = 60s)` (instância única, sem lock
-  distribuído).
+- **Back:** Spring Boot 4.1.1 (Web, Data JPA, Security, Validation), Flyway, PostgreSQL,
+  springdoc-openapi 3.1.x. Push com a lib `nl.martijndwars:web-push` (**ver risco na seção 15**).
+  Agendador = `@Scheduled(fixedDelay = 60s)` (instância única, sem lock distribuído).
 - **API versionada** sob `/api/v1` desde o início.
 - **Dev local:** `docker-compose` apenas com o Postgres; front e back rodam na máquina.
 - **`Clock` injetável no Spring** e `TimeProvider` no Angular — nunca `Instant.now()` / `new Date()`
@@ -382,7 +385,7 @@ tem teste; todo bug corrigido ganha teste de regressão. Sem meta cega de cobert
   relógio → despacha → envia 1x, idempotente na 2ª rodada).
 - Lib `web-push`: não se testa; mocka-se `CanalNotificacao`.
 
-### Frontend (Angular + Jest + @testing-library/angular)
+### Frontend (Angular + Vitest + @testing-library/angular)
 
 - Services de domínio: cálculo de "agora", encaixe de tarefas nos espaços livres, "dia lotado",
   formatação de `streak`.
@@ -526,12 +529,14 @@ Cada fatia vira seu próprio ciclo de plano → implementação. A **Fatia 1** �
 ## 13. Decisões em aberto
 
 1. **Hospedagem final** (Railway vs Oracle Always Free vs Fly.io) — confirmar na Fatia 8.
-2. **Nome do repositório** (ex.: `rotina`, `meu-dia`).
-3. **Runner de teste no front:** proposto **Jest** (mais rápido no CI a partir de Windows) — confirmar
-   contra Karma/Jasmine.
-4. **Horário default do resumo "bom dia"** — proposto 07:00.
-5. **`Nova tarefa` no desktop:** rota cheia (como no mobile) ou painel lateral — reavaliar UX na
+2. **Horário default do resumo "bom dia"** — proposto 07:00.
+3. **`Nova tarefa` no desktop:** rota cheia (como no mobile) ou painel lateral — reavaliar UX na
    Fatia 5.
+
+### Decisões fechadas depois da versão inicial
+
+- **Nome do repositório:** `APP-TASKY` (projeto **Tasky**) — fechado em 2026-08-31.
+- **Runner de teste no front:** **Vitest**, não Jest — fechado em 2026-08-31 (ver seção 15).
 
 ---
 
@@ -549,3 +554,52 @@ Cada fatia vira seu próprio ciclo de plano → implementação. A **Fatia 1** �
   notificação.
 - **Materialização de lembrete:** transformar as regras (blocos/hábitos/tarefas + fuso) em linhas
   concretas de `LembreteDia` com horário absoluto (`Instant`).
+
+---
+
+## 15. Revisão de versões e riscos (2026-08-31)
+
+Ao preparar a Fatia 1, as versões reais do ecossistema foram verificadas e algumas escolhas da
+versão inicial deste documento foram atualizadas.
+
+### Versões alvo confirmadas
+
+| Item | Versão | Observação |
+|---|---|---|
+| **Spring Boot** | **4.1.1** | Estável atual (`4.2.0-M1` é milestone, ignorado). O documento original dizia "Spring Boot 3". |
+| **Java** | **21** (Temurin) | Baseline do Boot 4.1.1 é Java 17 → **a escolha por Java 21 continua válida**. |
+| **Maven** | 3.9.16 | Já instalado na máquina do autor. |
+| **Angular / CLI** | **22.1.6** | Exige Node `^22.22.3 \|\| ^24.15.0 \|\| >=26.0.0`. |
+| **Node** | **24.20.0 LTS** | A máquina tinha Node 20 (insuficiente). Gerenciado por `nvm-windows`. |
+| **TypeScript** | 6.0.x | Faixa exigida pelo `@angular/build` 22 (`>=6.0 <6.1`). |
+| **Vitest** | 4.0.x | Peer dependency de `@angular/build` 22. |
+| **springdoc-openapi** | 3.1.0 | A linha 3.x é a compatível com Spring Boot 4 (a 2.x era para o Boot 3). |
+| **PostgreSQL** | pinado no `docker-compose` | Versão fixada explicitamente, sem tag flutuante. |
+
+### Mudança: Jest → Vitest
+
+A versão inicial propunha **Jest** como runner do front. Verificando o Angular 22, o
+`@angular/build` traz **`vitest ^4.0.8`** como peer dependency e o **Karma está depreciado** desde o
+Angular 20. **Vitest** passa a ser o runner do projeto — é o caminho oficial e evita montar
+integração customizada. Aprovado pelo autor em 2026-08-31.
+
+### Risco aberto: biblioteca de Web Push
+
+`nl.martijndwars:web-push` está em **5.1.2, sem release desde fevereiro de 2025** (~18 meses).
+Não foi validada contra Java 21 / Spring Boot 4.
+
+- **Quando morde:** só na **Fatia 7** (notificações). Não bloqueia as Fatias 1–6.
+- **Contenção já prevista no design:** a lib fica atrás da interface `CanalNotificacao`, então
+  trocá-la não afeta o resto do sistema.
+- **Plano B:** implementar o protocolo Web Push diretamente (ECDH P-256 + HKDF + AES128GCM +
+  cabeçalhos VAPID assinados com ES256), usando BouncyCastle ou a JCA do próprio JDK. É código
+  autocontido de porte pequeno.
+- **Ação:** validar a lib com um _spike_ logo no início da Fatia 7, antes de construir a UI de
+  notificações em cima dela.
+
+### Pré-requisitos de máquina (Windows 11)
+
+Levantados em 2026-08-31: **Maven 3.9.16** já presente; **JDK 21**, **Node 24 LTS**, **WSL2** e
+**Docker Desktop** precisavam ser instalados. O Node é gerenciado por `nvm-windows` (não usar
+Chocolatey para ele). Docker é necessário tanto para o PostgreSQL local quanto para os testes com
+Testcontainers.
