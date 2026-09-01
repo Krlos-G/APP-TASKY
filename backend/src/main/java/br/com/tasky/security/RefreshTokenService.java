@@ -125,6 +125,21 @@ public class RefreshTokenService {
                 usuario, emitirNaFamilia(usuario, familia), perdeuCorrida);
     }
 
+    /**
+     * Encerra a sessao a partir do token apresentado no logout.
+     *
+     * Silencioso quando o token e desconhecido: sair duas vezes, ou com um
+     * token ja vencido, nao e erro do ponto de vista de quem chamou.
+     */
+    @Transactional
+    public void revogarFamiliaDoToken(String tokenEmClaro) {
+        if (tokenEmClaro == null || tokenEmClaro.isBlank()) {
+            return;
+        }
+        repository.buscarPorHashComUsuario(hashDe(tokenEmClaro))
+                .ifPresent(registro -> revogarFamilia(registro.getFamilia()));
+    }
+
     /** Encerra a sessao: revoga a familia inteira. */
     @Transactional
     public void revogarFamilia(UUID familia) {

@@ -140,11 +140,11 @@ class SecurityConfigTest {
         @Test
         @DisplayName("com o header o pedido passa pelo filtro")
         void comHeaderPassaPeloFiltro() throws Exception {
-            // Os endpoints ainda nao existem (Etapa 6), entao o esperado aqui e
-            // 404: o que importa e nao ser mais o 403 do filtro.
+            // 401 por falta do cookie de sessao, e nao mais 403 do filtro: o
+            // que importa aqui e ter passado pela defesa de CSRF.
             mockMvc.perform(post("/api/v1/auth/refresh")
                             .header(ClienteHeaderFilter.HEADER, ClienteHeaderFilter.VALOR_ESPERADO))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
