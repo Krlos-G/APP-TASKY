@@ -2,6 +2,7 @@ package br.com.tasky.config;
 
 import br.com.tasky.security.ClienteHeaderFilter;
 import br.com.tasky.security.JwtAuthenticationFilter;
+import br.com.tasky.security.LoginRateLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,13 +29,16 @@ public class SecurityConfig {
     private final AuthProperties propriedades;
     private final JwtAuthenticationFilter jwtFilter;
     private final ClienteHeaderFilter clienteHeaderFilter;
+    private final LoginRateLimitFilter loginRateLimitFilter;
 
     public SecurityConfig(AuthProperties propriedades,
                           JwtAuthenticationFilter jwtFilter,
-                          ClienteHeaderFilter clienteHeaderFilter) {
+                          ClienteHeaderFilter clienteHeaderFilter,
+                          LoginRateLimitFilter loginRateLimitFilter) {
         this.propriedades = propriedades;
         this.jwtFilter = jwtFilter;
         this.clienteHeaderFilter = clienteHeaderFilter;
+        this.loginRateLimitFilter = loginRateLimitFilter;
     }
 
     @Bean
@@ -68,6 +72,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
 
+                // O rate limit vem primeiro: barrar forca bruta nao deve custar
+                // nem o trabalho de validar token ou header.
+                .addFilterBefore(loginRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(clienteHeaderFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
