@@ -95,9 +95,10 @@ health check em <http://localhost:8080/actuator/health>.
 ├─ backend/                     Spring Boot
 │  └─ src/main/
 │     ├─ java/br/com/tasky/
-│     │  ├─ config/             beans de infraestrutura (Clock)
-│     │  ├─ dominio/            entidades JPA, enums e conversores
-│     │  └─ repositorio/        repositórios Spring Data
+│     │  ├─ config/             configuração e beans de infraestrutura
+│     │  ├─ entity/             entidades JPA, enums e converters
+│     │  ├─ repository/         repositórios Spring Data
+│     │  └─ security/           autenticação: tokens, filtros, políticas
 │     └─ resources/
 │        ├─ application.yml
 │        └─ db/migration/       migrações Flyway
@@ -116,6 +117,9 @@ health check em <http://localhost:8080/actuator/health>.
 - **Nomes de domínio em português**: tabelas e colunas em `snake_case` (`bloco_modelo`,
   `hora_inicio`), classes em `PascalCase` (`BlocoModelo`), enums em maiúsculas (`A_FAZER`).
   Exceção deliberada: `streak` fica em inglês.
+- **Sufixos técnicos em inglês**, seguindo a convenção Spring: `UsuarioRepository`,
+  `RefreshTokenService`, `AuthProperties`, `ClockConfig`. O domínio é português; a camada é inglês.
+  As entidades não levam sufixo — o pacote `entity/` já diz o que são.
 - **O Flyway é a única fonte do schema.** O Hibernate roda com `ddl-auto: validate`, então qualquer
   divergência entre entidade e tabela derruba a aplicação na subida — de propósito.
 - **Nada de `Instant.now()` solto.** Tudo que precisa da hora atual recebe o bean `Clock` injetado,
