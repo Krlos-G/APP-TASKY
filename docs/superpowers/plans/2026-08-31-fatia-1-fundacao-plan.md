@@ -207,7 +207,7 @@ mapeando para o `snake_case`.
 - Enums Java (`StatusTarefa`, `StatusRegistroHabito`, `TipoAgenda`, `Prioridade`, `DiaSemana`,
   `TipoOrigemLembrete`, `StatusLembrete`) com `@Enumerated(EnumType.STRING)`.
 - `@Version` em `Tarefa`, `Habito`, `ModeloDia` e `BlocoModelo` (bloqueio otimista do spec).
-- Um `RepositoryJpa` vazio por agregado, só para o contexto validar os mapeamentos.
+- Um `Repository` vazio por agregado, só para o contexto validar os mapeamentos.
 
 Como o `ddl-auto` é `validate`, **qualquer divergência entre entidade e tabela quebra o boot** — é
 exatamente o alarme que se quer nesta fatia.

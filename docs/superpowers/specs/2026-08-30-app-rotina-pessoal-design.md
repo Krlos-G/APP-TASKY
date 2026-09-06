@@ -250,7 +250,7 @@ e por um ícone de engrenagem no topo.
 
 ### Fallback confiável
 
-Interface `CanalNotificacao` com implementações `PushWeb`, `Telegram`, `Email`. **No v1 entra só
+Interface `NotificacaoChannel` com implementações `PushWeb`, `Telegram`, `Email`. **No v1 entra só
 `PushWeb`.** `Telegram` vem na v1.1 (bot API, sem custo, mais confiável que e-mail), como camada
 extra para lembretes marcados como críticos.
 
@@ -372,8 +372,8 @@ tem teste; todo bug corrigido ganha teste de regressão. Sem meta cega de cobert
 
 ### Backend (JUnit 5 + AssertJ + Mockito)
 
-- **Unit — onde mora o risco:** `CalculadoraStreak`, `MontadorDeDia`, `GeradorDeLembretes`
-  (`disparar_em` correto em `Instant`, casos de fuso/DST com clock fixo), `DespachanteDeLembretes`
+- **Unit — onde mora o risco:** `StreakCalculator`, `DiaAssembler`, `LembreteGenerator`
+  (`disparar_em` correto em `Instant`, casos de fuso/DST com clock fixo), `LembreteDispatcher`
   (regra dos 30 min, hábito já feito → `CANCELADO`, contador de tentativas). Table-driven.
 - **Slice:** `@WebMvcTest` (formato do `400`, `401` sem token, `404` para id alheio, contrato JSON);
   `@DataJpaTest` (query de lembretes `PENDENTE` vencidos, unique de `RegistroHabito`, bump do
@@ -381,9 +381,9 @@ tem teste; todo bug corrigido ganha teste de regressão. Sem meta cega de cobert
 - **Integração:** `@SpringBootTest` + **Testcontainers PostgreSQL** (Flyway roda do zero → cobre
   "migração aplica limpo"). Fluxos completos: registrar → login → criar rotina → `GET /api/v1/day`
   → marcar hábito → `streak` sobe; refresh rotation + grace de reuso + logout revoga; lembrete
-  ponta a ponta com `CanalNotificacao` fake em memória e clock controlado (materializa → avança
+  ponta a ponta com `NotificacaoChannel` fake em memória e clock controlado (materializa → avança
   relógio → despacha → envia 1x, idempotente na 2ª rodada).
-- Lib `web-push`: não se testa; mocka-se `CanalNotificacao`.
+- Lib `web-push`: não se testa; mocka-se `NotificacaoChannel`.
 
 ### Frontend (Angular + Vitest + @testing-library/angular)
 
@@ -589,7 +589,7 @@ integração customizada. Aprovado pelo autor em 2026-08-31.
 Não foi validada contra Java 21 / Spring Boot 4.
 
 - **Quando morde:** só na **Fatia 7** (notificações). Não bloqueia as Fatias 1–6.
-- **Contenção já prevista no design:** a lib fica atrás da interface `CanalNotificacao`, então
+- **Contenção já prevista no design:** a lib fica atrás da interface `NotificacaoChannel`, então
   trocá-la não afeta o resto do sistema.
 - **Plano B:** implementar o protocolo Web Push diretamente (ECDH P-256 + HKDF + AES128GCM +
   cabeçalhos VAPID assinados com ES256), usando BouncyCastle ou a JCA do próprio JDK. É código

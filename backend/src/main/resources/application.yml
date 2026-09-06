@@ -2,8 +2,18 @@ spring:
   application:
     name: tasky-backend
 
+  # Le o .env da raiz do repositorio em desenvolvimento, para que
+  # "./mvnw spring-boot:run" funcione sem exportar variavel na mao.
+  # Os dois caminhos cobrem rodar a partir de /backend ou da raiz; ambos sao
+  # opcionais, entao em producao (onde as variaveis vem do ambiente) sao
+  # simplesmente ignorados.
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/tasky}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/tasky}
     username: ${SPRING_DATASOURCE_USERNAME:tasky}
     password: ${SPRING_DATASOURCE_PASSWORD:tasky}
 
@@ -30,6 +40,25 @@ management:
   endpoint:
     health:
       show-details: never
+
+# Necessario atras do proxy da hospedagem: sem isto o IP do cliente chega como
+# o do balanceador e o rate limit do login trataria todo mundo como um so.
+server:
+  forward-headers-strategy: framework
+
+tasky:
+  auth:
+    # Sem default: a aplicacao recusa subir se nao vier do ambiente.
+    jwt-secret: ${TASKY_JWT_SECRET:}
+    validade-access-token: PT20M
+    validade-refresh-token: P60D
+    # Vazio desabilita o registro.
+    codigo-convite: ${TASKY_CODIGO_CONVITE:}
+    cookie-same-site: ${TASKY_COOKIE_SAMESITE:Lax}
+    cookie-secure: ${TASKY_COOKIE_SECURE:false}
+    # Vazio = sem CORS (front e API na mesma origem).
+    cors-origem: ${TASKY_CORS_ORIGEM:}
+    max-tentativas-login: ${TASKY_MAX_TENTATIVAS_LOGIN:10}
 
 springdoc:
   api-docs:

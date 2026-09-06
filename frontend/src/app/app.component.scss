@@ -2,6 +2,11 @@
   min-height: 100dvh;
 }
 
+/* Sem sessao nao ha navegacao, entao o conteudo usa a pagina inteira. */
+.app--sem-nav .conteudo {
+  padding: 0;
+}
+
 .conteudo {
   padding: 1rem;
   /* Espaco para a tab bar fixa nao cobrir o conteudo, respeitando a
@@ -56,6 +61,11 @@
     font-size: 1.25rem;
     line-height: 1;
   }
+
+  /* No celular a tab bar so tem as abas; o rodape aparece no desktop. */
+  &__rodape {
+    display: none;
+  }
 }
 
 /* Desktop: a navegacao vira uma coluna lateral fixa. */
@@ -69,14 +79,52 @@
     padding: 2rem;
   }
 
+  .app--sem-nav {
+    display: block;
+  }
+
   .nav {
     position: sticky;
     top: 0;
     bottom: auto;
+    display: flex;
+    flex-direction: column;
     height: 100dvh;
     border-top: none;
     border-right: 1px solid var(--cor-borda);
     padding: 1.25rem 0.75rem;
+
+    &__rodape {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-top: auto;
+      padding: 0.75rem;
+      border-top: 1px solid var(--cor-borda);
+    }
+
+    &__usuario {
+      overflow: hidden;
+      font-size: 0.875rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__sair {
+      flex-shrink: 0;
+      padding: 0.35rem 0.7rem;
+      border: 1px solid var(--cor-borda);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--cor-texto-fraco);
+      font-size: 0.8rem;
+      cursor: pointer;
+
+      &:hover {
+        color: var(--cor-texto);
+      }
+    }
 
     &__marca {
       display: block;

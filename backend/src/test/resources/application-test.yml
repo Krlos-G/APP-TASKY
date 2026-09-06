@@ -1,0 +1,16 @@
+# Configuracao exclusiva dos testes.
+#
+# Arquivo com sufixo de perfil (-test) de proposito: um application.yml em
+# src/test/resources substituiria por inteiro o do src/main, em vez de
+# complementa-lo. Com perfil, os valores daqui apenas sobrepoem os de base.
+tasky:
+  auth:
+    jwt-secret: segredo-apenas-de-teste-com-mais-de-32-bytes-de-tamanho
+    codigo-convite: convite-de-teste
+    cookie-secure: false
+    cookie-same-site: Lax
+    # Alto de proposito: o contexto Spring e compartilhado entre classes de
+    # teste, entao os logins de todas elas somam no mesmo IP e no mesmo minuto.
+    # O comportamento do limite e verificado em LoginRateLimitFilterTest, com
+    # relogio controlado.
+    max-tentativas-login: 10000
