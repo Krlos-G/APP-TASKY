@@ -122,16 +122,28 @@ public class RotinaService {
         return modelo;
     }
 
+    /**
+     * Devolve o modelo, nao o bloco.
+     *
+     * O controller precisa do modelo inteiro para recalcular as sobreposicoes,
+     * e navegar bloco.getModeloDia() fora da transacao estouraria - a relacao e
+     * preguicosa e o open-in-view esta desligado. Resolver aqui dentro mantem o
+     * controller sem saber nada de sessao do Hibernate.
+     */
     @Transactional
-    public BlocoModelo atualizarBloco(Long blocoId, BlocoRequest pedido) {
+    public ModeloDia atualizarBloco(Long blocoId, BlocoRequest pedido) {
         validarHorario(pedido);
+        Long usuarioId = usuarioAtual.idObrigatorio();
 
         BlocoModelo bloco = blocoRepository
-                .findByIdAndModeloDiaUsuarioId(blocoId, usuarioAtual.idObrigatorio())
+                .findByIdAndModeloDiaUsuarioId(blocoId, usuarioId)
                 .orElseThrow(() -> ApiException.naoEncontrado("Bloco"));
 
         aplicar(pedido, bloco);
-        return bloco;
+
+        return modeloRepository
+                .findByIdAndUsuarioId(bloco.getModeloDia().getId(), usuarioId)
+                .orElseThrow(() -> ApiException.naoEncontrado("Modelo de dia"));
     }
 
     @Transactional

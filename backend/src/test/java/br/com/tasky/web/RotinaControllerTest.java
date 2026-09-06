@@ -216,6 +216,46 @@ class RotinaControllerTest {
         }
 
         @Test
+        @DisplayName("editar bloco muda o horario e devolve o modelo inteiro")
+        void editarBloco() throws Exception {
+            long id = criarModelo(tokenCarlos, "Dia util");
+            adicionarBloco(tokenCarlos, id, "Treino", "09:00", "10:00");
+
+            var modelo = mockMvc.perform(comAuth(get("/api/v1/rotina/modelos/" + id), tokenCarlos))
+                    .andReturn();
+            long blocoId = json.readTree(modelo.getResponse().getContentAsString())
+                    .get("blocos").get(0).get("id").asLong();
+
+            mockMvc.perform(comAuth(put("/api/v1/rotina/blocos/" + blocoId), tokenCarlos)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(corpo(Map.of(
+                                    "titulo", "Treino", "horaInicio", "07:00", "horaFim", "08:00"))))
+                    .andExpect(status().isOk())
+                    // Devolve o modelo, nao o bloco: o front precisa dos avisos
+                    // de sobreposicao recalculados.
+                    .andExpect(jsonPath("$.blocos[0].horaInicio").value("07:00:00"))
+                    .andExpect(jsonPath("$.sobreposicoes").isArray());
+        }
+
+        @Test
+        @DisplayName("nao da para editar bloco de outro usuario")
+        void editarBlocoAlheio() throws Exception {
+            long doOutro = criarModelo(tokenOutro, "Fim de semana");
+            adicionarBloco(tokenOutro, doOutro, "Preguica", "10:00", "12:00");
+
+            var modelo = mockMvc.perform(comAuth(get("/api/v1/rotina/modelos/" + doOutro), tokenOutro))
+                    .andReturn();
+            long blocoId = json.readTree(modelo.getResponse().getContentAsString())
+                    .get("blocos").get(0).get("id").asLong();
+
+            mockMvc.perform(comAuth(put("/api/v1/rotina/blocos/" + blocoId), tokenCarlos)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(corpo(Map.of(
+                                    "titulo", "Invadido", "horaInicio", "07:00", "horaFim", "08:00"))))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
         @DisplayName("apagar bloco tira ele do modelo")
         void apagarBloco() throws Exception {
             long id = criarModelo(tokenCarlos, "Dia util");

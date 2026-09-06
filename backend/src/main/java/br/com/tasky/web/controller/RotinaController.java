@@ -69,7 +69,7 @@ public class RotinaController {
     @PutMapping("/blocos/{id}")
     public ModeloDiaResponse atualizarBloco(@PathVariable Long id,
                                             @Valid @RequestBody BlocoRequest pedido) {
-        return ModeloDiaResponse.de(rotinaService.atualizarBloco(id, pedido).getModeloDia());
+        return ModeloDiaResponse.de(rotinaService.atualizarBloco(id, pedido));
     }
 
     @DeleteMapping("/blocos/{id}")

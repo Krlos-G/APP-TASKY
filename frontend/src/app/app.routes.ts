@@ -20,6 +20,12 @@ export const routes: Routes = [
     loadComponent: () => import('./paginas/hoje/hoje.component').then((m) => m.Hoje),
   },
   {
+    path: 'rotina',
+    canActivate: [autenticacaoGuard],
+    title: 'Rotina · Tasky',
+    loadComponent: () => import('./paginas/rotina/rotina.component').then((m) => m.Rotina),
+  },
+  {
     path: 'resumo',
     canActivate: [autenticacaoGuard],
     title: 'Resumo · Tasky',
