@@ -3,7 +3,7 @@ package br.com.tasky;
 import br.com.tasky.repository.RefreshTokenRepository;
 import br.com.tasky.repository.UsuarioRepository;
 import br.com.tasky.security.ClienteHeaderFilter;
-import br.com.tasky.web.AuthController;
+import br.com.tasky.web.controller.AuthController;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

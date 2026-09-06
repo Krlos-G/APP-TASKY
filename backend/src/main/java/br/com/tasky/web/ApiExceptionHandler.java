@@ -3,6 +3,7 @@ package br.com.tasky.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,6 +40,19 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of(
                 "erro", "Dados invalidos.",
                 "campos", campos));
+    }
+
+    /**
+     * Duas edicoes simultaneas do mesmo registro - o @Version das entidades em
+     * acao. O cliente precisa recarregar antes de tentar de novo, senao
+     * sobrescreveria a alteracao do outro dispositivo sem perceber.
+     */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> tratarConflito(
+            ObjectOptimisticLockingFailureException e) {
+        log.debug("Conflito de edicao concorrente: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                "erro", "Este item foi alterado em outro lugar. Recarregue e tente de novo."));
     }
 
     @ExceptionHandler(Exception.class)

@@ -38,6 +38,22 @@ public class ApiException extends RuntimeException {
         return new ApiException(HttpStatus.UNAUTHORIZED, "Sessao expirada. Entre novamente.");
     }
 
+    /** Recurso inexistente OU de outro dono - o cliente nao distingue os casos. */
+    public static ApiException naoEncontrado(String oQue) {
+        return new ApiException(HttpStatus.NOT_FOUND, oQue + " nao encontrado.");
+    }
+
+    public static ApiException modeloEmUso(String dias) {
+        return new ApiException(HttpStatus.CONFLICT,
+                "Este modelo esta em uso em: " + dias + ". Troque o modelo desses dias antes de apaga-lo.");
+    }
+
+    public static ApiException horarioInvalido() {
+        return new ApiException(HttpStatus.BAD_REQUEST,
+                "A hora de fim precisa ser depois da hora de inicio. "
+                        + "Blocos que atravessam a meia-noite ainda nao sao suportados.");
+    }
+
     public static ApiException fusoHorarioInvalido(String valor) {
         return new ApiException(HttpStatus.BAD_REQUEST, "Fuso horario desconhecido: " + valor);
     }

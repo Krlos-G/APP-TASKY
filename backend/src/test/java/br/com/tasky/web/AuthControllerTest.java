@@ -1,5 +1,7 @@
 package br.com.tasky.web;
 
+import br.com.tasky.web.controller.AuthController;
+
 import br.com.tasky.TestcontainersConfiguration;
 import br.com.tasky.repository.RefreshTokenRepository;
 import br.com.tasky.repository.UsuarioRepository;

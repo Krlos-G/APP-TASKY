@@ -1,4 +1,4 @@
-package br.com.tasky.web;
+package br.com.tasky.web.controller;
 
 import br.com.tasky.security.UsuarioAutenticado;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
