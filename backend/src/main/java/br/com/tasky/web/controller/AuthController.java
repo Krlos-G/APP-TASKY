@@ -1,4 +1,6 @@
-package br.com.tasky.web;
+package br.com.tasky.web.controller;
+
+import br.com.tasky.web.ApiException;
 
 import br.com.tasky.config.AuthProperties;
 import br.com.tasky.security.AuthService;

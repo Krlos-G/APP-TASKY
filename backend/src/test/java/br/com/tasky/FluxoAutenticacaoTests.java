@@ -3,7 +3,7 @@ package br.com.tasky;
 import br.com.tasky.repository.RefreshTokenRepository;
 import br.com.tasky.repository.UsuarioRepository;
 import br.com.tasky.security.ClienteHeaderFilter;
-import br.com.tasky.web.AuthController;
+import br.com.tasky.web.controller.AuthController;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -93,7 +93,8 @@ class FluxoAutenticacaoTests {
         // ---------------------------------------------------------------
         // 3. O token abre as rotas protegidas
         // ---------------------------------------------------------------
-        mockMvc.perform(get("/api/v1/ping").header("Authorization", "Bearer " + accessToken))
+        mockMvc.perform(get("/api/v1/rotina/modelos")
+                        .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk());
 
         // ---------------------------------------------------------------

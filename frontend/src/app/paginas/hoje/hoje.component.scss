@@ -1,19 +1,194 @@
-.pagina {
-  h1 {
-    margin: 0 0 0.5rem;
+.hoje {
+  max-width: 640px;
+
+  &__topo h1 {
+    margin: 0;
     font-size: 1.5rem;
   }
 
-  &__nota {
-    margin: 0 0 1rem;
+  &__data {
+    margin: 0.15rem 0 1.25rem;
+    color: var(--cor-texto-fraco);
+    font-size: 0.9rem;
+    /* Só a inicial: capitalize maiusculiza toda palavra e produziria
+       "Domingo, 6 De Setembro". */
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
+
+  &__carregando {
     color: var(--cor-texto-fraco);
   }
 
-  &__aviso {
-    padding: 1rem;
-    border: 1px dashed var(--cor-borda);
-    border-radius: var(--raio);
+  &__rodape {
+    margin-top: 1.5rem;
+    color: var(--cor-texto-fraco);
+    font-size: 0.85rem;
+
+    a {
+      color: var(--cor-primaria);
+    }
+  }
+}
+
+.alerta {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, crimson 12%, transparent);
+  color: crimson;
+  font-size: 0.875rem;
+}
+
+/* ------------------------------------------------------- bloco atual */
+
+.agora {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--cor-primaria);
+  border-radius: var(--raio);
+  background: var(--cor-primaria-fraca);
+
+  /* Fora do bloco corrente o destaque é desnecessário: não há nada
+     acontecendo agora que mereça a cor de ênfase. */
+  &--calmo {
+    border-color: var(--cor-borda);
+    background: var(--cor-superficie);
+  }
+
+  &__rotulo {
+    color: var(--cor-primaria);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  &--calmo &__rotulo {
+    color: var(--cor-texto-fraco);
+  }
+
+  &__titulo {
+    margin: 0.3rem 0 0.2rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  &__detalhe {
+    margin: 0;
+    color: var(--cor-texto-fraco);
+    font-size: 0.85rem;
+  }
+}
+
+/* ----------------------------------------------------- linha do tempo */
+
+.linha {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__item {
+    display: grid;
+    grid-template-columns: 3.2rem auto 1fr auto;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 8px;
+
+    &--atual {
+      background: var(--cor-primaria-fraca);
+    }
+
+    /* Bloco encerrado fica esmaecido: continua legível, mas some do foco. */
+    &--passado {
+      opacity: 0.45;
+    }
+  }
+
+  &__horario {
+    color: var(--cor-texto-fraco);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__marca {
+    width: 4px;
+    height: 22px;
+    border-radius: 2px;
+  }
+
+  &__titulo {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__agora {
+    margin-left: 0.4rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: var(--cor-primaria);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+
+  &__fim {
+    color: var(--cor-texto-fraco);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ------------------------------------------------------- estado vazio */
+
+.vazio-cartao {
+  padding: 1.5rem;
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio);
+  text-align: center;
+
+  &__titulo {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  &__nota {
+    margin: 0 0 1.1rem;
     color: var(--cor-texto-fraco);
     font-size: 0.9rem;
+  }
+}
+
+.botao {
+  display: inline-block;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  color: var(--cor-texto);
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+
+  &--primario {
+    border-color: var(--cor-primaria);
+    background: var(--cor-primaria);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 480px) {
+  .linha__item {
+    /* Em tela estreita o "até HH:mm" desce para a segunda linha em vez de
+       espremer o título. */
+    grid-template-columns: 3.2rem auto 1fr;
+  }
+
+  .linha__fim {
+    grid-column: 3;
+    justify-self: start;
   }
 }

@@ -1,0 +1,267 @@
+.rotina {
+  max-width: 720px;
+
+  &__topo h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+  }
+
+  &__nota {
+    margin: 0 0 1.25rem;
+    color: var(--cor-texto-fraco);
+    font-size: 0.9rem;
+  }
+
+  &__carregando {
+    color: var(--cor-texto-fraco);
+  }
+}
+
+.alerta {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, crimson 12%, transparent);
+  color: crimson;
+  font-size: 0.875rem;
+}
+
+.vazio {
+  margin: 0.5rem 0;
+  color: var(--cor-texto-fraco);
+  font-size: 0.875rem;
+}
+
+.bloco-secao {
+  margin-bottom: 2.5rem;
+
+  h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+  }
+}
+
+.linha-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  .campo__entrada {
+    flex: 1;
+  }
+}
+
+/* ------------------------------------------------------------- modelo */
+
+.modelo {
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+
+  &__topo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  &__nome {
+    flex: 1;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--cor-texto);
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__contagem {
+    margin-left: 0.5rem;
+    color: var(--cor-texto-fraco);
+    font-size: 0.8rem;
+  }
+
+  &__corpo {
+    padding: 0 0.75rem 0.75rem;
+    border-top: 1px solid var(--cor-borda);
+  }
+}
+
+/* -------------------------------------------------------------- blocos */
+
+.blocos {
+  margin: 0.75rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bloco {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__cor {
+    width: 4px;
+    height: 20px;
+    border-radius: 2px;
+  }
+
+  &__horario {
+    color: var(--cor-texto-fraco);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__titulo {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__acoes {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  /* Ocupa a linha inteira abaixo do bloco, sem quebrar a grade. */
+  &__aviso {
+    grid-column: 1 / -1;
+    color: goldenrod;
+    font-size: 0.78rem;
+  }
+}
+
+/* -------------------------------------------------- formulário de bloco */
+
+.bloco-form {
+  padding: 0.75rem;
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio);
+
+  &__titulo {
+    margin: 0 0 0.6rem;
+    font-size: 0.9rem;
+    color: var(--cor-texto-fraco);
+  }
+
+  &__campos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  &__acoes {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+}
+
+/* -------------------------------------------------------------- semana */
+
+.semana {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__dia {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+  }
+
+  &__nome {
+    font-size: 0.9rem;
+  }
+}
+
+/* --------------------------------------------------------- utilitários */
+
+.campo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 8rem;
+
+  &--largo {
+    flex-basis: 100%;
+  }
+
+  &--cor {
+    flex: 0 0 4rem;
+    min-width: 4rem;
+  }
+
+  &__rotulo {
+    color: var(--cor-texto-fraco);
+    font-size: 0.8rem;
+  }
+
+  &__entrada {
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    /* 16px evita o zoom automático do Safari no iPhone ao focar o campo. */
+    font-size: 16px;
+
+    &:focus {
+      outline: 2px solid var(--cor-primaria);
+      outline-offset: 1px;
+    }
+  }
+
+  &__cor {
+    width: 100%;
+    height: 2.6rem;
+    padding: 2px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    background: var(--cor-fundo);
+  }
+}
+
+.botao {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cor-texto);
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  &--primario {
+    border-color: var(--cor-primaria);
+    background: var(--cor-primaria);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  &--perigo {
+    color: crimson;
+  }
+
+  &--texto {
+    padding: 0.2rem 0.4rem;
+    border: none;
+    color: var(--cor-texto-fraco);
+    font-size: 0.8rem;
+
+    &:hover {
+      color: var(--cor-texto);
+    }
+  }
+}

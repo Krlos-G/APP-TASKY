@@ -3,10 +3,12 @@ package br.com.tasky.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,31 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of(
                 "erro", "Dados invalidos.",
                 "campos", campos));
+    }
+
+    /**
+     * Duas edicoes simultaneas do mesmo registro - o @Version das entidades em
+     * acao. O cliente precisa recarregar antes de tentar de novo, senao
+     * sobrescreveria a alteracao do outro dispositivo sem perceber.
+     */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> tratarConflito(
+            ObjectOptimisticLockingFailureException e) {
+        log.debug("Conflito de edicao concorrente: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                "erro", "Este item foi alterado em outro lugar. Recarregue e tente de novo."));
+    }
+
+    /**
+     * URL que nao casa com nenhum endpoint.
+     *
+     * Sem este tratamento a excecao cairia no handler generico e viraria 500,
+     * poluindo o log de erro com o que e apenas um caminho errado.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> tratarRotaInexistente(NoResourceFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("erro", "Recurso nao encontrado."));
     }
 
     @ExceptionHandler(Exception.class)

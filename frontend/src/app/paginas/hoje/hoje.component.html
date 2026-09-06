@@ -1,5 +1,101 @@
-<section class="pagina">
-  <h1>Hoje</h1>
-  <p class="pagina__nota">Linha do tempo do dia, bloco atual e marcação de hábitos e tarefas.</p>
-  <p class="pagina__aviso">Tela ainda vazia — chega na sua fatia do plano.</p>
+<section class="hoje">
+  <header class="hoje__topo">
+    <h1>Hoje</h1>
+    @if (dataPorExtenso()) {
+      <p class="hoje__data">{{ dataPorExtenso() }}</p>
+    }
+  </header>
+
+  @if (erro()) {
+    <p class="alerta" role="alert">{{ erro() }}</p>
+  }
+
+  @if (carregando()) {
+    <p class="hoje__carregando">Carregando…</p>
+  } @else if (dia(); as d) {
+    @if (!d.temRotina) {
+      <!-- Sem rotina não é erro: é convite para criar uma. -->
+      <div class="vazio-cartao">
+        <p class="vazio-cartao__titulo">Nenhuma rotina para hoje</p>
+        <p class="vazio-cartao__nota">
+          Monte um modelo de dia e diga em quais dias da semana ele vale.
+        </p>
+        <a class="botao botao--primario" routerLink="/rotina">Montar rotina</a>
+      </div>
+    } @else {
+      <!-- ------------------------------------------------ bloco atual -->
+      @switch (agora().situacao) {
+        @case ('durante') {
+          <div class="agora">
+            <span class="agora__rotulo">AGORA</span>
+            <p class="agora__titulo">{{ agora().atual!.titulo }}</p>
+            <p class="agora__detalhe">
+              {{ hhmm(agora().atual!.horaInicio) }}–{{ hhmm(agora().atual!.horaFim) }}
+              · faltam {{ duracao(agora().minutosRestantes) }}
+              @if (agora().proximo; as prox) {
+                · depois: {{ prox.titulo }} {{ hhmm(prox.horaInicio) }}
+              }
+            </p>
+          </div>
+        }
+        @case ('antes') {
+          <div class="agora agora--calmo">
+            <span class="agora__rotulo">A SEGUIR</span>
+            <p class="agora__titulo">{{ agora().proximo!.titulo }}</p>
+            <p class="agora__detalhe">
+              começa às {{ hhmm(agora().proximo!.horaInicio) }}
+              · em {{ duracao(agora().minutosRestantes) }}
+            </p>
+          </div>
+        }
+        @case ('entre') {
+          <div class="agora agora--calmo">
+            <span class="agora__rotulo">INTERVALO</span>
+            <p class="agora__titulo">{{ agora().proximo!.titulo }}</p>
+            <p class="agora__detalhe">
+              começa às {{ hhmm(agora().proximo!.horaInicio) }}
+              · em {{ duracao(agora().minutosRestantes) }}
+            </p>
+          </div>
+        }
+        @case ('depois') {
+          <div class="agora agora--calmo">
+            <span class="agora__rotulo">FIM DO DIA</span>
+            <p class="agora__titulo">Nada mais programado</p>
+            <p class="agora__detalhe">Sua rotina de hoje acabou.</p>
+          </div>
+        }
+      }
+
+      <!-- --------------------------------------------- linha do tempo -->
+      <ol class="linha">
+        @for (bloco of d.blocos; track bloco.id) {
+          <li
+            class="linha__item"
+            [class.linha__item--atual]="ehAtual(bloco)"
+            [class.linha__item--passado]="jaPassou(bloco)"
+          >
+            <span class="linha__horario">{{ hhmm(bloco.horaInicio) }}</span>
+            <span
+              class="linha__marca"
+              [style.background]="bloco.cor ?? 'var(--cor-primaria)'"
+              aria-hidden="true"
+            ></span>
+            <span class="linha__titulo">
+              {{ bloco.titulo }}
+              @if (ehAtual(bloco)) {
+                <span class="linha__agora">agora</span>
+              }
+            </span>
+            <span class="linha__fim">até {{ hhmm(bloco.horaFim) }}</span>
+          </li>
+        }
+      </ol>
+
+      <p class="hoje__rodape">
+        Modelo <strong>{{ d.nomeDoModelo }}</strong> ·
+        <a routerLink="/rotina">editar rotina</a>
+      </p>
+    }
+  }
 </section>

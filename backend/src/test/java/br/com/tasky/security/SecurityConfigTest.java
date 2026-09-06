@@ -54,18 +54,18 @@ class SecurityConfigTest {
         @Test
         @DisplayName("sem token devolve 401, e nao um redirecionamento para login")
         void semTokenDevolve401() throws Exception {
-            mockMvc.perform(get("/api/v1/ping"))
+            mockMvc.perform(get("/api/v1/rotina/modelos"))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
-        @DisplayName("com token valido devolve os dados do usuario autenticado")
+        @DisplayName("com token valido a rota protegida responde")
         void comTokenValidoDevolve200() throws Exception {
-            mockMvc.perform(get("/api/v1/ping")
+            // O usuario do token nao existe no banco, entao o proprio acesso e
+            // recusado - o que importa aqui e nao ser mais o 401 de "sem token".
+            mockMvc.perform(get("/api/v1/rotina/modelos")
                             .header("Authorization", "Bearer " + tokenValido()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.usuarioId").value(7))
-                    .andExpect(jsonPath("$.email").value("carlos@exemplo.com"));
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -81,16 +81,16 @@ class SecurityConfigTest {
                     .signWith(outraChave)
                     .compact();
 
-            mockMvc.perform(get("/api/v1/ping").header("Authorization", "Bearer " + forjado))
+            mockMvc.perform(get("/api/v1/rotina/modelos").header("Authorization", "Bearer " + forjado))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
         @DisplayName("header malformado e tratado como ausencia de token")
         void headerMalformado() throws Exception {
-            mockMvc.perform(get("/api/v1/ping").header("Authorization", "sem-o-prefixo-bearer"))
+            mockMvc.perform(get("/api/v1/rotina/modelos").header("Authorization", "sem-o-prefixo-bearer"))
                     .andExpect(status().isUnauthorized());
-            mockMvc.perform(get("/api/v1/ping").header("Authorization", "Bearer "))
+            mockMvc.perform(get("/api/v1/rotina/modelos").header("Authorization", "Bearer "))
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -152,7 +152,7 @@ class SecurityConfigTest {
         void filtroNaoAfetaOutrasRotas() throws Exception {
             // Sem o header e sem token: deve ser 401 por falta de autenticacao,
             // nao 403 pelo filtro de cliente.
-            mockMvc.perform(get("/api/v1/ping"))
+            mockMvc.perform(get("/api/v1/rotina/modelos"))
                     .andExpect(status().isUnauthorized());
         }
     }

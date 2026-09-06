@@ -1,0 +1,157 @@
+<section class="rotina">
+  <header class="rotina__topo">
+    <h1>Rotina</h1>
+    <p class="rotina__nota">
+      Monte modelos de dia com seus blocos de horário e diga qual vale em cada dia da semana.
+    </p>
+  </header>
+
+  @if (erro()) {
+    <p class="alerta" role="alert">{{ erro() }}</p>
+  }
+
+  @if (carregando()) {
+    <p class="rotina__carregando">Carregando…</p>
+  } @else {
+    <!-- ---------------------------------------------------- modelos -->
+    <section class="bloco-secao">
+      <h2>Modelos de dia</h2>
+
+      <form class="linha-form" [formGroup]="formModelo" (ngSubmit)="criarModelo()">
+        <input
+          class="campo__entrada"
+          type="text"
+          formControlName="nome"
+          placeholder="Ex.: Dia útil"
+          aria-label="Nome do novo modelo"
+        />
+        <button class="botao botao--primario" type="submit">Criar modelo</button>
+      </form>
+
+      @if (semModelos()) {
+        <p class="vazio">Nenhum modelo ainda. Crie o primeiro acima.</p>
+      }
+
+      @for (modelo of modelos(); track modelo.id) {
+        <article class="modelo">
+          <header class="modelo__topo">
+            <button
+              class="modelo__nome"
+              type="button"
+              (click)="alternarModelo(modelo.id)"
+              [attr.aria-expanded]="modeloAberto() === modelo.id"
+            >
+              {{ modeloAberto() === modelo.id ? '▾' : '▸' }} {{ modelo.nome }}
+              <span class="modelo__contagem">{{ modelo.blocos.length }} blocos</span>
+            </button>
+            <button class="botao botao--perigo" type="button" (click)="apagarModelo(modelo)">
+              Apagar
+            </button>
+          </header>
+
+          @if (modeloAberto() === modelo.id) {
+            <div class="modelo__corpo">
+              @if (modelo.blocos.length === 0) {
+                <p class="vazio">Sem blocos. Adicione o primeiro abaixo.</p>
+              }
+
+              <ul class="blocos">
+                @for (bloco of modelo.blocos; track bloco.id) {
+                  <li class="bloco">
+                    <span
+                      class="bloco__cor"
+                      [style.background]="bloco.cor ?? 'var(--cor-primaria)'"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="bloco__horario">
+                      {{ bloco.horaInicio.slice(0, 5) }}–{{ bloco.horaFim.slice(0, 5) }}
+                    </span>
+                    <span class="bloco__titulo">{{ bloco.titulo }}</span>
+
+                    <span class="bloco__acoes">
+                      <button class="botao botao--texto" type="button"
+                              (click)="editarBloco(modelo, bloco.id)">Editar</button>
+                      <button class="botao botao--texto" type="button"
+                              (click)="apagarBloco(modelo.id, bloco.id)">Remover</button>
+                    </span>
+
+                    @for (aviso of avisosDoBloco(modelo, bloco.id); track aviso) {
+                      <span class="bloco__aviso">⚠ {{ aviso }}</span>
+                    }
+                  </li>
+                }
+              </ul>
+
+              <form class="bloco-form" [formGroup]="formBloco" (ngSubmit)="salvarBloco(modelo.id)">
+                <h3 class="bloco-form__titulo">
+                  {{ blocoEmEdicao() ? 'Editar bloco' : 'Novo bloco' }}
+                </h3>
+
+                <div class="bloco-form__campos">
+                  <label class="campo campo--largo">
+                    <span class="campo__rotulo">Título</span>
+                    <input class="campo__entrada" type="text" formControlName="titulo"
+                           placeholder="Ex.: Foco no trabalho" />
+                  </label>
+
+                  <label class="campo">
+                    <span class="campo__rotulo">Início</span>
+                    <input class="campo__entrada" type="time" formControlName="horaInicio" />
+                  </label>
+
+                  <label class="campo">
+                    <span class="campo__rotulo">Fim</span>
+                    <input class="campo__entrada" type="time" formControlName="horaFim" />
+                  </label>
+
+                  <label class="campo campo--cor">
+                    <span class="campo__rotulo">Cor</span>
+                    <input class="campo__cor" type="color" formControlName="cor" />
+                  </label>
+                </div>
+
+                <div class="bloco-form__acoes">
+                  <button class="botao botao--primario" type="submit">
+                    {{ blocoEmEdicao() ? 'Salvar' : 'Adicionar' }}
+                  </button>
+                  @if (blocoEmEdicao()) {
+                    <button class="botao" type="button" (click)="cancelarEdicaoDeBloco()">
+                      Cancelar
+                    </button>
+                  }
+                </div>
+              </form>
+            </div>
+          }
+        </article>
+      }
+    </section>
+
+    <!-- ----------------------------------------------------- semana -->
+    <section class="bloco-secao">
+      <h2>Semana</h2>
+      <p class="rotina__nota">Qual modelo vale em cada dia.</p>
+
+      <ul class="semana">
+        @for (dia of diasSemana; track dia) {
+          <li class="semana__dia">
+            <span class="semana__nome">{{ nomeDoDia[dia] }}</span>
+            <select
+              class="campo__entrada"
+              [attr.aria-label]="'Modelo de ' + nomeDoDia[dia]"
+              [value]="modeloDoDia(dia) ?? ''"
+              (change)="atribuir(dia, $any($event.target).value)"
+            >
+              <option value="">— sem rotina —</option>
+              @for (modelo of modelos(); track modelo.id) {
+                <option [value]="modelo.id" [selected]="modeloDoDia(dia) === modelo.id">
+                  {{ modelo.nome }}
+                </option>
+              }
+            </select>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</section>
