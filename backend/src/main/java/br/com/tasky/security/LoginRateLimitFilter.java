@@ -1,5 +1,7 @@
 package br.com.tasky.security;
 
+import br.com.tasky.config.AuthProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,7 +41,6 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(LoginRateLimitFilter.class);
 
     private static final String CAMINHO_LOGIN = "/api/v1/auth/login";
-    private static final int MAXIMO_TENTATIVAS = 10;
     private static final Duration JANELA = Duration.ofMinutes(1);
 
     /** Acima disto, para de aceitar IPs novos: limite contra exaustao de memoria. */
@@ -47,9 +48,22 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
 
     private final Map<String, Deque<Instant>> tentativasPorIp = new ConcurrentHashMap<>();
     private final Clock clock;
+    private final int maximoTentativas;
 
-    public LoginRateLimitFilter(Clock clock) {
+    // Explicito porque ha mais de um construtor: sem isto o Spring nao sabe
+    // qual usar e procura um sem argumentos.
+    @Autowired
+    public LoginRateLimitFilter(Clock clock, AuthProperties propriedades) {
+        this(clock, propriedades.maxTentativasLogin());
+    }
+
+    /**
+     * Construtor direto, para os testes fixarem o limite sem montar as
+     * propriedades inteiras da aplicacao.
+     */
+    LoginRateLimitFilter(Clock clock, int maximoTentativas) {
         this.clock = clock;
+        this.maximoTentativas = maximoTentativas;
     }
 
     @Override
@@ -98,7 +112,7 @@ public class LoginRateLimitFilter extends OncePerRequestFilter {
                 tentativas.pollFirst();
             }
 
-            if (tentativas.size() >= MAXIMO_TENTATIVAS) {
+            if (tentativas.size() >= maximoTentativas) {
                 return true;
             }
 

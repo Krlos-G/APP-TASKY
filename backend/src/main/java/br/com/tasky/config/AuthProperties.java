@@ -34,7 +34,10 @@ public record AuthProperties(
         boolean cookieSecure,
 
         /** Origem permitida no CORS. Vazio = sem CORS (caso de origem unica). */
-        String corsOrigem) {
+        String corsOrigem,
+
+        /** Tentativas de login permitidas por IP a cada minuto. */
+        int maxTentativasLogin) {
 
     private static final int TAMANHO_MINIMO_SEGREDO = 32;
 
@@ -56,6 +59,11 @@ public record AuthProperties(
 
         // Os navegadores descartam SameSite=None sem Secure. Falhar aqui evita
         // um bug de "o login nao persiste" muito dificil de diagnosticar depois.
+        if (maxTentativasLogin < 1) {
+            throw new IllegalStateException(
+                    "tasky.auth.max-tentativas-login precisa ser ao menos 1.");
+        }
+
         if (cookieSameSite.equalsIgnoreCase("None") && !cookieSecure) {
             throw new IllegalStateException(
                     "cookie-same-site=None exige cookie-secure=true, "

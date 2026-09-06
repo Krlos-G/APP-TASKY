@@ -26,7 +26,7 @@ class AuthPropertiesTest {
                 "convite",
                 sameSite,
                 secure,
-                "");
+                "", 10);
     }
 
     @Test
@@ -80,7 +80,7 @@ class AuthPropertiesTest {
 
         var semCodigo = new AuthProperties(
                 SEGREDO_VALIDO, Duration.ofMinutes(20), Duration.ofDays(60),
-                "  ", "Lax", false, "");
+                "  ", "Lax", false, "", 10);
         assertThat(semCodigo.registroHabilitado()).isFalse();
     }
 
@@ -91,7 +91,7 @@ class AuthPropertiesTest {
 
         var comOrigem = new AuthProperties(
                 SEGREDO_VALIDO, Duration.ofMinutes(20), Duration.ofDays(60),
-                "convite", "Lax", false, "https://tasky.app");
+                "convite", "Lax", false, "https://tasky.app", 10);
         assertThat(comOrigem.corsHabilitado()).isTrue();
     }
 }

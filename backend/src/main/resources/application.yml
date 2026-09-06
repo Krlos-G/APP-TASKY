@@ -58,6 +58,7 @@ tasky:
     cookie-secure: ${TASKY_COOKIE_SECURE:false}
     # Vazio = sem CORS (front e API na mesma origem).
     cors-origem: ${TASKY_CORS_ORIGEM:}
+    max-tentativas-login: ${TASKY_MAX_TENTATIVAS_LOGIN:10}
 
 springdoc:
   api-docs:

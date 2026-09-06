@@ -40,7 +40,7 @@ class TokenAcessoServiceTest {
 
     private TokenAcessoService servicoEm(Instant momento) {
         var propriedades = new AuthProperties(
-                SEGREDO, VALIDADE, Duration.ofDays(60), "convite", "Lax", false, "");
+                SEGREDO, VALIDADE, Duration.ofDays(60), "convite", "Lax", false, "", 10);
         return new TokenAcessoService(propriedades, Clock.fixed(momento, ZoneOffset.UTC));
     }
 

@@ -35,7 +35,7 @@ class LoginRateLimitFilterTest {
     @BeforeEach
     void preparar() {
         relogio = new RelogioAjustavel(INICIO);
-        filtro = new LoginRateLimitFilter(relogio);
+        filtro = new LoginRateLimitFilter(relogio, MAXIMO);
     }
 
     private MockHttpServletRequest requisicaoDeLogin(String ip) {
