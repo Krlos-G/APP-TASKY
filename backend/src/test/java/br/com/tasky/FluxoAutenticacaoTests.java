@@ -93,7 +93,8 @@ class FluxoAutenticacaoTests {
         // ---------------------------------------------------------------
         // 3. O token abre as rotas protegidas
         // ---------------------------------------------------------------
-        mockMvc.perform(get("/api/v1/ping").header("Authorization", "Bearer " + accessToken))
+        mockMvc.perform(get("/api/v1/rotina/modelos")
+                        .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk());
 
         // ---------------------------------------------------------------
