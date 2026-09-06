@@ -10,8 +10,11 @@
     margin: 0.15rem 0 1.25rem;
     color: var(--cor-texto-fraco);
     font-size: 0.9rem;
-    /* A API devolve "quarta-feira, 2 de setembro"; a maiúscula é cosmética. */
-    text-transform: capitalize;
+    /* Só a inicial: capitalize maiusculiza toda palavra e produziria
+       "Domingo, 6 De Setembro". */
+    &::first-letter {
+      text-transform: uppercase;
+    }
   }
 
   &__carregando {
