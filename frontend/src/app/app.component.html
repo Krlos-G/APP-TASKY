@@ -1,23 +1,30 @@
-<div class="app">
-  <nav class="nav" aria-label="Navegação principal">
-    <span class="nav__marca">Tasky</span>
+<div class="app" [class.app--sem-nav]="!autenticado()">
+  @if (autenticado()) {
+    <nav class="nav" aria-label="Navegação principal">
+      <span class="nav__marca">Tasky</span>
 
-    <ul class="nav__lista">
-      @for (item of itens; track item.rota) {
-        <li>
-          <a
-            class="nav__item"
-            [routerLink]="item.rota"
-            routerLinkActive="nav__item--ativo"
-            [attr.aria-label]="item.rotulo"
-          >
-            <span class="nav__icone" aria-hidden="true">{{ item.icone }}</span>
-            <span class="nav__rotulo">{{ item.rotulo }}</span>
-          </a>
-        </li>
-      }
-    </ul>
-  </nav>
+      <ul class="nav__lista">
+        @for (item of itens; track item.rota) {
+          <li>
+            <a
+              class="nav__item"
+              [routerLink]="item.rota"
+              routerLinkActive="nav__item--ativo"
+              [attr.aria-label]="item.rotulo"
+            >
+              <span class="nav__icone" aria-hidden="true">{{ item.icone }}</span>
+              <span class="nav__rotulo">{{ item.rotulo }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+
+      <div class="nav__rodape">
+        <span class="nav__usuario">{{ usuario()?.nome }}</span>
+        <button class="nav__sair" type="button" (click)="sair()">Sair</button>
+      </div>
+    </nav>
+  }
 
   <main class="conteudo">
     <router-outlet />
