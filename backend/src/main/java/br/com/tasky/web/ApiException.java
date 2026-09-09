@@ -54,6 +54,17 @@ public class ApiException extends RuntimeException {
                         + "Blocos que atravessam a meia-noite ainda nao sao suportados.");
     }
 
+    public static ApiException agendaNaoSuportada() {
+        return new ApiException(HttpStatus.BAD_REQUEST,
+                "A agenda por vezes na semana ainda nao esta disponivel. "
+                        + "Escolha todo dia ou dias fixos da semana.");
+    }
+
+    public static ApiException diasDaSemanaVazios() {
+        return new ApiException(HttpStatus.BAD_REQUEST,
+                "Escolha ao menos um dia da semana para este habito.");
+    }
+
     public static ApiException fusoHorarioInvalido(String valor) {
         return new ApiException(HttpStatus.BAD_REQUEST, "Fuso horario desconhecido: " + valor);
     }

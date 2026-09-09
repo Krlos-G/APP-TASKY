@@ -10,7 +10,6 @@ import br.com.tasky.web.dto.DiaResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -26,12 +25,13 @@ public class DiaAssembler {
 
     private final RotinaService rotinaService;
     private final UsuarioAtual usuarioAtual;
-    private final Clock clock;
+    private final DataDoUsuario dataDoUsuario;
 
-    public DiaAssembler(RotinaService rotinaService, UsuarioAtual usuarioAtual, Clock clock) {
+    public DiaAssembler(RotinaService rotinaService, UsuarioAtual usuarioAtual,
+                        DataDoUsuario dataDoUsuario) {
         this.rotinaService = rotinaService;
         this.usuarioAtual = usuarioAtual;
-        this.clock = clock;
+        this.dataDoUsuario = dataDoUsuario;
     }
 
     /**
@@ -40,7 +40,7 @@ public class DiaAssembler {
     @Transactional(readOnly = true)
     public DiaResponse montar(LocalDate data) {
         Usuario usuario = usuarioAtual.obrigatorio();
-        LocalDate dia = data != null ? data : hojeDoUsuario(usuario);
+        LocalDate dia = data != null ? data : dataDoUsuario.hoje(usuario);
 
         // O dia da semana sai da data ja resolvida no fuso do usuario. Calcular
         // isso no cliente daria resultado errado sempre que o relogio do
@@ -51,16 +51,6 @@ public class DiaAssembler {
                 .map(modelo -> DiaResponse.comRotina(
                         dia, diaSemana.name(), modelo.getNome(), blocosOrdenados(modelo)))
                 .orElseGet(() -> DiaResponse.semRotina(dia, diaSemana.name()));
-    }
-
-    /**
-     * Hoje segundo o fuso do usuario, nunca o do servidor.
-     *
-     * Sem isto, quem usa o app depois da meia-noite veria o dia seguinte (ou o
-     * anterior) dependendo de onde a aplicacao esta hospedada.
-     */
-    private LocalDate hojeDoUsuario(Usuario usuario) {
-        return LocalDate.ofInstant(clock.instant(), usuario.zona());
     }
 
     private List<BlocoResponse> blocosOrdenados(ModeloDia modelo) {
