@@ -4,12 +4,18 @@ import br.com.tasky.RelogioAjustavel;
 import br.com.tasky.TestcontainersConfiguration;
 import br.com.tasky.entity.AtribuicaoDia;
 import br.com.tasky.entity.BlocoModelo;
+import br.com.tasky.entity.Habito;
 import br.com.tasky.entity.ModeloDia;
+import br.com.tasky.entity.RegistroHabito;
 import br.com.tasky.entity.Usuario;
 import br.com.tasky.entity.enums.DiaSemana;
+import br.com.tasky.entity.enums.StatusRegistroHabito;
+import br.com.tasky.entity.enums.TipoAgenda;
 import br.com.tasky.repository.AtribuicaoDiaRepository;
+import br.com.tasky.repository.HabitoRepository;
 import br.com.tasky.repository.ModeloDiaRepository;
 import br.com.tasky.repository.RefreshTokenRepository;
+import br.com.tasky.repository.RegistroHabitoRepository;
 import br.com.tasky.repository.UsuarioRepository;
 import br.com.tasky.security.TokenAcessoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +34,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.EnumSet;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -62,6 +71,8 @@ class DiaControllerTest {
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private ModeloDiaRepository modeloRepository;
     @Autowired private AtribuicaoDiaRepository atribuicaoRepository;
+    @Autowired private HabitoRepository habitoRepository;
+    @Autowired private RegistroHabitoRepository registroRepository;
     @Autowired private RefreshTokenRepository refreshTokenRepository;
     @Autowired private TokenAcessoService tokenAcessoService;
     @Autowired private Clock clock;
@@ -75,6 +86,8 @@ class DiaControllerTest {
         relogio = (RelogioAjustavel) clock;
         relogio.definir(INICIO);
 
+        registroRepository.deleteAll();
+        habitoRepository.deleteAll();
         atribuicaoRepository.deleteAll();
         modeloRepository.deleteAll();
         refreshTokenRepository.deleteAll();
@@ -116,6 +129,32 @@ class DiaControllerTest {
         atribuicaoRepository.save(atribuicao);
     }
 
+    private Habito habitoDiario(String nome, LocalTime horaPreferida) {
+        var habito = new Habito();
+        habito.setUsuario(usuario);
+        habito.setNome(nome);
+        habito.setTipoAgenda(TipoAgenda.DIARIO);
+        habito.setHoraPreferida(horaPreferida);
+        return habitoRepository.save(habito);
+    }
+
+    private Habito habitoNosDias(String nome, DiaSemana... dias) {
+        var habito = new Habito();
+        habito.setUsuario(usuario);
+        habito.setNome(nome);
+        habito.setTipoAgenda(TipoAgenda.DIAS_SEMANA);
+        habito.setDiasSemana(EnumSet.copyOf(List.of(dias)));
+        return habitoRepository.save(habito);
+    }
+
+    private void marcar(Habito habito, String data, StatusRegistroHabito status) {
+        var registro = new RegistroHabito();
+        registro.setHabito(habito);
+        registro.setData(LocalDate.parse(data));
+        registro.setStatus(status);
+        registroRepository.save(registro);
+    }
+
     /**
      * Avanca o relogio e reemite o token.
      *
@@ -153,6 +192,84 @@ class DiaControllerTest {
             buscarDia(null)
                     .andExpect(jsonPath("$.habitos").isArray())
                     .andExpect(jsonPath("$.tarefas").isArray());
+        }
+
+        @Test
+        @DisplayName("dia sem rotina ainda mostra os habitos")
+        void habitosIndependemDaRotina() throws Exception {
+            habitoDiario("Ler", null);
+
+            buscarDia(null)
+                    .andExpect(jsonPath("$.temRotina").value(false))
+                    .andExpect(jsonPath("$.habitos.length()").value(1))
+                    .andExpect(jsonPath("$.habitos[0].nome").value("Ler"));
+        }
+    }
+
+    @Nested
+    @DisplayName("habitos do dia")
+    class Habitos {
+
+        @Test
+        @DisplayName("habito diario aparece, com status e streak")
+        void comStatusEStreak() throws Exception {
+            var habito = habitoDiario("Ler", LocalTime.parse("07:00"));
+            marcar(habito, "2026-09-01", StatusRegistroHabito.FEITO);
+            marcar(habito, "2026-09-02", StatusRegistroHabito.FEITO);
+
+            buscarDia(null)
+                    .andExpect(jsonPath("$.habitos[0].nome").value("Ler"))
+                    .andExpect(jsonPath("$.habitos[0].status").value("FEITO"))
+                    .andExpect(jsonPath("$.habitos[0].streak").value(2))
+                    .andExpect(jsonPath("$.habitos[0].horaPreferida").value("07:00:00"));
+        }
+
+        @Test
+        @DisplayName("habito de terca e quinta nao aparece na quarta")
+        void habitoForaDaAgenda() throws Exception {
+            habitoNosDias("Academia", DiaSemana.TER, DiaSemana.QUI);
+
+            // 2026-09-02 e uma quarta.
+            buscarDia(null).andExpect(jsonPath("$.habitos.length()").value(0));
+
+            // 2026-09-03 e uma quinta.
+            buscarDia("2026-09-03")
+                    .andExpect(jsonPath("$.habitos.length()").value(1))
+                    .andExpect(jsonPath("$.habitos[0].nome").value("Academia"));
+        }
+
+        @Test
+        @DisplayName("habito marcado fora da agenda continua visivel no dia")
+        void bonusNaoSome() throws Exception {
+            var habito = habitoNosDias("Academia", DiaSemana.TER, DiaSemana.QUI);
+            marcar(habito, "2026-09-02", StatusRegistroHabito.FEITO);
+
+            buscarDia(null)
+                    .andExpect(jsonPath("$.habitos.length()").value(1))
+                    .andExpect(jsonPath("$.habitos[0].status").value("FEITO"));
+        }
+
+        @Test
+        @DisplayName("habito arquivado sai do dia")
+        void arquivadoNaoAparece() throws Exception {
+            var habito = habitoDiario("Ler", null);
+            habito.setArquivadoEm(INICIO);
+            habitoRepository.save(habito);
+
+            buscarDia(null).andExpect(jsonPath("$.habitos.length()").value(0));
+        }
+
+        @Test
+        @DisplayName("a ordem e por hora preferida, com os sem hora no fim")
+        void ordem() throws Exception {
+            habitoDiario("Sem hora", null);
+            habitoDiario("Meditar", LocalTime.parse("22:00"));
+            habitoDiario("Ler", LocalTime.parse("07:00"));
+
+            buscarDia(null)
+                    .andExpect(jsonPath("$.habitos[0].nome").value("Ler"))
+                    .andExpect(jsonPath("$.habitos[1].nome").value("Meditar"))
+                    .andExpect(jsonPath("$.habitos[2].nome").value("Sem hora"));
         }
     }
 

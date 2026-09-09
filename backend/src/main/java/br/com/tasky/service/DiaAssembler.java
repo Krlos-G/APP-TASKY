@@ -7,6 +7,7 @@ import br.com.tasky.entity.enums.DiaSemana;
 import br.com.tasky.security.UsuarioAtual;
 import br.com.tasky.web.dto.BlocoResponse;
 import br.com.tasky.web.dto.DiaResponse;
+import br.com.tasky.web.dto.HabitoDoDiaResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,12 +25,14 @@ import java.util.List;
 public class DiaAssembler {
 
     private final RotinaService rotinaService;
+    private final HabitoService habitoService;
     private final UsuarioAtual usuarioAtual;
     private final DataDoUsuario dataDoUsuario;
 
-    public DiaAssembler(RotinaService rotinaService, UsuarioAtual usuarioAtual,
-                        DataDoUsuario dataDoUsuario) {
+    public DiaAssembler(RotinaService rotinaService, HabitoService habitoService,
+                        UsuarioAtual usuarioAtual, DataDoUsuario dataDoUsuario) {
         this.rotinaService = rotinaService;
+        this.habitoService = habitoService;
         this.usuarioAtual = usuarioAtual;
         this.dataDoUsuario = dataDoUsuario;
     }
@@ -47,10 +50,14 @@ public class DiaAssembler {
         // aparelho estivesse em outro fuso que o da conta.
         DiaSemana diaSemana = DiaSemana.de(dia.getDayOfWeek());
 
+        // Habito independe de rotina: nao ter modelo atribuido ao sabado nao
+        // significa nao ter habitos no sabado.
+        List<HabitoDoDiaResponse> habitos = habitoService.doDia(usuario, dia);
+
         return rotinaService.modeloDoDia(usuario.getId(), diaSemana)
-                .map(modelo -> DiaResponse.comRotina(
-                        dia, diaSemana.name(), modelo.getNome(), blocosOrdenados(modelo)))
-                .orElseGet(() -> DiaResponse.semRotina(dia, diaSemana.name()));
+                .map(modelo -> DiaResponse.comRotina(dia, diaSemana.name(), modelo.getNome(),
+                        blocosOrdenados(modelo), habitos))
+                .orElseGet(() -> DiaResponse.semRotina(dia, diaSemana.name(), habitos));
     }
 
     private List<BlocoResponse> blocosOrdenados(ModeloDia modelo) {

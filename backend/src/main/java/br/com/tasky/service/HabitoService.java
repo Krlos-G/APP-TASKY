@@ -11,6 +11,7 @@ import br.com.tasky.repository.RegistroHabitoRepository;
 import br.com.tasky.repository.projection.Marcacao;
 import br.com.tasky.security.UsuarioAtual;
 import br.com.tasky.web.ApiException;
+import br.com.tasky.web.dto.HabitoDoDiaResponse;
 import br.com.tasky.web.dto.HabitoRequest;
 import br.com.tasky.web.dto.HabitoResponse;
 import br.com.tasky.web.dto.MarcacaoResponse;
@@ -144,6 +145,42 @@ public class HabitoService {
         return montarUm(habito, usuario);
     }
 
+    /**
+     * Os habitos que a tela do dia mostra: os devidos na data, mais os nao
+     * devidos que ja foram marcados nela - o bonus nao pode sumir depois de
+     * marcado.
+     */
+    @Transactional(readOnly = true)
+    public List<HabitoDoDiaResponse> doDia(Usuario usuario, LocalDate data) {
+        List<Habito> ativos =
+                habitoRepository.findByUsuarioIdAndArquivadoEmIsNullOrderByNomeAsc(usuario.getId());
+        if (ativos.isEmpty()) {
+            return List.of();
+        }
+
+        LocalDate hoje = dataDoUsuario.hoje(usuario);
+        ZoneId zona = usuario.zona();
+        LocalDate desde = menor(inicioDaJanela(ativos, hoje, zona), data);
+        LocalDate ate = data.isAfter(hoje) ? data : hoje;
+
+        Map<Long, Map<LocalDate, StatusRegistroHabito>> historico =
+                agrupar(registroRepository.marcacoesDoUsuario(usuario.getId(), desde, ate));
+
+        return ativos.stream()
+                .filter(habito -> habito.devidoEm(data)
+                        || marcacoesDe(historico, habito).containsKey(data))
+                .map(habito -> {
+                    Map<LocalDate, StatusRegistroHabito> marcacoes = marcacoesDe(historico, habito);
+                    return HabitoDoDiaResponse.de(habito, marcacoes.get(data),
+                            streakCalculator.calcular(habito, marcacoes, hoje, zona));
+                })
+                .sorted(Comparator
+                        .comparing(HabitoDoDiaResponse::horaPreferida,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(HabitoDoDiaResponse::nome))
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     public List<MarcacaoResponse> historico(Long id, LocalDate desde, LocalDate ate) {
         Usuario usuario = usuarioAtual.obrigatorio();
@@ -217,16 +254,12 @@ public class HabitoService {
         LocalDate hoje = dataDoUsuario.hoje(usuario);
         ZoneId zona = usuario.zona();
 
-        Map<Long, Map<LocalDate, StatusRegistroHabito>> historico = registroRepository
-                .marcacoesDoUsuario(usuario.getId(), inicioDaJanela(habitos, hoje, zona), hoje)
-                .stream()
-                .collect(Collectors.groupingBy(Marcacao::habitoId,
-                        Collectors.toMap(Marcacao::data, Marcacao::status)));
+        Map<Long, Map<LocalDate, StatusRegistroHabito>> historico = agrupar(registroRepository
+                .marcacoesDoUsuario(usuario.getId(), inicioDaJanela(habitos, hoje, zona), hoje));
 
         return habitos.stream()
                 .map(habito -> {
-                    Map<LocalDate, StatusRegistroHabito> marcacoes =
-                            historico.getOrDefault(habito.getId(), Map.of());
+                    Map<LocalDate, StatusRegistroHabito> marcacoes = marcacoesDe(historico, habito);
                     return HabitoResponse.de(
                             habito,
                             streakCalculator.calcular(habito, marcacoes, hoje, zona),
@@ -234,6 +267,20 @@ public class HabitoService {
                             habito.devidoEm(hoje));
                 })
                 .toList();
+    }
+
+    private Map<Long, Map<LocalDate, StatusRegistroHabito>> agrupar(List<Marcacao> marcacoes) {
+        return marcacoes.stream().collect(Collectors.groupingBy(Marcacao::habitoId,
+                Collectors.toMap(Marcacao::data, Marcacao::status)));
+    }
+
+    private Map<LocalDate, StatusRegistroHabito> marcacoesDe(
+            Map<Long, Map<LocalDate, StatusRegistroHabito>> historico, Habito habito) {
+        return historico.getOrDefault(habito.getId(), Map.of());
+    }
+
+    private LocalDate menor(LocalDate a, LocalDate b) {
+        return a.isBefore(b) ? a : b;
     }
 
     private LocalDate inicioDaJanela(List<Habito> habitos, LocalDate hoje, ZoneId zona) {
