@@ -1,19 +1,331 @@
-.pagina {
-  h1 {
-    margin: 0 0 0.5rem;
+.habitos {
+  max-width: 720px;
+
+  &__topo h1 {
+    margin: 0 0 0.25rem;
     font-size: 1.5rem;
   }
 
   &__nota {
-    margin: 0 0 1rem;
+    margin: 0 0 1.25rem;
+    color: var(--cor-texto-fraco);
+    font-size: 0.9rem;
+  }
+
+  &__carregando {
     color: var(--cor-texto-fraco);
   }
 
-  &__aviso {
-    padding: 1rem;
-    border: 1px dashed var(--cor-borda);
-    border-radius: var(--raio);
+  &__acoes {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+}
+
+.alerta {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, crimson 12%, transparent);
+  color: crimson;
+  font-size: 0.875rem;
+}
+
+.vazio {
+  margin: 0.5rem 0;
+  color: var(--cor-texto-fraco);
+  font-size: 0.875rem;
+}
+
+/* -------------------------------------------------------------- botões */
+
+.botao {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  &--primario {
+    border-color: var(--cor-primaria);
+    background: var(--cor-primaria);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  &--perigo {
+    border-color: crimson;
+    color: crimson;
+  }
+
+  &--curto {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.82rem;
+  }
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cor-texto-fraco);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &--perigo {
+    color: crimson;
+  }
+}
+
+/* ---------------------------------------------------------- formulário */
+
+.form-habito {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+
+  h2 {
+    margin: 0 0 0.85rem;
+    font-size: 1.05rem;
+  }
+
+  &__linha {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  &__acoes {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+}
+
+.campo {
+  display: block;
+  margin-bottom: 0.85rem;
+
+  &__rotulo {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--cor-texto-fraco);
+    font-size: 0.8rem;
+  }
+
+  &__entrada {
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-size: 0.95rem;
+  }
+
+  &__cor {
+    width: 3rem;
+    height: 2.5rem;
+    padding: 0.15rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    background: var(--cor-fundo);
+  }
+
+  &--cor {
+    flex: 0 0 auto;
+  }
+}
+
+.dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+
+  &__botao {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    background: var(--cor-fundo);
+    color: var(--cor-texto-fraco);
+    font-size: 0.82rem;
+    cursor: pointer;
+
+    &--ativo {
+      border-color: var(--cor-primaria);
+      background: var(--cor-primaria-fraca);
+      color: var(--cor-primaria);
+      font-weight: 600;
+    }
+  }
+}
+
+/* --------------------------------------------------------------- lista */
+
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.habito {
+  display: grid;
+  grid-template-columns: 4px 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+
+  /* Arquivado continua legível, mas sai do foco. */
+  &--arquivado {
+    opacity: 0.55;
+  }
+
+  &__cor {
+    align-self: stretch;
+    min-height: 34px;
+    border-radius: 2px;
+  }
+
+  &__nome {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__detalhe {
+    margin: 0.15rem 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: 0.82rem;
+  }
+
+  &__marcar {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  &__menu {
+    display: flex;
+    gap: 0.75rem;
+    grid-column: 2 / -1;
+    margin-top: 0.35rem;
+  }
+}
+
+.marca {
+  color: var(--cor-primaria);
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  &--pulado {
+    color: var(--cor-texto-fraco);
+  }
+}
+
+/* --------------------------------------------------- confirmar exclusão */
+
+.confirma {
+  grid-column: 2 / -1;
+  margin-top: 0.6rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid crimson;
+  border-radius: 8px;
+  background: color-mix(in srgb, crimson 8%, transparent);
+
+  &__texto {
+    margin: 0 0 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  &__acoes {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+/* ----------------------------------------------------------- histórico */
+
+.historico {
+  grid-column: 2 / -1;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--cor-borda);
+
+  &__lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    background: var(--cor-fundo);
+    font-size: 0.78rem;
+  }
+
+  &__data {
+    color: var(--cor-texto-fraco);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__status {
+    color: var(--cor-primaria);
+    font-weight: 600;
+
+    &--pulado {
+      color: var(--cor-texto-fraco);
+      font-weight: 400;
+    }
+  }
+}
+
+/* ------------------------------------------------------- estado vazio */
+
+.vazio-cartao {
+  padding: 1.5rem;
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio);
+  text-align: center;
+
+  &__titulo {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  &__nota {
+    margin: 0;
     color: var(--cor-texto-fraco);
     font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .habito {
+    grid-template-columns: 4px 1fr;
+  }
+
+  .habito__marcar {
+    grid-column: 2;
+    margin-top: 0.5rem;
+  }
+
+  .form-habito__linha {
+    flex-direction: column;
+    gap: 0;
   }
 }

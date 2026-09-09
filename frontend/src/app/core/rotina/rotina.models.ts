@@ -14,6 +14,17 @@ export const NOME_DO_DIA: Record<DiaSemana, string> = {
   DOM: 'Domingo',
 };
 
+/** Forma curta, para listas onde o nome inteiro não cabe. */
+export const NOME_CURTO_DO_DIA: Record<DiaSemana, string> = {
+  SEG: 'Seg',
+  TER: 'Ter',
+  QUA: 'Qua',
+  QUI: 'Qui',
+  SEX: 'Sex',
+  SAB: 'Sáb',
+  DOM: 'Dom',
+};
+
 export interface Bloco {
   id: number;
   titulo: string;

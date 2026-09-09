@@ -1,5 +1,194 @@
-<section class="pagina">
-  <h1>Hábitos</h1>
-  <p class="pagina__nota">Cadastro de hábitos, streak e histórico.</p>
-  <p class="pagina__aviso">Tela ainda vazia — chega na sua fatia do plano.</p>
+<section class="habitos">
+  <header class="habitos__topo">
+    <h1>Hábitos</h1>
+    <p class="habitos__nota">
+      O que você quer repetir. Marque no dia e a sequência cresce.
+    </p>
+  </header>
+
+  @if (erro()) {
+    <p class="alerta" role="alert">{{ erro() }}</p>
+  }
+
+  <div class="habitos__acoes">
+    <button class="botao botao--primario" type="button" (click)="abrirNovo()">
+      Novo hábito
+    </button>
+    <button class="botao" type="button" (click)="alternarArquivados()">
+      {{ mostrarArquivados() ? 'Ocultar arquivados' : 'Mostrar arquivados' }}
+    </button>
+  </div>
+
+  <!-- ------------------------------------------------------ formulário -->
+  @if (formAberto()) {
+    <form class="form-habito" [formGroup]="form" (ngSubmit)="salvar()">
+      <h2>{{ emEdicao() ? 'Editar hábito' : 'Novo hábito' }}</h2>
+
+      <label class="campo">
+        <span class="campo__rotulo">Nome</span>
+        <input
+          class="campo__entrada"
+          type="text"
+          formControlName="nome"
+          placeholder="Ex.: Ler 20 páginas"
+        />
+      </label>
+
+      <label class="campo">
+        <span class="campo__rotulo">Quando</span>
+        <select class="campo__entrada" formControlName="tipoAgenda">
+          <option value="DIARIO">Todo dia</option>
+          <option value="DIAS_SEMANA">Dias fixos da semana</option>
+        </select>
+      </label>
+
+      @if (porDiasDaSemana()) {
+        <div class="campo">
+          <span class="campo__rotulo">Dias</span>
+          <div class="dias">
+            @for (dia of diasSemana; track dia) {
+              <button
+                class="dias__botao"
+                type="button"
+                [class.dias__botao--ativo]="diaEscolhido(dia)"
+                [attr.aria-pressed]="diaEscolhido(dia)"
+                (click)="alternarDia(dia)"
+              >
+                {{ nomeCurtoDoDia[dia] }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="form-habito__linha">
+        <label class="campo">
+          <span class="campo__rotulo">Horário preferido</span>
+          <input class="campo__entrada" type="time" formControlName="horaPreferida" />
+        </label>
+
+        <label class="campo campo--cor">
+          <span class="campo__rotulo">Cor</span>
+          <input class="campo__cor" type="color" formControlName="cor" />
+        </label>
+      </div>
+
+      <div class="form-habito__acoes">
+        <button class="botao botao--primario" type="submit">Salvar</button>
+        <button class="botao" type="button" (click)="fechar()">Cancelar</button>
+      </div>
+    </form>
+  }
+
+  <!-- ------------------------------------------------------------ lista -->
+  @if (carregando()) {
+    <p class="habitos__carregando">Carregando…</p>
+  } @else if (semHabitos()) {
+    <div class="vazio-cartao">
+      <p class="vazio-cartao__titulo">Nenhum hábito ainda</p>
+      <p class="vazio-cartao__nota">
+        Comece por um só. Sequência curta que continua vale mais que lista longa parada.
+      </p>
+    </div>
+  } @else {
+    <ul class="lista">
+      @for (habito of habitos(); track habito.id) {
+        <li class="habito" [class.habito--arquivado]="habito.arquivado">
+          <span
+            class="habito__cor"
+            [style.background]="habito.cor ?? 'var(--cor-primaria)'"
+            aria-hidden="true"
+          ></span>
+
+          <div class="habito__corpo">
+            <p class="habito__nome">{{ habito.nome }}</p>
+            <p class="habito__detalhe">
+              {{ agendaPorExtenso(habito) }}
+              @if (habito.horaPreferida) {
+                · {{ habito.horaPreferida.slice(0, 5) }}
+              }
+              · {{ streakPorExtenso(habito) }}
+              @if (habito.arquivado) {
+                · arquivado
+              }
+            </p>
+          </div>
+
+          @if (!habito.arquivado) {
+            <div class="habito__marcar">
+              @if (habito.statusHoje === null) {
+                <button
+                  class="botao botao--primario botao--curto"
+                  type="button"
+                  (click)="marcar(habito, 'FEITO')"
+                >
+                  Feito
+                </button>
+                <button class="botao botao--curto" type="button" (click)="marcar(habito, 'PULADO')">
+                  Pular
+                </button>
+              } @else {
+                <span class="marca" [class.marca--pulado]="habito.statusHoje === 'PULADO'">
+                  {{ habito.statusHoje === 'FEITO' ? 'Feito hoje' : 'Pulado hoje' }}
+                </span>
+                <button class="botao botao--curto" type="button" (click)="desmarcar(habito)">
+                  Desfazer
+                </button>
+              }
+            </div>
+          }
+
+          <div class="habito__menu">
+            <button class="link" type="button" (click)="alternarHistorico(habito)">
+              {{ historicoAberto() === habito.id ? 'Fechar' : 'Histórico' }}
+            </button>
+            <button class="link" type="button" (click)="editar(habito)">Editar</button>
+            <button class="link" type="button" (click)="alternarArquivo(habito)">
+              {{ habito.arquivado ? 'Desarquivar' : 'Arquivar' }}
+            </button>
+            <button class="link link--perigo" type="button" (click)="pedirExclusao(habito)">
+              Excluir
+            </button>
+          </div>
+
+          @if (confirmandoExclusao() === habito.id) {
+            <div class="confirma" role="alertdialog">
+              <p class="confirma__texto">
+                Excluir <strong>{{ habito.nome }}</strong> apaga também todo o histórico de
+                marcações. Para tirar da lista sem perder nada, use <em>Arquivar</em>.
+              </p>
+              <div class="confirma__acoes">
+                <button class="botao botao--perigo" type="button" (click)="apagar(habito)">
+                  Excluir mesmo assim
+                </button>
+                <button class="botao" type="button" (click)="cancelarExclusao()">Cancelar</button>
+              </div>
+            </div>
+          }
+
+          @if (historicoAberto() === habito.id) {
+            <div class="historico">
+              @if (historico().length === 0) {
+                <p class="vazio">Nenhuma marcação nos últimos 30 dias.</p>
+              } @else {
+                <ul class="historico__lista">
+                  @for (marcacao of historico(); track marcacao.data) {
+                    <li class="historico__item">
+                      <span class="historico__data">{{ dataCurta(marcacao.data) }}</span>
+                      <span
+                        class="historico__status"
+                        [class.historico__status--pulado]="marcacao.status === 'PULADO'"
+                      >
+                        {{ marcacao.status === 'FEITO' ? 'Feito' : 'Pulado' }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
 </section>

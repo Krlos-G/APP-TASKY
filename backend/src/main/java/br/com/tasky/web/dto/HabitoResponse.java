@@ -6,7 +6,8 @@ import br.com.tasky.entity.enums.StatusRegistroHabito;
 import br.com.tasky.entity.enums.TipoAgenda;
 
 import java.time.LocalTime;
-import java.util.Set;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * @param statusHoje nulo quando o dia ainda nao foi marcado - diferente de ter
@@ -18,7 +19,7 @@ public record HabitoResponse(
         String icone,
         String cor,
         TipoAgenda tipoAgenda,
-        Set<DiaSemana> diasSemana,
+        List<DiaSemana> diasSemana,
         LocalTime horaPreferida,
         LocalTime horaLembrete,
         boolean arquivado,
@@ -34,7 +35,7 @@ public record HabitoResponse(
                 habito.getIcone(),
                 habito.getCor(),
                 habito.getTipoAgenda(),
-                Set.copyOf(habito.getDiasSemana()),
+                habito.getDiasSemana().stream().sorted(Comparator.naturalOrder()).toList(),
                 habito.getHoraPreferida(),
                 habito.getHoraLembrete(),
                 habito.isArquivado(),
