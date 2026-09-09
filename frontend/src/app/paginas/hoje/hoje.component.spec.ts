@@ -8,6 +8,7 @@ import { provideRouter } from '@angular/router';
 import { Hoje } from './hoje.component';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
 import { Bloco, Dia } from '../../core/rotina/rotina.models';
+import { HabitoDoDia } from '../../core/habitos/habito.models';
 
 function bloco(id: number, titulo: string, inicio: string, fim: string): Bloco {
   return {
@@ -17,6 +18,15 @@ function bloco(id: number, titulo: string, inicio: string, fim: string): Bloco {
     cor: null,
     minutosAntecedenciaLembrete: null,
   };
+}
+
+function habito(
+  id: number,
+  nome: string,
+  status: HabitoDoDia['status'],
+  streak: number,
+): HabitoDoDia {
+  return { id, nome, icone: null, cor: null, horaPreferida: null, status, streak };
 }
 
 const DIA_COM_ROTINA: Dia = {
@@ -143,5 +153,127 @@ describe('Hoje', () => {
     // Montar a data com numeros, e nao com new Date('2026-09-02'), evita o
     // parse em UTC que jogaria o dia para tras em fuso negativo.
     expect(texto(fixture)).toContain('2 de setembro');
+  });
+
+  describe('habitos', () => {
+    function marca(fixture: ReturnType<typeof montar>, indice = 0): HTMLButtonElement {
+      const botoes = (fixture.nativeElement as HTMLElement).querySelectorAll(
+        '.habito-item__marca',
+      );
+      return botoes[indice] as HTMLButtonElement;
+    }
+
+    it('lista os habitos do dia com o contador de feitos', () => {
+      comHora(10, 0);
+      const fixture = montar({
+        ...DIA_COM_ROTINA,
+        habitos: [habito(1, 'Ler', 'FEITO', 3), habito(2, 'Meditar', null, 0)],
+      });
+
+      const conteudo = texto(fixture);
+      expect(conteudo).toContain('Hábitos de hoje');
+      expect(conteudo).toContain('1/2');
+      expect(conteudo).toContain('3 dias seguidos');
+      expect(conteudo).toContain('começar hoje');
+    });
+
+    it('concorda o singular da sequencia', () => {
+      comHora(10, 0);
+      const fixture = montar({ ...DIA_COM_ROTINA, habitos: [habito(1, 'Ler', 'FEITO', 1)] });
+
+      expect(texto(fixture)).toContain('1 dia seguido');
+      expect(texto(fixture)).not.toContain('1 dias');
+    });
+
+    it('aparece mesmo sem rotina no dia', () => {
+      comHora(10, 0);
+      const fixture = montar({
+        ...DIA_COM_ROTINA,
+        temRotina: false,
+        blocos: [],
+        nomeDoModelo: null,
+        habitos: [habito(1, 'Ler', null, 0)],
+      });
+
+      expect(texto(fixture)).toContain('Nenhuma rotina para hoje');
+      expect(texto(fixture)).toContain('Hábitos de hoje');
+    });
+
+    it('marcar muda a tela antes da resposta do servidor', () => {
+      comHora(10, 0);
+      const fixture = montar({ ...DIA_COM_ROTINA, habitos: [habito(1, 'Ler', null, 2)] });
+
+      marca(fixture).click();
+      fixture.detectChanges();
+
+      // Sem esperar a rede: o contador ja subiu.
+      expect(texto(fixture)).toContain('1/1');
+
+      const req = http.expectOne('/api/v1/habitos/1/registros/2026-09-02');
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual({ status: 'FEITO' });
+
+      req.flush({ statusHoje: 'FEITO', streak: 3 });
+      fixture.detectChanges();
+
+      // O streak so vem do servidor; o front nao tenta adivinhar.
+      expect(texto(fixture)).toContain('3 dias seguidos');
+    });
+
+    it('erro do servidor desfaz a marcacao e avisa', () => {
+      comHora(10, 0);
+      const fixture = montar({ ...DIA_COM_ROTINA, habitos: [habito(1, 'Ler', null, 2)] });
+
+      marca(fixture).click();
+      fixture.detectChanges();
+      expect(texto(fixture)).toContain('1/1');
+
+      http.expectOne('/api/v1/habitos/1/registros/2026-09-02').flush(
+        { erro: 'Nao da para marcar um dia que ainda nao chegou.' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+      fixture.detectChanges();
+
+      expect(texto(fixture)).toContain('0/1');
+      expect(texto(fixture)).toContain('ainda nao chegou');
+    });
+
+    it('desmarcar apaga a marcacao do dia', () => {
+      comHora(10, 0);
+      const fixture = montar({ ...DIA_COM_ROTINA, habitos: [habito(1, 'Ler', 'FEITO', 3)] });
+
+      marca(fixture).click();
+      fixture.detectChanges();
+
+      const req = http.expectOne('/api/v1/habitos/1/registros/2026-09-02');
+      expect(req.request.method).toBe('DELETE');
+
+      req.flush({ statusHoje: null, streak: 2 });
+      fixture.detectChanges();
+
+      expect(texto(fixture)).toContain('0/1');
+    });
+
+    it('pular nao conta como feito', () => {
+      comHora(10, 0);
+      const fixture = montar({ ...DIA_COM_ROTINA, habitos: [habito(1, 'Ler', null, 2)] });
+
+      const pular = (fixture.nativeElement as HTMLElement).querySelector(
+        '.habito-item__pular',
+      ) as HTMLButtonElement;
+      pular.click();
+      fixture.detectChanges();
+
+      const req = http.expectOne('/api/v1/habitos/1/registros/2026-09-02');
+      expect(req.request.body).toEqual({ status: 'PULADO' });
+
+      req.flush({ statusHoje: 'PULADO', streak: 2 });
+      fixture.detectChanges();
+
+      expect(texto(fixture)).toContain('0/1');
+      // Pulado nao pode ler "comecar hoje" junto: o dia ja foi resolvido.
+      expect(texto(fixture)).toContain('pulado hoje');
+      expect(texto(fixture)).not.toContain('começar hoje');
+    });
   });
 });

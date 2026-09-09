@@ -97,5 +97,51 @@
         <a routerLink="/rotina">editar rotina</a>
       </p>
     }
+
+    <!-- ----------------------------------------------------- hábitos -->
+    <!-- Fora do bloco de rotina: dia sem modelo atribuído ainda tem hábitos. -->
+    @if (habitos().length > 0) {
+      <section class="habitos-hoje">
+        <header class="habitos-hoje__topo">
+          <h2>Hábitos de hoje</h2>
+          <span class="habitos-hoje__contador">{{ feitos() }}/{{ habitos().length }}</span>
+        </header>
+
+        <ul class="habitos-hoje__lista">
+          @for (habito of habitos(); track habito.id) {
+            <li class="habito-item" [class.habito-item--resolvido]="habito.status !== null">
+              <button
+                class="habito-item__marca"
+                type="button"
+                [class.habito-item__marca--feito]="habito.status === 'FEITO'"
+                [class.habito-item__marca--pulado]="habito.status === 'PULADO'"
+                [attr.aria-pressed]="habito.status === 'FEITO'"
+                [attr.aria-label]="
+                  habito.status === 'FEITO' ? 'Desmarcar ' + habito.nome : 'Marcar ' + habito.nome
+                "
+                (click)="alternar(habito, habito.status === null ? 'FEITO' : null)"
+              >
+                {{ habito.status === 'FEITO' ? '✓' : habito.status === 'PULADO' ? '–' : '' }}
+              </button>
+
+              <div class="habito-item__corpo">
+                <p class="habito-item__nome">{{ habito.nome }}</p>
+                <p class="habito-item__detalhe">{{ detalhe(habito) }}</p>
+              </div>
+
+              @if (habito.status === null) {
+                <button
+                  class="habito-item__pular"
+                  type="button"
+                  (click)="alternar(habito, 'PULADO')"
+                >
+                  pular
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
   }
 </section>

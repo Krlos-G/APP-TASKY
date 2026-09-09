@@ -1,3 +1,5 @@
+import { HabitoDoDia } from '../habitos/habito.models';
+
 export type DiaSemana = 'SEG' | 'TER' | 'QUA' | 'QUI' | 'SEX' | 'SAB' | 'DOM';
 
 export const DIAS_SEMANA: readonly DiaSemana[] = [
@@ -12,6 +14,17 @@ export const NOME_DO_DIA: Record<DiaSemana, string> = {
   SEX: 'Sexta',
   SAB: 'Sábado',
   DOM: 'Domingo',
+};
+
+/** Forma curta, para listas onde o nome inteiro não cabe. */
+export const NOME_CURTO_DO_DIA: Record<DiaSemana, string> = {
+  SEG: 'Seg',
+  TER: 'Ter',
+  QUA: 'Qua',
+  QUI: 'Qui',
+  SEX: 'Sex',
+  SAB: 'Sáb',
+  DOM: 'Dom',
 };
 
 export interface Bloco {
@@ -68,6 +81,6 @@ export interface Dia {
   temRotina: boolean;
   nomeDoModelo: string | null;
   blocos: Bloco[];
-  habitos: unknown[];
+  habitos: HabitoDoDia[];
   tarefas: unknown[];
 }
