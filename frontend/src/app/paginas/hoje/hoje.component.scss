@@ -141,6 +141,93 @@
   }
 }
 
+/* ----------------------------------------------------- hábitos de hoje */
+
+.habitos-hoje {
+  margin-top: 1.75rem;
+
+  &__topo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+  }
+
+  &__contador {
+    color: var(--cor-texto-fraco);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+.habito-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.5rem;
+  border-radius: 8px;
+
+  &--resolvido {
+    opacity: 0.6;
+  }
+
+  &__marca {
+    width: 26px;
+    height: 26px;
+    border: 1.5px solid var(--cor-borda);
+    border-radius: 50%;
+    background: transparent;
+    color: transparent;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+
+    &--feito {
+      border-color: var(--cor-primaria);
+      background: var(--cor-primaria);
+      color: #fff;
+    }
+
+    &--pulado {
+      color: var(--cor-texto-fraco);
+    }
+  }
+
+  &__nome {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  &__detalhe {
+    margin: 0.1rem 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: 0.78rem;
+  }
+
+  /* Pular é saída de emergência, não a ação principal: fica discreto. */
+  &__pular {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--cor-texto-fraco);
+    font-size: 0.78rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
 /* ------------------------------------------------------- estado vazio */
 
 .vazio-cartao {

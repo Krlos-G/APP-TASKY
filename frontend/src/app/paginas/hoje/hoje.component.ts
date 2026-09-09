@@ -2,6 +2,8 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { DiaService } from '../../core/rotina/dia.service';
+import { HabitoService } from '../../core/habitos/habito.service';
+import { HabitoDoDia, StatusHabito } from '../../core/habitos/habito.models';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
 import { Bloco, Dia } from '../../core/rotina/rotina.models';
 import { RespostaErro } from '../../core/auth/auth.models';
@@ -25,11 +27,17 @@ interface Agora {
 })
 export class Hoje implements OnInit {
   private readonly diaService = inject(DiaService);
+  private readonly habitoService = inject(HabitoService);
   private readonly tempo = inject(TimeProvider);
 
   protected readonly dia = signal<Dia | null>(null);
   protected readonly carregando = signal(true);
   protected readonly erro = signal<string | null>(null);
+
+  protected readonly habitos = computed(() => this.dia()?.habitos ?? []);
+  protected readonly feitos = computed(
+    () => this.habitos().filter((h) => h.status === 'FEITO').length,
+  );
 
   /**
    * Recalculado a cada minuto, porque depende do sinal do TimeProvider.
@@ -103,6 +111,75 @@ export class Hoje implements OnInit {
         this.erro.set(corpo?.erro ?? 'Não foi possível carregar o dia.');
       },
     });
+  }
+
+  /**
+   * Marca, pula ou desmarca o hábito, com a tela mudando antes da resposta.
+   *
+   * É a única escrita otimista do app: marcar é o gesto mais repetido que
+   * existe aqui, e esperar a rede a cada toque tornaria a tela lenta justo no
+   * que ela precisa fazer bem. Se o servidor recusar, o item volta ao estado
+   * anterior e o aviso aparece.
+   */
+  protected alternar(habito: HabitoDoDia, status: StatusHabito | null): void {
+    const data = this.dia()?.data;
+    if (!data) {
+      return;
+    }
+
+    const anterior = habito.status;
+    this.aplicar(habito.id, { status });
+
+    const requisicao =
+      status === null
+        ? this.habitoService.desmarcar(habito.id, data)
+        : this.habitoService.marcar(habito.id, data, status);
+
+    requisicao.subscribe({
+      // O streak só chega aqui: prever quanto ele vai subir seria adivinhar a
+      // regra do servidor no cliente.
+      next: (atualizado) =>
+        this.aplicar(habito.id, {
+          status: atualizado.statusHoje,
+          streak: atualizado.streak,
+        }),
+      error: (falha: HttpErrorResponse) => {
+        this.aplicar(habito.id, { status: anterior });
+        const corpo = falha.error as RespostaErro | null;
+        this.erro.set(corpo?.erro ?? 'Não foi possível salvar. Tente de novo.');
+      },
+    });
+  }
+
+  protected detalhe(habito: HabitoDoDia): string {
+    const partes: string[] = [];
+
+    if (habito.horaPreferida) {
+      partes.push(habito.horaPreferida.slice(0, 5));
+    }
+    if (habito.streak > 0) {
+      partes.push(
+        habito.streak === 1 ? '1 dia seguido' : `${habito.streak} dias seguidos`,
+      );
+    }
+    if (habito.status === 'PULADO') {
+      partes.push('pulado hoje');
+    } else if (habito.streak === 0) {
+      partes.push('começar hoje');
+    }
+
+    return partes.join(' · ');
+  }
+
+  private aplicar(id: number, mudanca: Partial<HabitoDoDia>): void {
+    this.dia.update((atual) =>
+      atual
+        ? {
+            ...atual,
+            habitos: atual.habitos.map((h) => (h.id === id ? { ...h, ...mudanca } : h)),
+          }
+        : atual,
+    );
   }
 
   /** O bloco está acontecendo agora? Usado para destacá-lo na linha do tempo. */

@@ -1,3 +1,5 @@
+import { HabitoDoDia } from '../habitos/habito.models';
+
 export type DiaSemana = 'SEG' | 'TER' | 'QUA' | 'QUI' | 'SEX' | 'SAB' | 'DOM';
 
 export const DIAS_SEMANA: readonly DiaSemana[] = [
@@ -79,6 +81,6 @@ export interface Dia {
   temRotina: boolean;
   nomeDoModelo: string | null;
   blocos: Bloco[];
-  habitos: unknown[];
+  habitos: HabitoDoDia[];
   tarefas: unknown[];
 }
