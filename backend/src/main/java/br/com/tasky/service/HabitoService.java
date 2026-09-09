@@ -1,6 +1,7 @@
 package br.com.tasky.service;
 
 import br.com.tasky.entity.Habito;
+import br.com.tasky.entity.RegistroHabito;
 import br.com.tasky.entity.Usuario;
 import br.com.tasky.entity.enums.DiaSemana;
 import br.com.tasky.entity.enums.StatusRegistroHabito;
@@ -12,6 +13,7 @@ import br.com.tasky.security.UsuarioAtual;
 import br.com.tasky.web.ApiException;
 import br.com.tasky.web.dto.HabitoRequest;
 import br.com.tasky.web.dto.HabitoResponse;
+import br.com.tasky.web.dto.MarcacaoResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +37,7 @@ import java.util.stream.Collectors;
 @Service
 public class HabitoService {
 
-    /**
-     * Quanto historico buscar para o streak: o teto do calculo mais o dia de
-     * tolerancia com que ele comeca quando hoje ainda esta em aberto.
-     */
+    /** O teto do StreakCalculator mais o dia de tolerancia com que ele comeca. */
     private static final int DIAS_DE_HISTORICO = 367;
 
     private final HabitoRepository habitoRepository;
@@ -109,6 +108,55 @@ public class HabitoService {
         habitoRepository.delete(buscar(id, usuarioAtual.idObrigatorio()));
     }
 
+    // -------------------------------------------------------------- marcacoes
+
+    /**
+     * Upsert: repetir a chamada troca o status da linha existente em vez de
+     * esbarrar no unique (habito, data), e o cliente otimista pode reenviar.
+     */
+    @Transactional
+    public HabitoResponse marcar(Long id, LocalDate data, StatusRegistroHabito status) {
+        Usuario usuario = usuarioAtual.obrigatorio();
+        Habito habito = buscar(id, usuario.getId());
+        exigirDataPassadaOuHoje(data, usuario);
+
+        RegistroHabito registro = registroRepository.findByHabitoIdAndData(id, data)
+                .orElseGet(() -> {
+                    var novo = new RegistroHabito();
+                    novo.setHabito(habito);
+                    novo.setData(data);
+                    return novo;
+                });
+        registro.setStatus(status);
+        registroRepository.save(registro);
+
+        return montarUm(habito, usuario);
+    }
+
+    @Transactional
+    public HabitoResponse desmarcar(Long id, LocalDate data) {
+        Usuario usuario = usuarioAtual.obrigatorio();
+        Habito habito = buscar(id, usuario.getId());
+        exigirDataPassadaOuHoje(data, usuario);
+
+        registroRepository.apagar(id, data);
+
+        return montarUm(habito, usuario);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MarcacaoResponse> historico(Long id, LocalDate desde, LocalDate ate) {
+        Usuario usuario = usuarioAtual.obrigatorio();
+        buscar(id, usuario.getId());
+
+        LocalDate fim = ate != null ? ate : dataDoUsuario.hoje(usuario);
+        LocalDate inicio = desde != null ? desde : fim.minusDays(29);
+
+        return registroRepository.marcacoesDoHabito(id, usuario.getId(), inicio, fim).stream()
+                .map(MarcacaoResponse::de)
+                .toList();
+    }
+
     // ------------------------------------------------------------------ apoio
 
     private Habito buscar(Long id, Long usuarioId) {
@@ -141,6 +189,16 @@ public class HabitoService {
             throw ApiException.diasDaSemanaVazios();
         }
         return EnumSet.copyOf(pedido.diasSemana());
+    }
+
+    /**
+     * Futuro medido no fuso da conta: as 23h em Sao Paulo ja e o dia seguinte
+     * num servidor em UTC, e o usuario levaria 400 marcando o proprio hoje.
+     */
+    private void exigirDataPassadaOuHoje(LocalDate data, Usuario usuario) {
+        if (data.isAfter(dataDoUsuario.hoje(usuario))) {
+            throw ApiException.dataNoFuturo();
+        }
     }
 
     private String nuloSeVazio(String valor) {

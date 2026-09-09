@@ -68,27 +68,24 @@ class StreakCalculatorTest {
                 caso("so hoje marcado vale um",
                         diario(), marcacoes().feito(0), 1),
 
+                caso("ontem marcado e anteontem em branco vale um",
+                        diario(), marcacoes().feito(1), 1),
+
                 // HOJE e segunda; o habito e de terca e quinta.
                 caso("segunda nao cobra habito de terca e quinta",
-                        criadoEm(nosDias(DiaSemana.TER, DiaSemana.QUI), HOJE.minusDays(6)),
-                        marcacoes().feito(4).feito(6), 2),
+                        nosDias(DiaSemana.TER, DiaSemana.QUI), marcacoes().feito(4).feito(6), 2),
 
                 caso("a corrente quebra no dia devido em branco, nao no dia livre",
                         nosDias(DiaSemana.TER, DiaSemana.QUI), marcacoes().feito(4), 1),
 
                 // Quarta nao e dia do habito: marcar la e bonus.
                 caso("marcacao em dia nao devido nao soma nem quebra",
-                        criadoEm(nosDias(DiaSemana.TER, DiaSemana.QUI), HOJE.minusDays(6)),
+                        nosDias(DiaSemana.TER, DiaSemana.QUI),
                         marcacoes().feito(4).feito(5).feito(6), 2),
 
-                // Arquivado na sexta: o streak fica congelado la, nao cai com o
-                // tempo. E o que faz arquivar preservar o historico de verdade.
                 caso("habito arquivado congela o streak na data do arquivamento",
                         arquivadoEm(diario(), HOJE.minusDays(3)),
                         marcacoes().feito(3).feito(4).feito(5), 3),
-
-                caso("habito criado ontem nao e cobrado por anteontem",
-                        criadoEm(diario(), HOJE.minusDays(1)), marcacoes().feito(1), 1),
 
                 caso("a contagem para no teto de um ano",
                         diario(), seguidosPorDia(400), 366));
@@ -122,13 +119,6 @@ class StreakCalculatorTest {
         habito.setNome("Ler");
         habito.setTipoAgenda(agenda);
         habito.setDiasSemana(dias);
-        // Longe o bastante para nao limitar a contagem, salvo onde o caso quer.
-        habito.setCriadoEm(instante(HOJE.minusDays(500)));
-        return habito;
-    }
-
-    private static Habito criadoEm(Habito habito, LocalDate data) {
-        habito.setCriadoEm(instante(data));
         return habito;
     }
 

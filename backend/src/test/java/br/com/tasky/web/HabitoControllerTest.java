@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
@@ -264,6 +265,134 @@ class HabitoControllerTest {
                 .andExpect(jsonPath("$[2].nome").value("Meditar"));
     }
 
+    // -------------------------------------------------------------- marcacoes
+
+    @Nested
+    @DisplayName("marcacao e historico")
+    class Marcacao {
+
+        @Test
+        @DisplayName("marcar hoje faz o streak subir")
+        void marcarHoje() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+
+            marcar(id, "2026-09-07", "FEITO")
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.streak").value(1))
+                    .andExpect(jsonPath("$.statusHoje").value("FEITO"));
+        }
+
+        @Test
+        @DisplayName("marcar dias anteriores conta, mesmo num habito criado hoje")
+        void marcarDiasAnteriores() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+
+            marcar(id, "2026-09-05", "FEITO").andExpect(status().isOk());
+            marcar(id, "2026-09-06", "FEITO").andExpect(status().isOk());
+            marcar(id, "2026-09-07", "FEITO")
+                    .andExpect(jsonPath("$.streak").value(3));
+        }
+
+        @Test
+        @DisplayName("marcar o mesmo dia duas vezes nao duplica nem da conflito")
+        void marcarDuasVezes() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+
+            marcar(id, "2026-09-07", "FEITO").andExpect(status().isOk());
+            marcar(id, "2026-09-07", "FEITO")
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.streak").value(1));
+        }
+
+        @Test
+        @DisplayName("pular nao soma ao streak, mas nao quebra a corrente")
+        void pular() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+
+            marcar(id, "2026-09-05", "FEITO").andExpect(status().isOk());
+            marcar(id, "2026-09-06", "PULADO").andExpect(status().isOk());
+            marcar(id, "2026-09-07", "FEITO")
+                    .andExpect(jsonPath("$.streak").value(2))
+                    .andExpect(jsonPath("$.statusHoje").value("FEITO"));
+        }
+
+        @Test
+        @DisplayName("trocar o status do dia sobrescreve a marcacao")
+        void trocarStatus() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+
+            marcar(id, "2026-09-07", "FEITO").andExpect(status().isOk());
+            marcar(id, "2026-09-07", "PULADO")
+                    .andExpect(jsonPath("$.statusHoje").value("PULADO"))
+                    .andExpect(jsonPath("$.streak").value(0));
+        }
+
+        @Test
+        @DisplayName("desmarcar volta atras e derruba o streak")
+        void desmarcar() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+            marcar(id, "2026-09-07", "FEITO").andExpect(status().isOk());
+
+            mockMvc.perform(comAuth(delete("/api/v1/habitos/" + id + "/registros/2026-09-07"),
+                            tokenCarlos))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.streak").value(0))
+                    .andExpect(jsonPath("$.statusHoje").doesNotExist());
+        }
+
+        @Test
+        @DisplayName("desmarcar dia sem marcacao nao e erro")
+        void desmarcarVazio() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+
+            mockMvc.perform(comAuth(delete("/api/v1/habitos/" + id + "/registros/2026-09-07"),
+                            tokenCarlos))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.streak").value(0));
+        }
+
+        @Test
+        @DisplayName("nao da para marcar um dia que ainda nao chegou")
+        void diaFuturo() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+
+            marcar(id, "2026-09-08", "FEITO")
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.erro").value(
+                            org.hamcrest.Matchers.containsString("ainda nao chegou")));
+        }
+
+        @Test
+        @DisplayName("o historico vem do mais recente para o mais antigo")
+        void historico() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+            marcar(id, "2026-09-05", "FEITO").andExpect(status().isOk());
+            marcar(id, "2026-09-06", "PULADO").andExpect(status().isOk());
+            marcar(id, "2026-09-07", "FEITO").andExpect(status().isOk());
+
+            mockMvc.perform(comAuth(get("/api/v1/habitos/" + id + "/historico"), tokenCarlos))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(3))
+                    .andExpect(jsonPath("$[0].data").value("2026-09-07"))
+                    .andExpect(jsonPath("$[1].status").value("PULADO"))
+                    .andExpect(jsonPath("$[2].data").value("2026-09-05"));
+        }
+
+        @Test
+        @DisplayName("o historico respeita o periodo pedido")
+        void historicoComPeriodo() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+            marcar(id, "2026-09-05", "FEITO").andExpect(status().isOk());
+            marcar(id, "2026-09-07", "FEITO").andExpect(status().isOk());
+
+            mockMvc.perform(comAuth(get("/api/v1/habitos/" + id + "/historico"), tokenCarlos)
+                            .param("desde", "2026-09-06")
+                            .param("ate", "2026-09-07"))
+                    .andExpect(jsonPath("$.length()").value(1))
+                    .andExpect(jsonPath("$[0].data").value("2026-09-07"));
+        }
+    }
+
     // ------------------------------------------------------------- propriedade
 
     @Nested
@@ -300,6 +429,11 @@ class HabitoControllerTest {
             mockMvc.perform(comAuth(delete("/api/v1/habitos/" + doOutro), tokenCarlos))
                     .andExpect(status().isNotFound());
 
+            marcar(doOutro, "2026-09-07", "FEITO").andExpect(status().isNotFound());
+
+            mockMvc.perform(comAuth(get("/api/v1/habitos/" + doOutro + "/historico"), tokenCarlos))
+                    .andExpect(status().isNotFound());
+
             // E continua intacto para o dono.
             mockMvc.perform(comAuth(get("/api/v1/habitos"), tokenOutro))
                     .andExpect(jsonPath("$.length()").value(1))
@@ -328,6 +462,13 @@ class HabitoControllerTest {
 
     private String corpo(Object valor) {
         return json.writeValueAsString(valor);
+    }
+
+    private ResultActions marcar(long habitoId, String data, String status) throws Exception {
+        return mockMvc.perform(
+                comAuth(put("/api/v1/habitos/" + habitoId + "/registros/" + data), tokenCarlos)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo(Map.of("status", status))));
     }
 
     private long criarHabito(String token, String nome) throws Exception {

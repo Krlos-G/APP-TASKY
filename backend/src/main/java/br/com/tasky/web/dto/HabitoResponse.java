@@ -9,14 +9,8 @@ import java.time.LocalTime;
 import java.util.Set;
 
 /**
- * Um habito com o que a tela precisa saber sobre ele hoje.
- *
- * O streak nao vem do banco: e recalculado a cada leitura pelo StreakCalculator.
- *
- * @param statusHoje nulo quando o dia ainda nao foi marcado - o que e diferente
- *                   de ter sido pulado, e a tela precisa distinguir os dois
- * @param devidoHoje false num habito de terca visto numa segunda; a tela usa
- *                   isso para nao cobrar o que a agenda nao pede
+ * @param statusHoje nulo quando o dia ainda nao foi marcado - diferente de ter
+ *                   sido pulado, e a tela precisa distinguir os dois
  */
 public record HabitoResponse(
         Long id,

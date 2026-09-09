@@ -7,12 +7,8 @@ import java.time.Clock;
 import java.time.LocalDate;
 
 /**
- * Que dia e hoje para este usuario.
- *
- * Existe para que a resposta seja sempre a mesma em todo o app. "Hoje" e o dia
- * no fuso da conta, nunca no do servidor: sem isso, quem usa o app depois da
- * meia-noite veria o dia seguinte (ou o anterior) dependendo de onde a
- * aplicacao esta hospedada - e o streak quebraria sozinho na virada.
+ * "Hoje" e o dia no fuso da conta, nunca no do servidor: sem isso, quem usa o
+ * app depois da meia-noite veria o dia errado conforme onde ele esta hospedado.
  */
 @Component
 public class DataDoUsuario {

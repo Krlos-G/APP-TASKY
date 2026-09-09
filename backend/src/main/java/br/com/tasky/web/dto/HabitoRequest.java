@@ -10,11 +10,8 @@ import java.time.LocalTime;
 import java.util.Set;
 
 /**
- * @param diasSemana   obrigatorio quando tipoAgenda e DIAS_SEMANA, ignorado nos
- *                     demais casos. A coerencia entre os dois e checada no
- *                     servico, que sabe traduzir a falta em mensagem util
- * @param horaPreferida so ordena a lista do dia; nao agenda nada
- * @param horaLembrete  nulo = sem lembrete para este habito (Fatia 7)
+ * @param diasSemana obrigatorio quando tipoAgenda e DIAS_SEMANA, ignorado nos
+ *                   demais casos
  */
 public record HabitoRequest(
         @NotBlank(message = "informe o nome") @Size(max = 100) String nome,
