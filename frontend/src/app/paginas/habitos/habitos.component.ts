@@ -5,6 +5,7 @@ import { HabitoService } from '../../core/habitos/habito.service';
 import { Habito, Marcacao, StatusHabito, TipoAgenda } from '../../core/habitos/habito.models';
 import { DIAS_SEMANA, DiaSemana, NOME_CURTO_DO_DIA } from '../../core/rotina/rotina.models';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
+import { formatarDataCurta } from '../../core/tempo/formatos';
 import { RespostaErro } from '../../core/auth/auth.models';
 
 @Component({
@@ -222,10 +223,7 @@ export class Habitos implements OnInit {
     return habito.streak === 1 ? '1 dia seguido' : `${habito.streak} dias seguidos`;
   }
 
-  protected dataCurta(iso: string): string {
-    const [, mes, dia] = iso.split('-');
-    return `${dia}/${mes}`;
-  }
+  protected readonly dataCurta = formatarDataCurta;
 
   private substituir(atualizado: Habito): void {
     this.habitos.update((lista) =>

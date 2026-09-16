@@ -41,6 +41,7 @@ const DIA_COM_ROTINA: Dia = {
   ],
   habitos: [],
   tarefas: [],
+  atrasadas: [],
 };
 
 describe('Hoje', () => {

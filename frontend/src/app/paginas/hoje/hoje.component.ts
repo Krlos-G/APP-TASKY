@@ -5,6 +5,7 @@ import { DiaService } from '../../core/rotina/dia.service';
 import { HabitoService } from '../../core/habitos/habito.service';
 import { HabitoDoDia, StatusHabito } from '../../core/habitos/habito.models';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
+import { formatarDuracao } from '../../core/tempo/formatos';
 import { Bloco, Dia } from '../../core/rotina/rotina.models';
 import { RespostaErro } from '../../core/auth/auth.models';
 
@@ -196,15 +197,7 @@ export class Hoje implements OnInit {
     return hora.slice(0, 5);
   }
 
-  /** "1h12" lê melhor que "72 minutos" para uma contagem regressiva. */
-  protected duracao(minutos: number): string {
-    if (minutos < 60) {
-      return `${minutos} min`;
-    }
-    const horas = Math.floor(minutos / 60);
-    const resto = minutos % 60;
-    return resto === 0 ? `${horas}h` : `${horas}h${String(resto).padStart(2, '0')}`;
-  }
+  protected readonly duracao = formatarDuracao;
 
   private emMinutos(hora: string): number {
     const [h, m] = hora.split(':').map(Number);
