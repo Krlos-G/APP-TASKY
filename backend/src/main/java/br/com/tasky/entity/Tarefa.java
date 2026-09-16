@@ -91,4 +91,10 @@ public class Tarefa {
                 && dataPlanejada != null
                 && dataPlanejada.isBefore(hoje);
     }
+
+    public boolean isVencida(LocalDate hoje) {
+        return status == StatusTarefa.A_FAZER
+                && dataLimite != null
+                && dataLimite.isBefore(hoje);
+    }
 }

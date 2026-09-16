@@ -363,6 +363,14 @@ class HabitoControllerTest {
         }
 
         @Test
+        @DisplayName("data malformada na URL e erro do cliente, nao do servidor")
+        void dataMalformada() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+
+            marcar(id, "07-09-2026", "FEITO").andExpect(status().isBadRequest());
+        }
+
+        @Test
         @DisplayName("o historico vem do mais recente para o mais antigo")
         void historico() throws Exception {
             long id = criarHabito(tokenCarlos, "Ler");

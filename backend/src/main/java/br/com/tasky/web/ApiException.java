@@ -70,6 +70,11 @@ public class ApiException extends RuntimeException {
                 "Escolha ao menos um dia da semana para este habito.");
     }
 
+    public static ApiException horarioSemData() {
+        return new ApiException(HttpStatus.BAD_REQUEST,
+                "Para definir um horario, escolha tambem o dia da tarefa.");
+    }
+
     public static ApiException fusoHorarioInvalido(String valor) {
         return new ApiException(HttpStatus.BAD_REQUEST, "Fuso horario desconhecido: " + valor);
     }
