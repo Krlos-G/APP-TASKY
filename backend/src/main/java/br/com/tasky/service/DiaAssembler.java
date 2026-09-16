@@ -7,13 +7,13 @@ import br.com.tasky.entity.enums.DiaSemana;
 import br.com.tasky.security.UsuarioAtual;
 import br.com.tasky.web.dto.BlocoResponse;
 import br.com.tasky.web.dto.DiaResponse;
-import br.com.tasky.web.dto.HabitoDoDiaResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Monta a linha do tempo de um dia a partir da rotina do usuario.
@@ -26,13 +26,16 @@ public class DiaAssembler {
 
     private final RotinaService rotinaService;
     private final HabitoService habitoService;
+    private final TarefaService tarefaService;
     private final UsuarioAtual usuarioAtual;
     private final DataDoUsuario dataDoUsuario;
 
     public DiaAssembler(RotinaService rotinaService, HabitoService habitoService,
-                        UsuarioAtual usuarioAtual, DataDoUsuario dataDoUsuario) {
+                        TarefaService tarefaService, UsuarioAtual usuarioAtual,
+                        DataDoUsuario dataDoUsuario) {
         this.rotinaService = rotinaService;
         this.habitoService = habitoService;
+        this.tarefaService = tarefaService;
         this.usuarioAtual = usuarioAtual;
         this.dataDoUsuario = dataDoUsuario;
     }
@@ -43,21 +46,26 @@ public class DiaAssembler {
     @Transactional(readOnly = true)
     public DiaResponse montar(LocalDate data) {
         Usuario usuario = usuarioAtual.obrigatorio();
-        LocalDate dia = data != null ? data : dataDoUsuario.hoje(usuario);
+        LocalDate hoje = dataDoUsuario.hoje(usuario);
+        LocalDate dia = data != null ? data : hoje;
 
         // O dia da semana sai da data ja resolvida no fuso do usuario. Calcular
         // isso no cliente daria resultado errado sempre que o relogio do
         // aparelho estivesse em outro fuso que o da conta.
         DiaSemana diaSemana = DiaSemana.de(dia.getDayOfWeek());
+        Optional<ModeloDia> modelo = rotinaService.modeloDoDia(usuario.getId(), diaSemana);
 
-        // Habito independe de rotina: nao ter modelo atribuido ao sabado nao
-        // significa nao ter habitos no sabado.
-        List<HabitoDoDiaResponse> habitos = habitoService.doDia(usuario, dia);
-
-        return rotinaService.modeloDoDia(usuario.getId(), diaSemana)
-                .map(modelo -> DiaResponse.comRotina(dia, diaSemana.name(), modelo.getNome(),
-                        blocosOrdenados(modelo), habitos))
-                .orElseGet(() -> DiaResponse.semRotina(dia, diaSemana.name(), habitos));
+        // Habitos e tarefas independem de rotina: sabado sem modelo atribuido
+        // nao e sabado sem nada para fazer.
+        return new DiaResponse(
+                dia,
+                diaSemana.name(),
+                modelo.isPresent(),
+                modelo.map(ModeloDia::getNome).orElse(null),
+                modelo.map(this::blocosOrdenados).orElse(List.of()),
+                habitoService.doDia(usuario, dia),
+                tarefaService.doDia(usuario, dia),
+                dia.equals(hoje) ? tarefaService.atrasadas(usuario) : List.of());
     }
 
     private List<BlocoResponse> blocosOrdenados(ModeloDia modelo) {

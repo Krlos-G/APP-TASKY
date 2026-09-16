@@ -49,20 +49,30 @@ public class TarefaService {
         LocalDate hoje = dataDoUsuario.hoje(usuario);
         Long id = usuario.getId();
 
-        List<Tarefa> tarefas = switch (filtro) {
-            case HOJE -> ordenar(
-                    tarefaRepository.findByUsuarioIdAndDataPlanejadaAndStatusNot(id, hoje, CANCELADA));
-            case PROXIMAS -> ordenar(
-                    tarefaRepository.findByUsuarioIdAndStatusAndDataPlanejadaAfter(id, A_FAZER, hoje));
-            case ATRASADAS -> ordenar(
-                    tarefaRepository.findByUsuarioIdAndStatusAndDataPlanejadaBefore(id, A_FAZER, hoje));
-            case SEM_DATA -> ordenar(
-                    tarefaRepository.findByUsuarioIdAndStatusAndDataPlanejadaIsNull(id, A_FAZER));
-            case CONCLUIDAS ->
-                    tarefaRepository.findByUsuarioIdAndStatusOrderByConcluidoEmDesc(id, FEITA);
+        return switch (filtro) {
+            case HOJE -> doDia(usuario, hoje);
+            case ATRASADAS -> atrasadas(usuario);
+            case PROXIMAS -> responder(ordenar(
+                    tarefaRepository.findByUsuarioIdAndStatusAndDataPlanejadaAfter(id, A_FAZER, hoje)), hoje);
+            case SEM_DATA -> responder(ordenar(
+                    tarefaRepository.findByUsuarioIdAndStatusAndDataPlanejadaIsNull(id, A_FAZER)), hoje);
+            case CONCLUIDAS -> responder(
+                    tarefaRepository.findByUsuarioIdAndStatusOrderByConcluidoEmDesc(id, FEITA), hoje);
         };
+    }
 
-        return tarefas.stream().map(tarefa -> TarefaResponse.de(tarefa, hoje)).toList();
+    /** As a fazer e as feitas daquela data: feita continua na tela, marcada. */
+    @Transactional(readOnly = true)
+    public List<TarefaResponse> doDia(Usuario usuario, LocalDate data) {
+        return responder(ordenar(tarefaRepository.findByUsuarioIdAndDataPlanejadaAndStatusNot(
+                usuario.getId(), data, CANCELADA)), dataDoUsuario.hoje(usuario));
+    }
+
+    @Transactional(readOnly = true)
+    public List<TarefaResponse> atrasadas(Usuario usuario) {
+        LocalDate hoje = dataDoUsuario.hoje(usuario);
+        return responder(ordenar(tarefaRepository.findByUsuarioIdAndStatusAndDataPlanejadaBefore(
+                usuario.getId(), A_FAZER, hoje)), hoje);
     }
 
     @Transactional(readOnly = true)
@@ -146,6 +156,10 @@ public class TarefaService {
 
     private List<Tarefa> ordenar(List<Tarefa> tarefas) {
         return tarefas.stream().sorted(ORDEM_DE_EXECUCAO).toList();
+    }
+
+    private List<TarefaResponse> responder(List<Tarefa> tarefas, LocalDate hoje) {
+        return tarefas.stream().map(tarefa -> TarefaResponse.de(tarefa, hoje)).toList();
     }
 
     private String nuloSeVazio(String valor) {
