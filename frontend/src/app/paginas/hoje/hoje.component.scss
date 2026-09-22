@@ -32,15 +32,6 @@
   }
 }
 
-.alerta {
-  margin: 0 0 1rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: 8px;
-  background: color-mix(in srgb, crimson 12%, transparent);
-  color: crimson;
-  font-size: 0.875rem;
-}
-
 /* ------------------------------------------------------- bloco atual */
 
 .agora {
@@ -141,9 +132,59 @@
   }
 }
 
-/* ----------------------------------------------------- hábitos de hoje */
+/* ------------------------------------- seções de hábitos e tarefas */
 
-.habitos-hoje {
+.progresso {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+
+  &__trilha {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--cor-borda);
+    overflow: hidden;
+  }
+
+  &__barra {
+    display: block;
+    height: 100%;
+    background: var(--cor-primaria);
+  }
+
+  &__numero {
+    color: var(--cor-texto-fraco);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.atrasadas {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in srgb, crimson 35%, transparent);
+  border-radius: var(--raio);
+
+  &__titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.35rem;
+    color: crimson;
+    font-size: 0.9rem;
+  }
+
+  &__contagem {
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, crimson 16%, transparent);
+    font-size: 0.75rem;
+  }
+}
+
+.secao {
   margin-top: 1.75rem;
 
   &__topo {
@@ -163,21 +204,20 @@
     font-size: 0.85rem;
     font-variant-numeric: tabular-nums;
   }
-
-  &__lista {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
 }
 
-.habito-item {
+.itens {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.7rem;
   padding: 0.55rem 0.5rem;
-  border-radius: 8px;
 
   &--resolvido {
     opacity: 0.6;
@@ -205,9 +245,24 @@
     }
   }
 
+  &__corpo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
   &__nome {
     margin: 0;
+    overflow: hidden;
     font-size: 0.95rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &--resolvido &__nome {
+    text-decoration: line-through;
   }
 
   &__detalhe {
@@ -226,6 +281,32 @@
     text-decoration: underline;
     cursor: pointer;
   }
+}
+
+.selo {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, crimson 14%, transparent);
+  color: crimson;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* Acima da barra de navegação, que tem --altura-tab-bar no mobile. */
+.adicionar {
+  position: fixed;
+  right: 1.25rem;
+  bottom: calc(var(--altura-tab-bar) + 1rem);
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  color: #fff;
+  font-size: 1.6rem;
+  line-height: 1;
+  text-decoration: none;
 }
 
 /* ------------------------------------------------------- estado vazio */

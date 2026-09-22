@@ -4,8 +4,10 @@ import { RouterLink } from '@angular/router';
 import { DiaService } from '../../core/rotina/dia.service';
 import { HabitoService } from '../../core/habitos/habito.service';
 import { HabitoDoDia, StatusHabito } from '../../core/habitos/habito.models';
+import { TarefaService } from '../../core/tarefas/tarefa.service';
+import { Tarefa } from '../../core/tarefas/tarefa.models';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
-import { formatarDuracao } from '../../core/tempo/formatos';
+import { formatarDataCurta, formatarDuracao } from '../../core/tempo/formatos';
 import { Bloco, Dia } from '../../core/rotina/rotina.models';
 import { RespostaErro } from '../../core/auth/auth.models';
 
@@ -29,6 +31,7 @@ interface Agora {
 export class Hoje implements OnInit {
   private readonly diaService = inject(DiaService);
   private readonly habitoService = inject(HabitoService);
+  private readonly tarefaService = inject(TarefaService);
   private readonly tempo = inject(TimeProvider);
 
   protected readonly dia = signal<Dia | null>(null);
@@ -39,6 +42,27 @@ export class Hoje implements OnInit {
   protected readonly feitos = computed(
     () => this.habitos().filter((h) => h.status === 'FEITO').length,
   );
+
+  protected readonly tarefas = computed(() => this.dia()?.tarefas ?? []);
+  protected readonly atrasadas = computed(() => this.dia()?.atrasadas ?? []);
+  protected readonly tarefasFeitas = computed(
+    () => this.tarefas().filter((t) => t.status === 'FEITA').length,
+  );
+
+  /**
+   * Quanto do dia já saiu do caminho. Nulo quando não há nada a contar.
+   *
+   * As atrasadas ficam de fora: são dívida de outro dia, e contá-las faria
+   * hoje nascer atrasado.
+   */
+  protected readonly progresso = computed(() => {
+    const total = this.habitos().length + this.tarefas().length;
+    if (total === 0) {
+      return null;
+    }
+    const feitos = this.feitos() + this.tarefasFeitas();
+    return { feitos, total, porcento: Math.round((feitos / total) * 100) };
+  });
 
   /**
    * Recalculado a cada minuto, porque depende do sinal do TimeProvider.
@@ -167,6 +191,55 @@ export class Hoje implements OnInit {
       partes.push('pulado hoje');
     } else if (habito.streak === 0) {
       partes.push('começar hoje');
+    }
+
+    return partes.join(' · ');
+  }
+
+  /** Mesma marcação otimista dos hábitos, agora para a tarefa. */
+  protected alternarTarefa(tarefa: Tarefa): void {
+    const anterior = tarefa.status;
+    const feita = anterior === 'FEITA';
+    this.aplicarTarefa(tarefa.id, { status: feita ? 'A_FAZER' : 'FEITA' });
+
+    const requisicao = feita
+      ? this.tarefaService.desfazerConclusao(tarefa.id)
+      : this.tarefaService.concluir(tarefa.id);
+
+    requisicao.subscribe({
+      next: (atualizada) => this.aplicarTarefa(tarefa.id, atualizada),
+      error: (falha: HttpErrorResponse) => {
+        this.aplicarTarefa(tarefa.id, { status: anterior });
+        const corpo = falha.error as RespostaErro | null;
+        this.erro.set(corpo?.erro ?? 'Não foi possível salvar. Tente de novo.');
+      },
+    });
+  }
+
+  private aplicarTarefa(id: number, mudanca: Partial<Tarefa>): void {
+    const trocar = (lista: Tarefa[]) =>
+      lista.map((t) => (t.id === id ? { ...t, ...mudanca } : t));
+
+    this.dia.update((atual) =>
+      atual
+        ? { ...atual, tarefas: trocar(atual.tarefas), atrasadas: trocar(atual.atrasadas) }
+        : atual,
+    );
+  }
+
+  protected readonly dataCurta = formatarDataCurta;
+
+  protected detalheDaTarefa(tarefa: Tarefa): string {
+    const partes: string[] = [];
+
+    if (tarefa.horaPlanejada) {
+      partes.push(tarefa.horaPlanejada.slice(0, 5));
+    }
+    if (tarefa.minutosEstimados) {
+      partes.push(formatarDuracao(tarefa.minutosEstimados));
+    }
+    if (tarefa.prioridade === 'ALTA') {
+      partes.push('prioridade alta');
     }
 
     return partes.join(' · ');

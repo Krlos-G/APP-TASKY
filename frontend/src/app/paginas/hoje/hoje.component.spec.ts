@@ -9,6 +9,7 @@ import { Hoje } from './hoje.component';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
 import { Bloco, Dia } from '../../core/rotina/rotina.models';
 import { HabitoDoDia } from '../../core/habitos/habito.models';
+import { Tarefa } from '../../core/tarefas/tarefa.models';
 
 function bloco(id: number, titulo: string, inicio: string, fim: string): Bloco {
   return {
@@ -27,6 +28,25 @@ function habito(
   streak: number,
 ): HabitoDoDia {
   return { id, nome, icone: null, cor: null, horaPreferida: null, status, streak };
+}
+
+function tarefa(parcial: Partial<Tarefa> = {}): Tarefa {
+  return {
+    id: 10,
+    titulo: 'Responder e-mail',
+    observacoes: null,
+    prioridade: 'MEDIA',
+    minutosEstimados: null,
+    dataLimite: null,
+    dataPlanejada: '2026-09-02',
+    horaPlanejada: null,
+    horaLembrete: null,
+    status: 'A_FAZER',
+    concluidoEm: null,
+    atrasada: false,
+    vencida: false,
+    ...parcial,
+  };
 }
 
 const DIA_COM_ROTINA: Dia = {
@@ -159,7 +179,7 @@ describe('Hoje', () => {
   describe('habitos', () => {
     function marca(fixture: ReturnType<typeof montar>, indice = 0): HTMLButtonElement {
       const botoes = (fixture.nativeElement as HTMLElement).querySelectorAll(
-        '.habito-item__marca',
+        '.item__marca',
       );
       return botoes[indice] as HTMLButtonElement;
     }
@@ -260,7 +280,7 @@ describe('Hoje', () => {
       const fixture = montar({ ...DIA_COM_ROTINA, habitos: [habito(1, 'Ler', null, 2)] });
 
       const pular = (fixture.nativeElement as HTMLElement).querySelector(
-        '.habito-item__pular',
+        '.item__pular',
       ) as HTMLButtonElement;
       pular.click();
       fixture.detectChanges();
@@ -275,6 +295,113 @@ describe('Hoje', () => {
       // Pulado nao pode ler "comecar hoje" junto: o dia ja foi resolvido.
       expect(texto(fixture)).toContain('pulado hoje');
       expect(texto(fixture)).not.toContain('começar hoje');
+    });
+  });
+
+  describe('tarefas', () => {
+    function marcas(fixture: ReturnType<typeof montar>): HTMLButtonElement[] {
+      return Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('.item__marca'),
+      ) as HTMLButtonElement[];
+    }
+
+    it('lista as tarefas do dia com o contador de feitas', () => {
+      comHora(10, 0);
+      const fixture = montar({
+        ...DIA_COM_ROTINA,
+        tarefas: [
+          tarefa({ id: 10, titulo: 'Responder e-mail', horaPlanejada: '14:30:00' }),
+          tarefa({ id: 11, titulo: 'Revisar PR', status: 'FEITA', minutosEstimados: 90 }),
+        ],
+      });
+
+      const conteudo = texto(fixture);
+      expect(conteudo).toContain('Tarefas de hoje');
+      expect(conteudo).toContain('14:30');
+      expect(conteudo).toContain('1h30');
+      expect(conteudo).toContain('1/2');
+    });
+
+    it('a barra de progresso soma habitos e tarefas', () => {
+      comHora(10, 0);
+      const fixture = montar({
+        ...DIA_COM_ROTINA,
+        habitos: [habito(1, 'Ler', 'FEITO', 3), habito(2, 'Meditar', null, 0)],
+        tarefas: [tarefa({ id: 10, status: 'FEITA' }), tarefa({ id: 11 })],
+      });
+
+      const barra = (fixture.nativeElement as HTMLElement).querySelector(
+        '[role="progressbar"]',
+      ) as HTMLElement;
+      expect(barra.getAttribute('aria-valuenow')).toBe('2');
+      expect(barra.getAttribute('aria-valuemax')).toBe('4');
+    });
+
+    it('as atrasadas aparecem em secao propria e ficam fora do progresso', () => {
+      comHora(10, 0);
+      const fixture = montar({
+        ...DIA_COM_ROTINA,
+        habitos: [habito(1, 'Ler', 'FEITO', 3)],
+        atrasadas: [
+          tarefa({ id: 20, titulo: 'Pagar boleto', dataPlanejada: '2026-08-31', atrasada: true, vencida: true }),
+        ],
+      });
+
+      const conteudo = texto(fixture);
+      expect(conteudo).toContain('Atrasadas');
+      expect(conteudo).toContain('de 31/08');
+
+      // Divida de outro dia nao entra na conta de hoje: 1 de 1, nao 1 de 2.
+      const barra = (fixture.nativeElement as HTMLElement).querySelector(
+        '[role="progressbar"]',
+      ) as HTMLElement;
+      expect(barra.getAttribute('aria-valuemax')).toBe('1');
+      expect((fixture.nativeElement as HTMLElement).querySelectorAll('.selo').length).toBe(1);
+    });
+
+    it('concluir a tarefa muda a tela antes da resposta', () => {
+      comHora(10, 0);
+      const fixture = montar({ ...DIA_COM_ROTINA, tarefas: [tarefa()] });
+
+      marcas(fixture)[0].click();
+      fixture.detectChanges();
+      expect(texto(fixture)).toContain('1/1');
+
+      const req = http.expectOne('/api/v1/tarefas/10/conclusao');
+      expect(req.request.method).toBe('PUT');
+      req.flush(tarefa({ status: 'FEITA' }));
+      fixture.detectChanges();
+
+      expect(texto(fixture)).toContain('1/1');
+    });
+
+    it('erro do servidor desfaz a conclusao e avisa', () => {
+      comHora(10, 0);
+      const fixture = montar({ ...DIA_COM_ROTINA, tarefas: [tarefa()] });
+
+      marcas(fixture)[0].click();
+      fixture.detectChanges();
+      expect(texto(fixture)).toContain('1/1');
+
+      http.expectOne('/api/v1/tarefas/10/conclusao').flush(
+        { erro: 'Tarefa nao encontrada.' },
+        { status: 404, statusText: 'Not Found' },
+      );
+      fixture.detectChanges();
+
+      expect(texto(fixture)).toContain('0/1');
+      expect(texto(fixture)).toContain('Tarefa nao encontrada.');
+    });
+
+    it('o botao de adicionar leva o dia e a origem', () => {
+      comHora(10, 0);
+      const fixture = montar(DIA_COM_ROTINA);
+
+      const link = (fixture.nativeElement as HTMLElement).querySelector(
+        '.adicionar',
+      ) as HTMLAnchorElement;
+      expect(link.getAttribute('href')).toContain('data=2026-09-02');
+      expect(link.getAttribute('href')).toContain('origem=%2Fhoje');
     });
   });
 });
