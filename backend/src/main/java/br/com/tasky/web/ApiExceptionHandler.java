@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
@@ -41,6 +43,17 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of(
                 "erro", "Dados invalidos.",
                 "campos", campos));
+    }
+
+    /**
+     * Valor que nao converte para o tipo esperado: enum desconhecido, data
+     * malformada, JSON quebrado. E erro de quem chamou - sem estes dois
+     * tratamentos, caia no handler generico e virava 500.
+     */
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<Map<String, Object>> tratarValorIlegivel(Exception e) {
+        log.debug("Requisicao com valor ilegivel: {}", e.getMessage());
+        return ResponseEntity.badRequest().body(Map.of("erro", "Algum valor enviado e invalido."));
     }
 
     /**

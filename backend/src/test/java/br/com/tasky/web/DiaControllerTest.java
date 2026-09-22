@@ -7,15 +7,18 @@ import br.com.tasky.entity.BlocoModelo;
 import br.com.tasky.entity.Habito;
 import br.com.tasky.entity.ModeloDia;
 import br.com.tasky.entity.RegistroHabito;
+import br.com.tasky.entity.Tarefa;
 import br.com.tasky.entity.Usuario;
 import br.com.tasky.entity.enums.DiaSemana;
 import br.com.tasky.entity.enums.StatusRegistroHabito;
+import br.com.tasky.entity.enums.StatusTarefa;
 import br.com.tasky.entity.enums.TipoAgenda;
 import br.com.tasky.repository.AtribuicaoDiaRepository;
 import br.com.tasky.repository.HabitoRepository;
 import br.com.tasky.repository.ModeloDiaRepository;
 import br.com.tasky.repository.RefreshTokenRepository;
 import br.com.tasky.repository.RegistroHabitoRepository;
+import br.com.tasky.repository.TarefaRepository;
 import br.com.tasky.repository.UsuarioRepository;
 import br.com.tasky.security.TokenAcessoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,6 +76,7 @@ class DiaControllerTest {
     @Autowired private AtribuicaoDiaRepository atribuicaoRepository;
     @Autowired private HabitoRepository habitoRepository;
     @Autowired private RegistroHabitoRepository registroRepository;
+    @Autowired private TarefaRepository tarefaRepository;
     @Autowired private RefreshTokenRepository refreshTokenRepository;
     @Autowired private TokenAcessoService tokenAcessoService;
     @Autowired private Clock clock;
@@ -86,6 +90,7 @@ class DiaControllerTest {
         relogio = (RelogioAjustavel) clock;
         relogio.definir(INICIO);
 
+        tarefaRepository.deleteAll();
         registroRepository.deleteAll();
         habitoRepository.deleteAll();
         atribuicaoRepository.deleteAll();
@@ -147,6 +152,15 @@ class DiaControllerTest {
         return habitoRepository.save(habito);
     }
 
+    private void tarefa(String titulo, String data, StatusTarefa status) {
+        var tarefa = new Tarefa();
+        tarefa.setUsuario(usuario);
+        tarefa.setTitulo(titulo);
+        tarefa.setDataPlanejada(data == null ? null : LocalDate.parse(data));
+        tarefa.setStatus(status);
+        tarefaRepository.save(tarefa);
+    }
+
     private void marcar(Habito habito, String data, StatusRegistroHabito status) {
         var registro = new RegistroHabito();
         registro.setHabito(habito);
@@ -191,7 +205,18 @@ class DiaControllerTest {
         void contratoReservaEspacoParaAsProximasFatias() throws Exception {
             buscarDia(null)
                     .andExpect(jsonPath("$.habitos").isArray())
-                    .andExpect(jsonPath("$.tarefas").isArray());
+                    .andExpect(jsonPath("$.tarefas").isArray())
+                    .andExpect(jsonPath("$.atrasadas").isArray());
+        }
+
+        @Test
+        @DisplayName("dia sem rotina ainda mostra as tarefas")
+        void tarefasIndependemDaRotina() throws Exception {
+            tarefa("Responder e-mail", "2026-09-02", StatusTarefa.A_FAZER);
+
+            buscarDia(null)
+                    .andExpect(jsonPath("$.temRotina").value(false))
+                    .andExpect(jsonPath("$.tarefas[0].titulo").value("Responder e-mail"));
         }
 
         @Test
@@ -203,6 +228,55 @@ class DiaControllerTest {
                     .andExpect(jsonPath("$.temRotina").value(false))
                     .andExpect(jsonPath("$.habitos.length()").value(1))
                     .andExpect(jsonPath("$.habitos[0].nome").value("Ler"));
+        }
+    }
+
+    @Nested
+    @DisplayName("tarefas do dia")
+    class Tarefas {
+
+        @Test
+        @DisplayName("a tarefa de hoje aparece no dia, feita ou nao")
+        void tarefaDeHoje() throws Exception {
+            tarefa("Pendente", "2026-09-02", StatusTarefa.A_FAZER);
+            tarefa("Feita", "2026-09-02", StatusTarefa.FEITA);
+
+            buscarDia(null)
+                    .andExpect(jsonPath("$.tarefas.length()").value(2))
+                    .andExpect(jsonPath("$.atrasadas.length()").value(0));
+        }
+
+        @Test
+        @DisplayName("tarefa de ontem nao feita vai para atrasadas, nao para o dia")
+        void atrasada() throws Exception {
+            tarefa("Esquecida", "2026-09-01", StatusTarefa.A_FAZER);
+
+            buscarDia(null)
+                    .andExpect(jsonPath("$.tarefas.length()").value(0))
+                    .andExpect(jsonPath("$.atrasadas.length()").value(1))
+                    .andExpect(jsonPath("$.atrasadas[0].titulo").value("Esquecida"))
+                    .andExpect(jsonPath("$.atrasadas[0].atrasada").value(true));
+        }
+
+        @Test
+        @DisplayName("tarefa feita ontem nao aparece em lugar nenhum")
+        void feitaOntem() throws Exception {
+            tarefa("Resolvida", "2026-09-01", StatusTarefa.FEITA);
+
+            buscarDia(null)
+                    .andExpect(jsonPath("$.tarefas.length()").value(0))
+                    .andExpect(jsonPath("$.atrasadas.length()").value(0));
+        }
+
+        @Test
+        @DisplayName("olhando outro dia, atrasadas vem vazia")
+        void atrasadasSoHoje() throws Exception {
+            tarefa("Esquecida", "2026-09-01", StatusTarefa.A_FAZER);
+            tarefa("De sexta", "2026-09-04", StatusTarefa.A_FAZER);
+
+            buscarDia("2026-09-04")
+                    .andExpect(jsonPath("$.tarefas[0].titulo").value("De sexta"))
+                    .andExpect(jsonPath("$.atrasadas.length()").value(0));
         }
     }
 

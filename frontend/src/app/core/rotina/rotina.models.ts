@@ -1,4 +1,5 @@
 import { HabitoDoDia } from '../habitos/habito.models';
+import { Tarefa } from '../tarefas/tarefa.models';
 
 export type DiaSemana = 'SEG' | 'TER' | 'QUA' | 'QUI' | 'SEX' | 'SAB' | 'DOM';
 
@@ -82,5 +83,7 @@ export interface Dia {
   nomeDoModelo: string | null;
   blocos: Bloco[];
   habitos: HabitoDoDia[];
-  tarefas: unknown[];
+  tarefas: Tarefa[];
+  /** Só preenchida quando o dia pedido é hoje. */
+  atrasadas: Tarefa[];
 }

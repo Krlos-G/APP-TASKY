@@ -4,6 +4,21 @@
     @if (dataPorExtenso()) {
       <p class="hoje__data">{{ dataPorExtenso() }}</p>
     }
+
+    @if (progresso(); as p) {
+      <div class="progresso">
+        <div
+          class="progresso__trilha"
+          role="progressbar"
+          [attr.aria-valuenow]="p.feitos"
+          [attr.aria-valuemax]="p.total"
+          [attr.aria-label]="'Progresso do dia: ' + p.feitos + ' de ' + p.total"
+        >
+          <span class="progresso__barra" [style.width.%]="p.porcento"></span>
+        </div>
+        <span class="progresso__numero">{{ p.feitos }}/{{ p.total }}</span>
+      </div>
+    }
   </header>
 
   @if (erro()) {
@@ -13,6 +28,54 @@
   @if (carregando()) {
     <p class="hoje__carregando">Carregando…</p>
   } @else if (dia(); as d) {
+    <!-- --------------------------------------------------- atrasadas -->
+    <!-- No topo e sem sumir: é o que se esquece se não estiver na cara. -->
+    @if (atrasadas().length > 0) {
+      <section class="atrasadas">
+        <h2 class="atrasadas__titulo">
+          Atrasadas
+          <span class="atrasadas__contagem">{{ atrasadas().length }}</span>
+        </h2>
+
+        <ul class="itens">
+          @for (tarefa of atrasadas(); track tarefa.id) {
+            <li class="item" [class.item--resolvido]="tarefa.status === 'FEITA'">
+              <button
+                class="item__marca"
+                type="button"
+                [class.item__marca--feito]="tarefa.status === 'FEITA'"
+                [attr.aria-pressed]="tarefa.status === 'FEITA'"
+                [attr.aria-label]="
+                  (tarefa.status === 'FEITA' ? 'Desfazer ' : 'Concluir ') + tarefa.titulo
+                "
+                (click)="alternarTarefa(tarefa)"
+              >
+                {{ tarefa.status === 'FEITA' ? '✓' : '' }}
+              </button>
+
+              <a
+                class="item__corpo"
+                [routerLink]="['/tarefas', tarefa.id]"
+                [queryParams]="{ origem: '/hoje' }"
+              >
+                <span class="item__nome">{{ tarefa.titulo }}</span>
+                <span class="item__detalhe">
+                  de {{ dataCurta(tarefa.dataPlanejada!) }}
+                  @if (detalheDaTarefa(tarefa)) {
+                    · {{ detalheDaTarefa(tarefa) }}
+                  }
+                </span>
+              </a>
+
+              @if (tarefa.vencida) {
+                <span class="selo">vencida</span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
     @if (!d.temRotina) {
       <!-- Sem rotina não é erro: é convite para criar uma. -->
       <div class="vazio-cartao">
@@ -101,20 +164,20 @@
     <!-- ----------------------------------------------------- hábitos -->
     <!-- Fora do bloco de rotina: dia sem modelo atribuído ainda tem hábitos. -->
     @if (habitos().length > 0) {
-      <section class="habitos-hoje">
-        <header class="habitos-hoje__topo">
+      <section class="secao">
+        <header class="secao__topo">
           <h2>Hábitos de hoje</h2>
-          <span class="habitos-hoje__contador">{{ feitos() }}/{{ habitos().length }}</span>
+          <span class="secao__contador">{{ feitos() }}/{{ habitos().length }}</span>
         </header>
 
-        <ul class="habitos-hoje__lista">
+        <ul class="itens">
           @for (habito of habitos(); track habito.id) {
-            <li class="habito-item" [class.habito-item--resolvido]="habito.status !== null">
+            <li class="item" [class.item--resolvido]="habito.status !== null">
               <button
-                class="habito-item__marca"
+                class="item__marca"
                 type="button"
-                [class.habito-item__marca--feito]="habito.status === 'FEITO'"
-                [class.habito-item__marca--pulado]="habito.status === 'PULADO'"
+                [class.item__marca--feito]="habito.status === 'FEITO'"
+                [class.item__marca--pulado]="habito.status === 'PULADO'"
                 [attr.aria-pressed]="habito.status === 'FEITO'"
                 [attr.aria-label]="
                   habito.status === 'FEITO' ? 'Desmarcar ' + habito.nome : 'Marcar ' + habito.nome
@@ -124,14 +187,14 @@
                 {{ habito.status === 'FEITO' ? '✓' : habito.status === 'PULADO' ? '–' : '' }}
               </button>
 
-              <div class="habito-item__corpo">
-                <p class="habito-item__nome">{{ habito.nome }}</p>
-                <p class="habito-item__detalhe">{{ detalhe(habito) }}</p>
+              <div class="item__corpo">
+                <p class="item__nome">{{ habito.nome }}</p>
+                <p class="item__detalhe">{{ detalhe(habito) }}</p>
               </div>
 
               @if (habito.status === null) {
                 <button
-                  class="habito-item__pular"
+                  class="item__pular"
                   type="button"
                   (click)="alternar(habito, 'PULADO')"
                 >
@@ -143,5 +206,58 @@
         </ul>
       </section>
     }
+
+    <!-- ----------------------------------------------- tarefas de hoje -->
+    @if (tarefas().length > 0) {
+      <section class="secao">
+        <header class="secao__topo">
+          <h2>Tarefas de hoje</h2>
+          <span class="secao__contador">{{ tarefasFeitas() }}/{{ tarefas().length }}</span>
+        </header>
+
+        <ul class="itens">
+          @for (tarefa of tarefas(); track tarefa.id) {
+            <li class="item" [class.item--resolvido]="tarefa.status === 'FEITA'">
+              <button
+                class="item__marca"
+                type="button"
+                [class.item__marca--feito]="tarefa.status === 'FEITA'"
+                [attr.aria-pressed]="tarefa.status === 'FEITA'"
+                [attr.aria-label]="
+                  (tarefa.status === 'FEITA' ? 'Desfazer ' : 'Concluir ') + tarefa.titulo
+                "
+                (click)="alternarTarefa(tarefa)"
+              >
+                {{ tarefa.status === 'FEITA' ? '✓' : '' }}
+              </button>
+
+              <a
+                class="item__corpo"
+                [routerLink]="['/tarefas', tarefa.id]"
+                [queryParams]="{ origem: '/hoje' }"
+              >
+                <span class="item__nome">{{ tarefa.titulo }}</span>
+                @if (detalheDaTarefa(tarefa)) {
+                  <span class="item__detalhe">{{ detalheDaTarefa(tarefa) }}</span>
+                }
+              </a>
+
+              @if (tarefa.vencida) {
+                <span class="selo">vencida</span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <a
+      class="adicionar"
+      routerLink="/tarefas/nova"
+      [queryParams]="{ data: d.data, origem: '/hoje' }"
+      aria-label="Nova tarefa"
+    >
+      +
+    </a>
   }
 </section>

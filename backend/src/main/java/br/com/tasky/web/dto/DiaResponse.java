@@ -10,7 +10,8 @@ import java.util.List;
  *                     estado legitimo, nao erro, e a tela precisa distinguir
  *                     "sem rotina" de "rotina vazia"
  * @param nomeDoModelo nulo quando nao ha rotina
- * @param tarefas      reservado para a Fatia 5
+ * @param atrasadas    so preenchida quando o dia pedido e hoje: olhando outro
+ *                     dia, "atrasada em relacao a que" nao tem resposta util
  */
 public record DiaResponse(
         LocalDate data,
@@ -19,16 +20,6 @@ public record DiaResponse(
         String nomeDoModelo,
         List<BlocoResponse> blocos,
         List<HabitoDoDiaResponse> habitos,
-        List<Object> tarefas) {
-
-    public static DiaResponse semRotina(LocalDate data, String diaSemana,
-                                        List<HabitoDoDiaResponse> habitos) {
-        return new DiaResponse(data, diaSemana, false, null, List.of(), habitos, List.of());
-    }
-
-    public static DiaResponse comRotina(LocalDate data, String diaSemana, String nomeDoModelo,
-                                        List<BlocoResponse> blocos,
-                                        List<HabitoDoDiaResponse> habitos) {
-        return new DiaResponse(data, diaSemana, true, nomeDoModelo, blocos, habitos, List.of());
-    }
+        List<TarefaResponse> tarefas,
+        List<TarefaResponse> atrasadas) {
 }

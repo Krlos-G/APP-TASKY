@@ -42,3 +42,13 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Aviso de erro das telas. Global porque e identico em todas elas. */
+.alerta {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, crimson 12%, transparent);
+  color: crimson;
+  font-size: 0.875rem;
+}
