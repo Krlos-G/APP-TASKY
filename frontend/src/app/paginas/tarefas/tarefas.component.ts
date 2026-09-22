@@ -24,6 +24,9 @@ export class Tarefas {
   protected readonly carregando = signal(true);
   protected readonly erro = signal<string | null>(null);
 
+  /** A aba atual viaja com o link: salvar a edição traz de volta para ela. */
+  protected readonly origem = computed(() => `/tarefas?filtro=${this.filtro()}`);
+
   protected readonly mensagemVazia = computed(
     () => FILTROS_TAREFA.find((f) => f.valor === this.filtro())?.vazio ?? '',
   );

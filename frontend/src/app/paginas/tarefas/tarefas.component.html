@@ -1,7 +1,9 @@
 <section class="tarefas">
   <header class="tarefas__topo">
     <h1>Tarefas</h1>
-    <a class="botao" routerLink="/tarefas/nova">Nova tarefa</a>
+    <a class="botao" routerLink="/tarefas/nova" [queryParams]="{ origem: origem() }">
+      Nova tarefa
+    </a>
   </header>
 
   <nav class="abas" aria-label="Filtros de tarefa">
@@ -43,7 +45,11 @@
             {{ tarefa.status === 'FEITA' ? '✓' : '' }}
           </button>
 
-          <a class="tarefa__corpo" [routerLink]="['/tarefas', tarefa.id]">
+          <a
+            class="tarefa__corpo"
+            [routerLink]="['/tarefas', tarefa.id]"
+            [queryParams]="{ origem: origem() }"
+          >
             <span class="tarefa__titulo">{{ tarefa.titulo }}</span>
             @if (detalhe(tarefa)) {
               <span class="tarefa__detalhe">{{ detalhe(tarefa) }}</span>

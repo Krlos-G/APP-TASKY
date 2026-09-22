@@ -1,0 +1,91 @@
+<section class="edicao">
+  <header class="edicao__topo">
+    <h1>{{ editando() ? 'Editar tarefa' : 'Nova tarefa' }}</h1>
+  </header>
+
+  @if (erro()) {
+    <p class="alerta" role="alert">{{ erro() }}</p>
+  }
+
+  @if (carregando()) {
+    <p class="edicao__nota">Carregando…</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="salvar()">
+      <label class="campo">
+        <span class="campo__rotulo">Título</span>
+        <input
+          class="campo__entrada"
+          type="text"
+          formControlName="titulo"
+          placeholder="Ex.: Responder e-mail do cliente"
+        />
+      </label>
+
+      <label class="campo">
+        <span class="campo__rotulo">Observações</span>
+        <textarea class="campo__entrada" rows="3" formControlName="observacoes"></textarea>
+      </label>
+
+      <div class="edicao__linha">
+        <label class="campo">
+          <span class="campo__rotulo">Prioridade</span>
+          <select class="campo__entrada" formControlName="prioridade">
+            <option value="BAIXA">Baixa</option>
+            <option value="MEDIA">Média</option>
+            <option value="ALTA">Alta</option>
+          </select>
+        </label>
+
+        <label class="campo">
+          <span class="campo__rotulo">Estimativa (min)</span>
+          <input class="campo__entrada" type="number" min="1" formControlName="minutosEstimados" />
+        </label>
+      </div>
+
+      <div class="edicao__linha">
+        <label class="campo">
+          <span class="campo__rotulo">Fazer no dia</span>
+          <input class="campo__entrada" type="date" formControlName="dataPlanejada" />
+        </label>
+
+        <label class="campo">
+          <span class="campo__rotulo">Horário</span>
+          <input class="campo__entrada" type="time" formControlName="horaPlanejada" />
+          @if (form.controls.horaPlanejada.disabled) {
+            <span class="campo__dica">escolha o dia primeiro</span>
+          }
+        </label>
+      </div>
+
+      <label class="campo">
+        <span class="campo__rotulo">Prazo</span>
+        <input class="campo__entrada" type="date" formControlName="dataLimite" />
+      </label>
+
+      <div class="edicao__acoes">
+        <button class="botao botao--primario" type="submit">Salvar</button>
+        <button class="botao" type="button" (click)="voltar()">Cancelar</button>
+      </div>
+    </form>
+
+    @if (editando()) {
+      <div class="excluir">
+        @if (confirmandoExclusao()) {
+          <p class="excluir__texto">Excluir esta tarefa? Não dá para desfazer.</p>
+          <div class="excluir__acoes">
+            <button class="botao botao--perigo" type="button" (click)="apagar()">
+              Excluir mesmo assim
+            </button>
+            <button class="botao" type="button" (click)="confirmandoExclusao.set(false)">
+              Cancelar
+            </button>
+          </div>
+        } @else {
+          <button class="link link--perigo" type="button" (click)="confirmandoExclusao.set(true)">
+            Excluir tarefa
+          </button>
+        }
+      </div>
+    }
+  }
+</section>

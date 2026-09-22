@@ -43,5 +43,19 @@ export const routes: Routes = [
     title: 'Tarefas · Tasky',
     loadComponent: () => import('./paginas/tarefas/tarefas.component').then((m) => m.Tarefas),
   },
+  {
+    path: 'tarefas/nova',
+    canActivate: [autenticacaoGuard],
+    title: 'Nova tarefa · Tasky',
+    loadComponent: () =>
+      import('./paginas/tarefa-edicao/tarefa-edicao.component').then((m) => m.TarefaEdicao),
+  },
+  {
+    path: 'tarefas/:id',
+    canActivate: [autenticacaoGuard],
+    title: 'Tarefa · Tasky',
+    loadComponent: () =>
+      import('./paginas/tarefa-edicao/tarefa-edicao.component').then((m) => m.TarefaEdicao),
+  },
   { path: '**', redirectTo: 'hoje' },
 ];
