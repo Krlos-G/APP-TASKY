@@ -181,6 +181,46 @@ public class HabitoService {
                 .toList();
     }
 
+    /**
+     * Quantos dias devidos do periodo foram cumpridos.
+     *
+     * PULADO nao conta como feito nem como cobrado: descanso planejado nao
+     * deveria puxar a media para baixo.
+     */
+    @Transactional(readOnly = true)
+    public Cumprimento cumprimentoNoPeriodo(Usuario usuario, LocalDate inicio, LocalDate fim) {
+        List<Habito> ativos =
+                habitoRepository.findByUsuarioIdAndArquivadoEmIsNullOrderByNomeAsc(usuario.getId());
+        Map<Long, Map<LocalDate, StatusRegistroHabito>> historico =
+                agrupar(registroRepository.marcacoesDoUsuario(usuario.getId(), inicio, fim));
+
+        int cobrados = 0;
+        int feitos = 0;
+
+        for (Habito habito : ativos) {
+            Map<LocalDate, StatusRegistroHabito> marcacoes = marcacoesDe(historico, habito);
+
+            for (LocalDate dia = inicio; !dia.isAfter(fim); dia = dia.plusDays(1)) {
+                if (!habito.devidoEm(dia)) {
+                    continue;
+                }
+                StatusRegistroHabito status = marcacoes.get(dia);
+                if (status == StatusRegistroHabito.PULADO) {
+                    continue;
+                }
+                cobrados++;
+                if (status == StatusRegistroHabito.FEITO) {
+                    feitos++;
+                }
+            }
+        }
+
+        return new Cumprimento(feitos, cobrados);
+    }
+
+    public record Cumprimento(int feitos, int cobrados) {
+    }
+
     @Transactional(readOnly = true)
     public List<MarcacaoResponse> historico(Long id, LocalDate desde, LocalDate ate) {
         Usuario usuario = usuarioAtual.obrigatorio();
