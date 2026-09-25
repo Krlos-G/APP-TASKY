@@ -57,4 +57,46 @@ describe('App', () => {
 
     expect(rotulos(fixture.nativeElement)).toEqual(['Hoje', 'Resumo', 'Hábitos', 'Tarefas']);
   });
+
+  it('manda o fuso do aparelho uma vez, quando ha sessao', () => {
+    autenticar();
+
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    const req = http.expectOne('/api/v1/usuarios/eu/fuso');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body.fusoHorario).toBe(
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+    );
+    req.flush(null);
+
+    // Uma vez por sessao: redesenhar a tela nao reenvia.
+    fixture.detectChanges();
+    http.expectNone('/api/v1/usuarios/eu/fuso');
+  });
+
+  it('sem sessao, nao manda fuso nenhum', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    http.expectNone('/api/v1/usuarios/eu/fuso');
+  });
+
+  it('falha ao sincronizar o fuso nao aparece na tela', () => {
+    autenticar();
+
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    http.expectOne('/api/v1/usuarios/eu/fuso').flush(
+      { erro: 'Fuso horario desconhecido: Marte/Olympus' },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    fixture.detectChanges();
+
+    // A navegacao segue de pe e nenhum aviso de erro foi parar no shell.
+    expect(rotulos(fixture.nativeElement).length).toBe(4);
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Marte');
+  });
 });
