@@ -7,7 +7,12 @@ import { HabitoDoDia, StatusHabito } from '../../core/habitos/habito.models';
 import { TarefaService } from '../../core/tarefas/tarefa.service';
 import { Tarefa } from '../../core/tarefas/tarefa.models';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
-import { formatarDataCurta, formatarDuracao } from '../../core/tempo/formatos';
+import {
+  formatarDataCurta,
+  formatarDataPorExtenso,
+  formatarDuracao,
+  formatarStreak,
+} from '../../core/tempo/formatos';
 import { Bloco, Dia } from '../../core/rotina/rotina.models';
 import { RespostaErro } from '../../core/auth/auth.models';
 
@@ -111,17 +116,7 @@ export class Hoje implements OnInit {
 
   protected readonly dataPorExtenso = computed(() => {
     const data = this.dia()?.data;
-    if (!data) {
-      return '';
-    }
-    // A data vem como yyyy-MM-dd; montar com números evita o parse UTC do
-    // Date, que jogaria o dia para trás em fusos negativos.
-    const [ano, mes, dia] = data.split('-').map(Number);
-    return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    });
+    return data ? formatarDataPorExtenso(data) : '';
   });
 
   ngOnInit(): void {
@@ -183,9 +178,7 @@ export class Hoje implements OnInit {
       partes.push(habito.horaPreferida.slice(0, 5));
     }
     if (habito.streak > 0) {
-      partes.push(
-        habito.streak === 1 ? '1 dia seguido' : `${habito.streak} dias seguidos`,
-      );
+      partes.push(formatarStreak(habito.streak));
     }
     if (habito.status === 'PULADO') {
       partes.push('pulado hoje');
