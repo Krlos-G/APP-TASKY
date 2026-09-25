@@ -1,8 +1,114 @@
-<section class="pagina">
-  <h1>Resumo</h1>
-  <p class="pagina__nota">
-    Progresso do dia e da semana. Daqui também se chega à Rotina e aos Ajustes.
-  </p>
+<section class="resumo">
+  <header class="resumo__topo">
+    <h1>Resumo</h1>
+    @if (dataPorExtenso()) {
+      <p class="resumo__data">{{ dataPorExtenso() }}</p>
+    }
+  </header>
+
+  @if (erro()) {
+    <p class="alerta" role="alert">{{ erro() }}</p>
+  }
+
+  @if (carregando()) {
+    <p class="resumo__nota">Carregando…</p>
+  } @else if (resumo(); as r) {
+    <!-- ------------------------------------------------------------ hoje -->
+    <article class="cartao">
+      <h2 class="cartao__titulo">Hoje</h2>
+
+      @if (progressoDoDia(); as p) {
+        <div class="barra">
+          <div
+            class="barra__trilha"
+            role="progressbar"
+            [attr.aria-valuenow]="p.feitos"
+            [attr.aria-valuemax]="p.total"
+            [attr.aria-label]="'Progresso de hoje: ' + p.feitos + ' de ' + p.total"
+          >
+            <span class="barra__preenchida" [style.width.%]="p.porcento"></span>
+          </div>
+          <span class="barra__numero">{{ p.porcento }}%</span>
+        </div>
+      } @else {
+        <p class="resumo__nota">Nada planejado para hoje.</p>
+      }
+
+      <ul class="numeros">
+        <li>
+          <strong>{{ r.dia.habitosFeitos }}/{{ r.dia.habitosDevidos }}</strong>
+          <span>hábitos</span>
+        </li>
+        <li>
+          <strong>{{ r.dia.tarefasFeitas }}/{{ r.dia.tarefasDoDia }}</strong>
+          <span>tarefas</span>
+        </li>
+        @if (r.dia.atrasadas > 0) {
+          <li class="numeros__alerta">
+            <strong>{{ r.dia.atrasadas }}</strong>
+            <span>{{ r.dia.atrasadas === 1 ? 'atrasada' : 'atrasadas' }}</span>
+          </li>
+        }
+      </ul>
+    </article>
+
+    <!-- ---------------------------------------------------------- semana -->
+    <article class="cartao">
+      <h2 class="cartao__titulo">Esta semana</h2>
+      <p class="cartao__periodo">{{ periodo() }}</p>
+
+      @if (progressoDaSemana(); as p) {
+        <div class="barra">
+          <div
+            class="barra__trilha"
+            role="progressbar"
+            [attr.aria-valuenow]="p.feitos"
+            [attr.aria-valuemax]="p.total"
+            [attr.aria-label]="'Hábitos da semana: ' + p.feitos + ' de ' + p.total"
+          >
+            <span class="barra__preenchida" [style.width.%]="p.porcento"></span>
+          </div>
+          <span class="barra__numero">{{ p.porcento }}%</span>
+        </div>
+      }
+
+      <ul class="numeros">
+        <li>
+          <strong>{{ r.semana.habitosFeitos }}/{{ r.semana.habitosCobrados }}</strong>
+          <span>hábitos cumpridos</span>
+        </li>
+        <li>
+          <strong>{{ r.semana.tarefasConcluidas }}</strong>
+          <span>{{ r.semana.tarefasConcluidas === 1 ? 'tarefa concluída' : 'tarefas concluídas' }}</span>
+        </li>
+      </ul>
+    </article>
+
+    <!-- ------------------------------------------------------ sequências -->
+    <section class="sequencias">
+      <h2 class="cartao__titulo">Sequências</h2>
+
+      @if (r.streaks.length === 0) {
+        <p class="resumo__nota">
+          Nenhum hábito ainda. <a routerLink="/habitos">Crie o primeiro</a> e a contagem começa.
+        </p>
+      } @else {
+        <ul class="sequencias__lista">
+          @for (sequencia of r.streaks; track sequencia.id) {
+            <li class="sequencia">
+              <span
+                class="sequencia__cor"
+                [style.background]="sequencia.cor ?? 'var(--cor-primaria)'"
+                aria-hidden="true"
+              ></span>
+              <span class="sequencia__nome">{{ sequencia.nome }}</span>
+              <span class="sequencia__streak">{{ streakPorExtenso(sequencia.streak) }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
 
   <nav class="atalhos">
     <a class="atalho" routerLink="/rotina">
@@ -13,6 +119,4 @@
       </span>
     </a>
   </nav>
-
-  <p class="pagina__aviso">O dashboard chega na sua fatia do plano.</p>
 </section>

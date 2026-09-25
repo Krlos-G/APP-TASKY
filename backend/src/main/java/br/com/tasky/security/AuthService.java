@@ -3,6 +3,7 @@ package br.com.tasky.security;
 import br.com.tasky.config.AuthProperties;
 import br.com.tasky.entity.Usuario;
 import br.com.tasky.repository.UsuarioRepository;
+import br.com.tasky.service.FusoHorario;
 import br.com.tasky.web.ApiException;
 import br.com.tasky.web.dto.LoginRequest;
 import br.com.tasky.web.dto.RegistrarRequest;
@@ -10,13 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DateTimeException;
-import java.time.ZoneId;
 
 @Service
 public class AuthService {
 
-    private static final String FUSO_PADRAO = "America/Sao_Paulo";
 
     /**
      * Hash descartavel usado quando o e-mail nao existe.
@@ -64,7 +62,7 @@ public class AuthService {
         usuario.setEmail(pedido.email().trim().toLowerCase());
         usuario.setSenhaHash(passwordEncoder.encode(pedido.senha()));
         usuario.setNomeExibicao(pedido.nomeExibicao().trim());
-        usuario.setFusoHorario(validarFuso(pedido.fusoHorario()));
+        usuario.setFusoHorario(FusoHorario.validar(pedido.fusoHorario()));
 
         return usuarioRepository.save(usuario);
     }
@@ -114,17 +112,6 @@ public class AuthService {
                 usuario,
                 tokenAcessoService.gerar(usuario),
                 refreshTokenService.emitirNovaFamilia(usuario));
-    }
-
-    private String validarFuso(String informado) {
-        if (informado == null || informado.isBlank()) {
-            return FUSO_PADRAO;
-        }
-        try {
-            return ZoneId.of(informado.trim()).getId();
-        } catch (DateTimeException e) {
-            throw ApiException.fusoHorarioInvalido(informado);
-        }
     }
 
     /** Resultado de um login ou renovacao: quem entrou e os dois tokens. */

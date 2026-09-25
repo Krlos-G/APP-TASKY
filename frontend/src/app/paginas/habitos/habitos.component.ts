@@ -5,7 +5,7 @@ import { HabitoService } from '../../core/habitos/habito.service';
 import { Habito, Marcacao, StatusHabito, TipoAgenda } from '../../core/habitos/habito.models';
 import { DIAS_SEMANA, DiaSemana, NOME_CURTO_DO_DIA } from '../../core/rotina/rotina.models';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
-import { formatarDataCurta } from '../../core/tempo/formatos';
+import { formatarDataCurta, formatarStreak } from '../../core/tempo/formatos';
 import { RespostaErro } from '../../core/auth/auth.models';
 
 @Component({
@@ -217,10 +217,7 @@ export class Habitos implements OnInit {
   }
 
   protected streakPorExtenso(habito: Habito): string {
-    if (habito.streak === 0) {
-      return 'sem sequência';
-    }
-    return habito.streak === 1 ? '1 dia seguido' : `${habito.streak} dias seguidos`;
+    return formatarStreak(habito.streak);
   }
 
   protected readonly dataCurta = formatarDataCurta;

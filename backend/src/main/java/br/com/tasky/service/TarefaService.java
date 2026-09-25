@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 
@@ -73,6 +74,16 @@ public class TarefaService {
         LocalDate hoje = dataDoUsuario.hoje(usuario);
         return responder(ordenar(tarefaRepository.findByUsuarioIdAndStatusAndDataPlanejadaBefore(
                 usuario.getId(), A_FAZER, hoje)), hoje);
+    }
+
+    /** Conta pelo momento da conclusao, situado no fuso da conta. */
+    @Transactional(readOnly = true)
+    public long concluidasNoPeriodo(Usuario usuario, LocalDate inicio, LocalDate fim) {
+        ZoneId zona = usuario.zona();
+        return tarefaRepository.contarConcluidasEntre(
+                usuario.getId(),
+                inicio.atStartOfDay(zona).toInstant(),
+                fim.plusDays(1).atStartOfDay(zona).toInstant());
     }
 
     @Transactional(readOnly = true)
