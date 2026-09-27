@@ -2,10 +2,8 @@ package br.com.tasky.web;
 
 import br.com.tasky.TestcontainersConfiguration;
 import br.com.tasky.config.PushProperties;
-import br.com.tasky.entity.InscricaoPush;
 import br.com.tasky.entity.Usuario;
-import br.com.tasky.notificacao.CanalNotificacao;
-import br.com.tasky.notificacao.Notificacao;
+import br.com.tasky.notificacao.CanalDeTeste;
 import br.com.tasky.notificacao.ResultadoEnvio;
 import br.com.tasky.repository.InscricaoPushRepository;
 import br.com.tasky.repository.RefreshTokenRepository;
@@ -28,10 +26,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -45,29 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @Import({TestcontainersConfiguration.class, InscricaoPushControllerTest.CanalDeTesteConfig.class})
 class InscricaoPushControllerTest {
-
-    /** Canal de mentira: registra o que passou e devolve o que o teste mandar. */
-    static class CanalDeTeste implements CanalNotificacao {
-
-        final List<String> enviados = new ArrayList<>();
-        Function<InscricaoPush, ResultadoEnvio> resposta = i -> ResultadoEnvio.ENVIADO;
-
-        @Override
-        public boolean disponivel() {
-            return true;
-        }
-
-        @Override
-        public ResultadoEnvio enviar(InscricaoPush inscricao, Notificacao notificacao) {
-            enviados.add(inscricao.getEndpoint() + " :: " + notificacao.titulo());
-            return resposta.apply(inscricao);
-        }
-
-        void limpar() {
-            enviados.clear();
-            resposta = i -> ResultadoEnvio.ENVIADO;
-        }
-    }
 
     @TestConfiguration
     static class CanalDeTesteConfig {
@@ -171,8 +143,8 @@ class InscricaoPushControllerTest {
                 .andExpect(jsonPath("$.enviadas").value(2))
                 .andExpect(jsonPath("$.aparelhos").value(2));
 
-        assertThat(canal.enviados).hasSize(2)
-                .allSatisfy(registro -> assertThat(registro).doesNotContain("alheio"));
+        assertThat(canal.destinos).hasSize(2)
+                .allSatisfy(destino -> assertThat(destino).doesNotContain("alheio"));
     }
 
     @Test
