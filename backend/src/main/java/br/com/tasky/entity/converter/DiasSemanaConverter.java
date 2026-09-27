@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
  * Grava um conjunto de dias da semana como lista separada por virgula
  * (ex.: "SEG,QUA,SEX") na coluna habito.dias_semana.
  *
- * Escolhido em vez de tabela de juncao ou array nativo por ser um conjunto
- * pequeno e fixo. Se um dia for preciso consultar por dia da semana, isto
+ * em vez de tabela de juncao ou array nativo por ser um conjunto
+ * pequeno e fixo se um dia for preciso consultar por dia da semana, isto
  * deve virar tabela de juncao.
  */
 @Converter
