@@ -25,7 +25,11 @@
         Este navegador não expõe notificações para o app. Em desenvolvimento isso é
         esperado: o service worker só roda numa versão publicada.
       </p>
-    } @else if (chave() && !chave()!.habilitado) {
+    } @else if (!chave()) {
+      <p class="cartao__nota">
+        Não foi possível falar com o servidor sobre notificações.
+      </p>
+    } @else if (!chave()!.habilitado) {
       <p class="cartao__nota">
         O servidor está sem chaves de notificação configuradas.
       </p>

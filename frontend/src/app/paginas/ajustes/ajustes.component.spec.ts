@@ -41,7 +41,9 @@ describe('Ajustes', () => {
     http = TestBed.inject(HttpTestingController);
   }
 
-  function montar(opcoes: { habilitado?: boolean; perfil?: Perfil } = {}) {
+  function montar(
+    opcoes: { habilitado?: boolean; perfil?: Perfil; jaInscrito?: boolean } = {},
+  ) {
     const fixture = TestBed.createComponent(Ajustes);
     fixture.detectChanges();
 
@@ -50,6 +52,12 @@ describe('Ajustes', () => {
       habilitado: opcoes.habilitado ?? true,
       chavePublica: 'CHAVE-PUBLICA',
     });
+
+    // Com inscricao no navegador, a tela reconfirma com o servidor ao abrir.
+    if (opcoes.jaInscrito) {
+      http.expectOne((r) => r.method === 'POST' && r.url === '/api/v1/inscricoes-push')
+        .flush(null);
+    }
     fixture.detectChanges();
     return fixture;
   }
@@ -133,7 +141,7 @@ describe('Ajustes', () => {
 
   it('ja inscrito, oferece desativar e enviar teste', () => {
     configurar({ isEnabled: true, subscription: of(inscricaoFalsa()) });
-    const fixture = montar();
+    const fixture = montar({ jaInscrito: true });
 
     expect(texto(fixture)).toContain('Este aparelho recebe os lembretes.');
 
@@ -154,7 +162,7 @@ describe('Ajustes', () => {
         return Promise.resolve();
       },
     });
-    const fixture = montar();
+    const fixture = montar({ jaInscrito: true });
 
     clicar(fixture, 'Desativar neste aparelho');
 
@@ -201,5 +209,53 @@ describe('Ajustes', () => {
     expect(conteudo).toContain('carlos@tasky.app');
     expect(conteudo).toContain('America/Sao_Paulo');
     expect(conteudo).toContain('vem do aparelho');
+  });
+
+  it('inscricao do navegador nao basta: a tela reconfirma com o servidor', () => {
+    configurar({ isEnabled: true, subscription: of(inscricaoFalsa()) });
+    const fixture = montar({ jaInscrito: true });
+
+    // A reconfirmacao ja foi consumida pelo montar(); aqui o que importa e o
+    // conteudo dela, com as chaves que o navegador entregou.
+    expect(texto(fixture)).toContain('Este aparelho recebe os lembretes.');
+  });
+
+  it('se o servidor nao aceitar a reconfirmacao, a tela volta a oferecer ativar', () => {
+    configurar({ isEnabled: true, subscription: of(inscricaoFalsa()) });
+
+    const fixture = TestBed.createComponent(Ajustes);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/usuarios/eu').flush(PERFIL);
+    http.expectOne('/api/v1/inscricoes-push/chave')
+      .flush({ habilitado: true, chavePublica: 'CHAVE-PUBLICA' });
+
+    http.expectOne((r) => r.method === 'POST' && r.url === '/api/v1/inscricoes-push')
+      .flush({ erro: 'Recurso nao encontrado.' }, { status: 404, statusText: 'Not Found' });
+    fixture.detectChanges();
+
+    // Sem isto, a tela prometeria lembretes que o servidor nem sabe que deve mandar.
+    expect(texto(fixture)).toContain('Ative para receber os lembretes');
+  });
+
+  it('teste sem aparelho registrado diz para ativar de novo', () => {
+    configurar({ isEnabled: true, subscription: of(inscricaoFalsa()) });
+    const fixture = montar({ jaInscrito: true });
+
+    clicar(fixture, 'Enviar teste');
+    http.expectOne('/api/v1/inscricoes-push/testar').flush({ enviadas: 0, aparelhos: 0 });
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('não está registrado no servidor');
+  });
+
+  it('teste que nao entregou diz que a falha foi na entrega', () => {
+    configurar({ isEnabled: true, subscription: of(inscricaoFalsa()) });
+    const fixture = montar({ jaInscrito: true });
+
+    clicar(fixture, 'Enviar teste');
+    http.expectOne('/api/v1/inscricoes-push/testar').flush({ enviadas: 0, aparelhos: 1 });
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('não conseguiu entregar');
   });
 });

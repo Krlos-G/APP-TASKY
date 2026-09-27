@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { SwPush } from '@angular/service-worker';
 import { take } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
-import { ChavePush, PushService } from '../../core/push/push.service';
+import { ChavePush, PushService, TesteEnvio } from '../../core/push/push.service';
 import { Perfil, UsuarioService } from '../../core/usuario/usuario.service';
 import { RespostaErro } from '../../core/auth/auth.models';
 
@@ -51,9 +51,14 @@ export class Ajustes implements OnInit {
     });
 
     if (this.suportado) {
-      this.swPush.subscription.pipe(take(1)).subscribe((inscricao) =>
-        this.inscricao.set(inscricao),
-      );
+      this.swPush.subscription.pipe(take(1)).subscribe((inscricao) => {
+        // O navegador ter uma inscricao nao prova que o servidor sabe dela: o
+        // registro pode ter falhado. Reenviar e barato, idempotente, e evita a
+        // tela afirmar que os lembretes chegam quando nao chegam.
+        if (inscricao) {
+          this.registrar(inscricao, { silencioso: true });
+        }
+      });
     }
   }
 
@@ -96,12 +101,7 @@ export class Ajustes implements OnInit {
   protected testar(): void {
     this.ocupado.set(true);
     this.pushService.testar().subscribe({
-      next: (resultado) =>
-        this.concluir(
-          resultado.enviadas > 0
-            ? `Enviado para ${resultado.enviadas} de ${resultado.aparelhos} aparelho(s).`
-            : 'Nenhum aparelho recebeu. Ative as notificações primeiro.',
-        ),
+      next: (resultado) => this.concluir(mensagemDoTeste(resultado)),
       error: (falha: HttpErrorResponse) => this.falhar(falha),
     });
   }
@@ -123,7 +123,7 @@ export class Ajustes implements OnInit {
 
   // ------------------------------------------------------------------ apoio
 
-  private registrar(inscricao: PushSubscription): void {
+  private registrar(inscricao: PushSubscription, opcoes = { silencioso: false }): void {
     const chaves = inscricao.toJSON().keys ?? {};
 
     this.pushService
@@ -136,9 +136,18 @@ export class Ajustes implements OnInit {
       .subscribe({
         next: () => {
           this.inscricao.set(inscricao);
-          this.concluir('Notificações ativadas neste aparelho.');
+          if (!opcoes.silencioso) {
+            this.concluir('Notificações ativadas neste aparelho.');
+          }
         },
-        error: (falha: HttpErrorResponse) => this.falhar(falha),
+        // Falhando a sincronizacao de fundo, a tela volta a oferecer "ativar"
+        // em vez de prometer o que nao vai acontecer.
+        error: (falha: HttpErrorResponse) => {
+          this.inscricao.set(null);
+          if (!opcoes.silencioso) {
+            this.falhar(falha);
+          }
+        },
       });
   }
 
@@ -169,6 +178,17 @@ export class Ajustes implements OnInit {
   private irParaLogin(): void {
     void this.router.navigateByUrl('/login');
   }
+}
+
+/** O servidor distingue "nenhum aparelho" de "os aparelhos nao receberam". */
+function mensagemDoTeste(resultado: TesteEnvio): string {
+  if (resultado.enviadas > 0) {
+    return `Enviado para ${resultado.enviadas} de ${resultado.aparelhos} aparelho(s).`;
+  }
+  if (resultado.aparelhos === 0) {
+    return 'Este aparelho não está registrado no servidor. Ative as notificações de novo.';
+  }
+  return 'O servidor não conseguiu entregar. Tente ativar de novo neste aparelho.';
 }
 
 function ehIphone(): boolean {
