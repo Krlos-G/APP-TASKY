@@ -79,7 +79,11 @@ describe('Rotina', () => {
 
     componente.alternarModelo(1);
     componente.formBloco.setValue({
-      titulo: 'Invertido', horaInicio: '18:00', horaFim: '09:00', cor: '#000000',
+      titulo: 'Invertido',
+      horaInicio: '18:00',
+      horaFim: '09:00',
+      cor: '#000000',
+      minutosAntecedenciaLembrete: '',
     });
     componente.salvarBloco(1);
 

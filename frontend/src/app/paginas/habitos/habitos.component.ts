@@ -42,6 +42,7 @@ export class Habitos implements OnInit {
     nome: ['', [Validators.required, Validators.maxLength(100)]],
     tipoAgenda: ['DIARIO' as TipoAgenda],
     horaPreferida: [''],
+    horaLembrete: [''],
     cor: ['#4f46e5'],
   });
 
@@ -71,7 +72,13 @@ export class Habitos implements OnInit {
   protected abrirNovo(): void {
     this.emEdicao.set(null);
     this.diasEscolhidos.set([]);
-    this.form.reset({ nome: '', tipoAgenda: 'DIARIO', horaPreferida: '', cor: '#4f46e5' });
+    this.form.reset({
+      nome: '',
+      tipoAgenda: 'DIARIO',
+      horaPreferida: '',
+      horaLembrete: '',
+      cor: '#4f46e5',
+    });
     this.formAberto.set(true);
   }
 
@@ -82,6 +89,7 @@ export class Habitos implements OnInit {
       nome: habito.nome,
       tipoAgenda: habito.tipoAgenda,
       horaPreferida: habito.horaPreferida?.slice(0, 5) ?? '',
+      horaLembrete: habito.horaLembrete?.slice(0, 5) ?? '',
       cor: habito.cor ?? '#4f46e5',
     });
     this.formAberto.set(true);
@@ -125,6 +133,7 @@ export class Habitos implements OnInit {
       tipoAgenda: valores.tipoAgenda,
       diasSemana: porDias ? this.diasEscolhidos() : [],
       horaPreferida: valores.horaPreferida || null,
+      horaLembrete: valores.horaLembrete || null,
       cor: valores.cor,
     };
 

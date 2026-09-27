@@ -3,8 +3,11 @@ package br.com.tasky.service;
 import br.com.tasky.entity.Usuario;
 import br.com.tasky.repository.UsuarioRepository;
 import br.com.tasky.security.UsuarioAtual;
+import br.com.tasky.web.dto.PerfilResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalTime;
 
 @Service
 public class UsuarioService {
@@ -15,6 +18,19 @@ public class UsuarioService {
     public UsuarioService(UsuarioRepository usuarioRepository, UsuarioAtual usuarioAtual) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioAtual = usuarioAtual;
+    }
+
+    @Transactional(readOnly = true)
+    public PerfilResponse perfil() {
+        return PerfilResponse.de(usuarioAtual.obrigatorio());
+    }
+
+    /** Hora nula desliga o resumo diario. */
+    @Transactional
+    public void definirResumoDiario(LocalTime hora) {
+        Usuario usuario = usuarioAtual.obrigatorio();
+        usuario.setHoraResumoDiario(hora);
+        usuarioRepository.save(usuario);
     }
 
     /**

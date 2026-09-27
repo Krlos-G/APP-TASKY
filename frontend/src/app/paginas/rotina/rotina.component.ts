@@ -46,6 +46,7 @@ export class Rotina implements OnInit {
     horaInicio: ['09:00', [Validators.required]],
     horaFim: ['10:00', [Validators.required]],
     cor: ['#4f46e5'],
+    minutosAntecedenciaLembrete: [''],
   });
 
   ngOnInit(): void {
@@ -120,12 +121,22 @@ export class Rotina implements OnInit {
       horaInicio: bloco.horaInicio.slice(0, 5),
       horaFim: bloco.horaFim.slice(0, 5),
       cor: bloco.cor ?? '#4f46e5',
+      minutosAntecedenciaLembrete:
+        bloco.minutosAntecedenciaLembrete !== null
+          ? String(bloco.minutosAntecedenciaLembrete)
+          : '',
     });
   }
 
   protected cancelarEdicaoDeBloco(): void {
     this.blocoEmEdicao.set(null);
-    this.formBloco.reset({ titulo: '', horaInicio: '09:00', horaFim: '10:00', cor: '#4f46e5' });
+    this.formBloco.reset({
+      titulo: '',
+      horaInicio: '09:00',
+      horaFim: '10:00',
+      cor: '#4f46e5',
+      minutosAntecedenciaLembrete: '',
+    });
   }
 
   protected salvarBloco(modeloId: number): void {
@@ -142,10 +153,20 @@ export class Rotina implements OnInit {
       return;
     }
 
+    const pedido = {
+      titulo: valores.titulo,
+      horaInicio: valores.horaInicio,
+      horaFim: valores.horaFim,
+      cor: valores.cor,
+      minutosAntecedenciaLembrete: valores.minutosAntecedenciaLembrete
+        ? Number(valores.minutosAntecedenciaLembrete)
+        : null,
+    };
+
     const emEdicao = this.blocoEmEdicao();
     const requisicao = emEdicao
-      ? this.rotinaService.atualizarBloco(emEdicao, valores)
-      : this.rotinaService.adicionarBloco(modeloId, valores);
+      ? this.rotinaService.atualizarBloco(emEdicao, pedido)
+      : this.rotinaService.adicionarBloco(modeloId, pedido);
 
     requisicao.subscribe({
       next: (modelo) => {

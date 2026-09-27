@@ -37,6 +37,7 @@ export class TarefaEdicao implements OnInit {
     dataPlanejada: [''],
     horaPlanejada: [''],
     dataLimite: [''],
+    horaLembrete: [''],
   });
 
   constructor() {
@@ -91,6 +92,7 @@ export class TarefaEdicao implements OnInit {
       dataPlanejada: valores.dataPlanejada || null,
       horaPlanejada: valores.dataPlanejada && valores.horaPlanejada ? valores.horaPlanejada : null,
       dataLimite: valores.dataLimite || null,
+      horaLembrete: valores.horaLembrete || null,
     };
 
     const id = this.id();
@@ -132,6 +134,7 @@ export class TarefaEdicao implements OnInit {
           minutosEstimados: tarefa.minutosEstimados ? String(tarefa.minutosEstimados) : '',
           dataPlanejada: tarefa.dataPlanejada ?? '',
           dataLimite: tarefa.dataLimite ?? '',
+          horaLembrete: tarefa.horaLembrete?.slice(0, 5) ?? '',
         });
         // Depois da data, para o campo já estar habilitado.
         this.form.controls.horaPlanejada.setValue(tarefa.horaPlanejada?.slice(0, 5) ?? '');
