@@ -60,6 +60,12 @@ tasky:
     cors-origem: ${TASKY_CORS_ORIGEM:}
     max-tentativas-login: ${TASKY_MAX_TENTATIVAS_LOGIN:10}
 
+  push:
+    # Vazias desabilitam as notificacoes; a aplicacao sobe do mesmo jeito.
+    chave-publica: ${TASKY_VAPID_PUBLICA:}
+    chave-privada: ${TASKY_VAPID_PRIVADA:}
+    assunto: ${TASKY_VAPID_ASSUNTO:mailto:tasky@exemplo.com}
+
 springdoc:
   api-docs:
     path: /v3/api-docs

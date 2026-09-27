@@ -17,6 +17,10 @@
 		<java.version>21</java.version>
 		<springdoc.version>3.1.0</springdoc.version>
 		<jjwt.version>0.13.0</jjwt.version>
+		<web-push.version>5.1.2</web-push.version>
+		<bouncycastle.version>1.81</bouncycastle.version>
+		<httpclient.version>4.5.14</httpclient.version>
+		<jose4j.version>0.9.6</jose4j.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -102,6 +106,43 @@
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
 			<version>${jjwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>nl.martijndwars</groupId>
+			<artifactId>web-push</artifactId>
+			<version>${web-push.version}</version>
+			<exclusions>
+				<!-- A CLI da lib arrasta o jcommander, que a aplicacao nao usa. -->
+				<exclusion>
+					<groupId>com.beust</groupId>
+					<artifactId>jcommander</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!--
+			A web-push declara a BouncyCastle como optional, entao ela nao vem
+			junto - sem isto o PushService quebra em runtime. E pedimos o
+			artefato atual (jdk18on) no lugar do jdk15on de 2021 que ela cita.
+		-->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>${bouncycastle.version}</version>
+		</dependency>
+		<!--
+			A web-push declara cliente HTTP e jose4j em escopo runtime, mas o
+			PushWeb programa contra os tipos deles (HttpPost, HttpResponse, e a
+			JoseException que o send declara) - precisam estar na compilacao.
+		-->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>${httpclient.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bitbucket.b_c</groupId>
+			<artifactId>jose4j</artifactId>
+			<version>${jose4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
