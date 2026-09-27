@@ -23,54 +23,10 @@
   }
 }
 
-.vazio {
-  margin: 0.5rem 0;
-  color: var(--cor-texto-fraco);
-  font-size: 0.875rem;
-}
 
 /* -------------------------------------------------------------- botões */
 
-.botao {
-  padding: 0.55rem 1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: 8px;
-  background: var(--cor-superficie);
-  color: var(--cor-texto);
-  font-size: 0.9rem;
-  cursor: pointer;
 
-  &--primario {
-    border-color: var(--cor-primaria);
-    background: var(--cor-primaria);
-    color: #fff;
-    font-weight: 600;
-  }
-
-  &--perigo {
-    border-color: crimson;
-    color: crimson;
-  }
-
-  &--curto {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.82rem;
-  }
-}
-
-.link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--cor-texto-fraco);
-  font-size: 0.8rem;
-  text-decoration: underline;
-  cursor: pointer;
-
-  &--perigo {
-    color: crimson;
-  }
-}
 
 /* ---------------------------------------------------------- formulário */
 
@@ -98,40 +54,6 @@
   }
 }
 
-.campo {
-  display: block;
-  margin-bottom: 0.85rem;
-
-  &__rotulo {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: var(--cor-texto-fraco);
-    font-size: 0.8rem;
-  }
-
-  &__entrada {
-    width: 100%;
-    padding: 0.55rem 0.7rem;
-    border: 1px solid var(--cor-borda);
-    border-radius: 8px;
-    background: var(--cor-fundo);
-    color: var(--cor-texto);
-    font-size: 0.95rem;
-  }
-
-  &__cor {
-    width: 3rem;
-    height: 2.5rem;
-    padding: 0.15rem;
-    border: 1px solid var(--cor-borda);
-    border-radius: 8px;
-    background: var(--cor-fundo);
-  }
-
-  &--cor {
-    flex: 0 0 auto;
-  }
-}
 
 .dias {
   display: flex;
@@ -227,9 +149,9 @@
   grid-column: 2 / -1;
   margin-top: 0.6rem;
   padding: 0.75rem 0.85rem;
-  border: 1px solid crimson;
+  border: 1px solid var(--cor-vermelho);
   border-radius: 8px;
-  background: color-mix(in srgb, crimson 8%, transparent);
+  background: color-mix(in srgb, var(--cor-vermelho) 8%, transparent);
 
   &__texto {
     margin: 0 0 0.7rem;
@@ -286,24 +208,6 @@
 
 /* ------------------------------------------------------- estado vazio */
 
-.vazio-cartao {
-  padding: 1.5rem;
-  border: 1px dashed var(--cor-borda);
-  border-radius: var(--raio);
-  text-align: center;
-
-  &__titulo {
-    margin: 0 0 0.35rem;
-    font-size: 1.05rem;
-    font-weight: 600;
-  }
-
-  &__nota {
-    margin: 0;
-    color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
-  }
-}
 
 @media (max-width: 560px) {
   .habito {
@@ -318,5 +222,14 @@
   .form-habito__linha {
     flex-direction: column;
     gap: 0;
+  }
+}
+
+.campo {
+  margin-bottom: 0.85rem;
+
+  &--cor {
+    flex: 0 0 4rem;
+    margin-bottom: 0;
   }
 }

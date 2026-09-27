@@ -27,24 +27,6 @@
   }
 }
 
-.cartao {
-  margin-bottom: 1rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  background: var(--cor-superficie);
-
-  &__titulo {
-    margin: 0;
-    font-size: 1rem;
-  }
-
-  &__periodo {
-    margin: 0.15rem 0 0;
-    color: var(--cor-texto-fraco);
-    font-size: 0.82rem;
-  }
-}
 
 .barra {
   display: flex;
@@ -97,7 +79,7 @@
   }
 
   &__alerta strong {
-    color: crimson;
+    color: var(--cor-vermelho);
   }
 }
 
@@ -166,4 +148,8 @@
     color: var(--cor-texto-fraco);
     font-size: 0.8rem;
   }
+}
+
+.cartao {
+  margin-bottom: 1rem;
 }

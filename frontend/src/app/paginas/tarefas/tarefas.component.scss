@@ -19,15 +19,6 @@
   }
 }
 
-.botao {
-  padding: 0.5rem 0.95rem;
-  border-radius: 8px;
-  background: var(--cor-primaria);
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: none;
-}
 
 /* Rola na horizontal em tela estreita: cinco abas não cabem no iPhone. */
 .abas {
@@ -115,11 +106,3 @@
   }
 }
 
-.selo {
-  padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, crimson 14%, transparent);
-  color: crimson;
-  font-size: 0.72rem;
-  font-weight: 600;
-}

@@ -36,8 +36,8 @@
     margin: 0;
     padding: 0.7rem 0.85rem;
     border-radius: 8px;
-    background: color-mix(in srgb, crimson 12%, transparent);
-    color: crimson;
+    background: color-mix(in srgb, var(--cor-vermelho) 12%, transparent);
+    color: var(--cor-vermelho);
     font-size: 0.875rem;
   }
 
@@ -58,37 +58,3 @@
   }
 }
 
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-
-  &__rotulo {
-    font-size: 0.85rem;
-    color: var(--cor-texto-fraco);
-  }
-
-  &__entrada {
-    padding: 0.7rem 0.8rem;
-    border: 1px solid var(--cor-borda);
-    border-radius: 8px;
-    background: var(--cor-fundo);
-    color: var(--cor-texto);
-    /* 16px evita o zoom automatico do Safari no iPhone ao focar o campo. */
-    font-size: 16px;
-
-    &:focus {
-      outline: 2px solid var(--cor-primaria);
-      outline-offset: 1px;
-    }
-
-    &[aria-invalid='true'] {
-      border-color: crimson;
-    }
-  }
-
-  &__erro {
-    color: crimson;
-    font-size: 0.8rem;
-  }
-}

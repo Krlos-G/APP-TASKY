@@ -164,7 +164,7 @@
 .atrasadas {
   margin-bottom: 1.5rem;
   padding: 0.75rem 0.85rem;
-  border: 1px solid color-mix(in srgb, crimson 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cor-vermelho) 35%, transparent);
   border-radius: var(--raio);
 
   &__titulo {
@@ -172,14 +172,14 @@
     align-items: center;
     gap: 0.4rem;
     margin: 0 0 0.35rem;
-    color: crimson;
+    color: var(--cor-vermelho);
     font-size: 0.9rem;
   }
 
   &__contagem {
     padding: 0 0.4rem;
     border-radius: 999px;
-    background: color-mix(in srgb, crimson 16%, transparent);
+    background: color-mix(in srgb, var(--cor-vermelho) 16%, transparent);
     font-size: 0.75rem;
   }
 }
@@ -283,14 +283,6 @@
   }
 }
 
-.selo {
-  padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, crimson 14%, transparent);
-  color: crimson;
-  font-size: 0.72rem;
-  font-weight: 600;
-}
 
 /* Acima da barra de navegação, que tem --altura-tab-bar no mobile. */
 .adicionar {
@@ -311,42 +303,7 @@
 
 /* ------------------------------------------------------- estado vazio */
 
-.vazio-cartao {
-  padding: 1.5rem;
-  border: 1px dashed var(--cor-borda);
-  border-radius: var(--raio);
-  text-align: center;
 
-  &__titulo {
-    margin: 0 0 0.35rem;
-    font-size: 1.05rem;
-    font-weight: 600;
-  }
-
-  &__nota {
-    margin: 0 0 1.1rem;
-    color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
-  }
-}
-
-.botao {
-  display: inline-block;
-  padding: 0.6rem 1.1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: 8px;
-  color: var(--cor-texto);
-  font-size: 0.9rem;
-  text-decoration: none;
-  cursor: pointer;
-
-  &--primario {
-    border-color: var(--cor-primaria);
-    background: var(--cor-primaria);
-    color: #fff;
-    font-weight: 600;
-  }
-}
 
 @media (max-width: 480px) {
   .linha__item {
@@ -359,4 +316,9 @@
     grid-column: 3;
     justify-self: start;
   }
+}
+
+/* Ha um botao logo abaixo da nota neste cartao. */
+.vazio-cartao__nota {
+  margin-bottom: 1.1rem;
 }

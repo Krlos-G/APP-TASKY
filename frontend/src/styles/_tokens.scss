@@ -1,0 +1,105 @@
+/* Tokens do Tasky.
+ *
+ * Os cinzas e as cores vem da paleta do iOS: e o vocabulario que o aparelho
+ * ja ensinou a ler. Cada token existe nos dois modos com o mesmo nome, entao
+ * nenhum componente precisa saber em qual deles esta. */
+
+:root {
+  --familia: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  /* Tipografia espelhando os text styles do iOS. O corpo e 17px. */
+  --tam-titulo-grande: 34px;
+  --tam-titulo: 28px;
+  --tam-seccao: 22px;
+  --tam-destaque: 20px;
+  --tam-corpo: 17px;
+  --tam-apoio: 15px;
+  --tam-nota: 13px;
+  --tam-legenda: 12px;
+  --letra-titulo: -0.026em;
+  --letra-corpo: -0.01em;
+
+  /* Escala de 4pt. */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 20px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+
+  --raio-cartao: 18px;
+  --raio-botao: 12px;
+  --raio-campo: 12px;
+  --raio-pilula: 999px;
+  /* Alias do raio antigo, ainda usado pelas telas que faltam repintar. */
+  --raio: var(--raio-cartao);
+
+  --transicao-rapida: 140ms;
+  --transicao: 220ms;
+  /* A curva do iOS: sai rapido, chega devagar. */
+  --curva: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --altura-tab-bar: 60px;
+  --largura-lateral: 220px;
+  /* Alvo minimo de toque da Apple. */
+  --toque: 44px;
+
+  --cor-fundo: #f2f2f7;
+  --cor-superficie: #ffffff;
+  /* Um campo dentro de um cartao precisa ser mais fundo que ele, senao some. */
+  --cor-campo: #f2f2f7;
+  --cor-borda: #e5e5ea;
+  /* Mais forte que a borda comum: o campo precisa se sustentar tanto sobre o
+   * cartao quanto direto sobre o fundo da pagina. */
+  --cor-borda-campo: #c7c7cc;
+  --cor-trilho: #d8d8de;
+  --cor-texto: #1c1c1e;
+  /* Mais escuro que o cinza da Apple de proposito: o #8e8e93 dela nao passa
+   * no contraste sobre fundo claro. */
+  --cor-texto-fraco: #6b6b70;
+
+  --cor-primaria: #007aff;
+  /* A mesma cor quando ela e texto, onde o azul puro fica claro demais. */
+  --cor-primaria-texto: #0060cc;
+  --cor-primaria-fraca: rgba(0, 122, 255, 0.11);
+
+  --cor-verde: #2aae4f;
+  --cor-vermelho: #d70015;
+  --cor-vermelho-fraca: rgba(215, 0, 21, 0.1);
+  /* Laranja do streak em duas versoes: a legivel, para texto, e a viva, para
+   * preenchimento - onde a exigencia de contraste e menor. */
+  --cor-laranja: #c2610a;
+  --cor-laranja-cheia: #ff9500;
+
+  --cor-sobre-cor: #ffffff;
+
+  --sombra-cartao: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sombra-flutuante: 0 10px 30px rgba(0, 0, 0, 0.13);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cor-fundo: #000000;
+    --cor-superficie: #1c1c1e;
+    --cor-campo: #2c2c2e;
+    --cor-borda: #38383a;
+    --cor-borda-campo: #48484a;
+    --cor-trilho: #2c2c2e;
+    --cor-texto: #ffffff;
+    --cor-texto-fraco: #8e8e93;
+
+    --cor-primaria: #0a84ff;
+    --cor-primaria-texto: #0a84ff;
+    --cor-primaria-fraca: rgba(10, 132, 255, 0.16);
+
+    --cor-verde: #30d158;
+    --cor-vermelho: #ff453a;
+    --cor-vermelho-fraca: rgba(255, 69, 58, 0.16);
+    --cor-laranja: #ff9f0a;
+    --cor-laranja-cheia: #ff9f0a;
+
+    --sombra-cartao: none;
+    --sombra-flutuante: 0 12px 34px rgba(0, 0, 0, 0.5);
+  }
+}
