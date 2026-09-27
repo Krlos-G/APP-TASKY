@@ -104,6 +104,17 @@
                     <input class="campo__entrada" type="time" formControlName="horaFim" />
                   </label>
 
+                  <label class="campo">
+                    <span class="campo__rotulo">Avisar antes (min)</span>
+                    <input
+                      class="campo__entrada"
+                      type="number"
+                      min="0"
+                      placeholder="sem aviso"
+                      formControlName="minutosAntecedenciaLembrete"
+                    />
+                  </label>
+
                   <label class="campo campo--cor">
                     <span class="campo__rotulo">Cor</span>
                     <input class="campo__cor" type="color" formControlName="cor" />

@@ -28,6 +28,9 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
 
     List<Tarefa> findByUsuarioIdAndStatusOrderByConcluidoEmDesc(Long usuarioId, StatusTarefa status);
 
+    List<Tarefa> findByUsuarioIdAndStatusAndDataPlanejadaBetween(
+            Long usuarioId, StatusTarefa status, LocalDate inicio, LocalDate fim);
+
     /** Fim exclusivo: uma conclusao na virada nao pode contar nas duas semanas. */
     @Query("""
             SELECT count(t) FROM Tarefa t

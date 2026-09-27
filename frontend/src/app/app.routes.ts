@@ -44,6 +44,12 @@ export const routes: Routes = [
     loadComponent: () => import('./paginas/tarefas/tarefas.component').then((m) => m.Tarefas),
   },
   {
+    path: 'ajustes',
+    canActivate: [autenticacaoGuard],
+    title: 'Ajustes · Tasky',
+    loadComponent: () => import('./paginas/ajustes/ajustes.component').then((m) => m.Ajustes),
+  },
+  {
     path: 'tarefas/nova',
     canActivate: [autenticacaoGuard],
     title: 'Nova tarefa · Tasky',
