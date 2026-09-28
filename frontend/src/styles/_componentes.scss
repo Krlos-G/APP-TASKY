@@ -212,3 +212,214 @@
   color: var(--cor-primaria-texto);
   font-size: var(--tam-apoio);
 }
+
+/* ------------------------------ seções e listas agrupadas (iOS grouped) */
+
+.secao {
+  margin-top: var(--esp-6);
+
+  &__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--esp-3);
+    margin: 0 0 var(--esp-2) var(--esp-1);
+  }
+
+  /* Cabecalho de lista agrupada, como nos apps da Apple. */
+  &__titulo {
+    margin: 0 0 var(--esp-2) var(--esp-1);
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-legenda);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    &--alerta {
+      color: var(--cor-vermelho);
+    }
+  }
+
+  &__topo &__titulo {
+    margin: 0;
+  }
+
+  &__contagem {
+    padding: 1px var(--esp-2);
+    border-radius: var(--raio-pilula);
+    background: var(--cor-vermelho-fraca);
+    color: var(--cor-vermelho);
+    font-size: var(--tam-legenda);
+    font-weight: 600;
+  }
+
+  &__contador {
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__acao {
+    color: var(--cor-primaria-texto);
+    font-size: var(--tam-nota);
+    text-decoration: none;
+  }
+
+  &__rodape {
+    margin: var(--esp-2) 0 0 var(--esp-1);
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-legenda);
+  }
+}
+
+.itens {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-cartao);
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--esp-3);
+  /* Alvo de toque minimo da Apple. */
+  min-height: var(--toque);
+  padding: var(--esp-2) var(--esp-4);
+
+  /* Separador recuado ate depois do circulo, como nas listas do iOS: ele
+     separa os textos, nao corta o cartao ao meio. */
+  & + & {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: calc(var(--esp-4) + 26px + var(--esp-3));
+      height: 1px;
+      background: var(--cor-borda);
+    }
+  }
+
+  /* O separador pertence a linha de baixo, entao e o modificador dela que
+     manda: sem circulo a frente, o recuo volta a ser o padrao. */
+  & + &--simples::before {
+    left: var(--esp-4);
+  }
+
+  /* Linha que e um link inteiro: o padding vai para dentro do <a>, senao o
+     alvo de toque fica menor que a linha. */
+  &--link {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+
+  /* Concluido so escurece. O circulo cheio ja diz "feito" - riscar por cima
+     seria dizer a mesma coisa duas vezes. */
+  &--resolvido {
+    opacity: 0.55;
+  }
+
+  &__marca {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 2px solid var(--cor-borda-campo);
+    border-radius: 50%;
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+
+    &--feito {
+      border-color: var(--cor-verde);
+      background: var(--cor-verde);
+      color: var(--cor-sobre-verde);
+    }
+
+    &--pulado {
+      color: var(--cor-texto-fraco);
+    }
+  }
+
+  &__corpo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  &__nome {
+    margin: 0;
+    overflow: hidden;
+    font-size: var(--tam-corpo);
+    letter-spacing: var(--letra-corpo);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__detalhe {
+    margin: 1px 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+  }
+}
+
+/* --------------------------------------------------------- progresso */
+
+.progresso {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+
+  /* Um segmento por item. Mostra quantas coisas existem, e nao so que
+     proporcao delas caiu - que e o que uma barra unica esconde. */
+  &__trilha {
+    display: flex;
+    flex: 1;
+    gap: 4px;
+
+    /* Cheio demais para segmentos legiveis: volta a ser barra. */
+    &--continua {
+      overflow: hidden;
+      border-radius: 4px;
+      background: var(--cor-trilho);
+    }
+  }
+
+  &__segmento {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--cor-trilho);
+
+    &--cheio {
+      background: var(--cor-primaria);
+    }
+  }
+
+  &__barra {
+    display: block;
+    height: 8px;
+    background: var(--cor-primaria);
+  }
+
+  &__numero {
+    font-size: var(--tam-corpo);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__total {
+    color: var(--cor-texto-fraco);
+    font-weight: 400;
+  }
+}

@@ -12,6 +12,7 @@ import br.com.tasky.repository.projection.Marcacao;
 import br.com.tasky.security.UsuarioAtual;
 import br.com.tasky.web.ApiException;
 import br.com.tasky.web.dto.HabitoDoDiaResponse;
+import br.com.tasky.web.dto.DiaDoHabitoResponse;
 import br.com.tasky.web.dto.HabitoRequest;
 import br.com.tasky.web.dto.HabitoResponse;
 import br.com.tasky.web.dto.MarcacaoResponse;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Regras dos habitos: cadastro, agenda e arquivamento.
@@ -40,6 +42,9 @@ public class HabitoService {
 
     /** O teto do StreakCalculator mais o dia de tolerancia com que ele comeca. */
     private static final int DIAS_DE_HISTORICO = 367;
+
+    /** Janela recente que a tela desenha ao lado do numero da sequencia. */
+    private static final int DIAS_RECENTES = 14;
 
     private final HabitoRepository habitoRepository;
     private final RegistroHabitoRepository registroRepository;
@@ -304,8 +309,18 @@ public class HabitoService {
                             habito,
                             streakCalculator.calcular(habito, marcacoes, hoje, zona),
                             marcacoes.get(hoje),
-                            habito.devidoEm(hoje));
+                            habito.devidoEm(hoje),
+                            ultimosDias(habito, marcacoes, hoje));
                 })
+                .toList();
+    }
+
+    /** Do mais antigo ao de hoje: a tela le a sequencia da esquerda para a direita. */
+    private List<DiaDoHabitoResponse> ultimosDias(
+            Habito habito, Map<LocalDate, StatusRegistroHabito> marcacoes, LocalDate hoje) {
+        return IntStream.range(0, DIAS_RECENTES)
+                .mapToObj(passo -> hoje.minusDays(DIAS_RECENTES - 1L - passo))
+                .map(dia -> new DiaDoHabitoResponse(dia, marcacoes.get(dia), habito.devidoEm(dia)))
                 .toList();
     }
 

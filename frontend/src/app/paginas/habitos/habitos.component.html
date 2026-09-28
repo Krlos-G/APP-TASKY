@@ -112,7 +112,6 @@
               @if (habito.horaPreferida) {
                 · {{ habito.horaPreferida.slice(0, 5) }}
               }
-              · {{ streakPorExtenso(habito) }}
               @if (habito.arquivado) {
                 · arquivado
               }
@@ -142,6 +141,30 @@
               }
             </div>
           }
+
+          <div class="habito__sequencia">
+            <div
+              class="trilha"
+              [attr.aria-label]="'Últimos 14 dias: ' + streakPorExtenso(habito)"
+              role="img"
+            >
+              @for (dia of habito.ultimosDias; track dia.data) {
+                <span
+                  class="trilha__dia"
+                  [class.trilha__dia--feito]="dia.status === 'FEITO'"
+                  [class.trilha__dia--pulado]="dia.status === 'PULADO'"
+                  [class.trilha__dia--folga]="!dia.devido && dia.status === null"
+                ></span>
+              }
+            </div>
+
+            <span class="habito__streak" [class.habito__streak--ativa]="habito.streak > 0">
+              @if (habito.streak > 0) {
+                <app-icone nome="habitos" [tamanho]="15" />
+              }
+              {{ streakPorExtenso(habito) }}
+            </span>
+          </div>
 
           <div class="habito__menu">
             <button class="link" type="button" (click)="alternarHistorico(habito)">

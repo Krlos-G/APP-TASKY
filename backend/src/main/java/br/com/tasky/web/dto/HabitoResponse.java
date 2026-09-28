@@ -10,8 +10,9 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * @param statusHoje nulo quando o dia ainda nao foi marcado - diferente de ter
- *                   sido pulado, e a tela precisa distinguir os dois
+ * @param statusHoje  nulo quando o dia ainda nao foi marcado - diferente de ter
+ *                    sido pulado, e a tela precisa distinguir os dois
+ * @param ultimosDias janela recente, do mais antigo ao de hoje
  */
 public record HabitoResponse(
         Long id,
@@ -25,10 +26,12 @@ public record HabitoResponse(
         boolean arquivado,
         int streak,
         StatusRegistroHabito statusHoje,
-        boolean devidoHoje) {
+        boolean devidoHoje,
+        List<DiaDoHabitoResponse> ultimosDias) {
 
     public static HabitoResponse de(Habito habito, int streak,
-                                    StatusRegistroHabito statusHoje, boolean devidoHoje) {
+                                    StatusRegistroHabito statusHoje, boolean devidoHoje,
+                                    List<DiaDoHabitoResponse> ultimosDias) {
         return new HabitoResponse(
                 habito.getId(),
                 habito.getNome(),
@@ -41,6 +44,7 @@ public record HabitoResponse(
                 habito.isArquivado(),
                 streak,
                 statusHoje,
-                devidoHoje);
+                devidoHoje,
+                ultimosDias);
     }
 }

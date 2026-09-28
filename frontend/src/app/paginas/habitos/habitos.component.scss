@@ -2,14 +2,16 @@
   max-width: 720px;
 
   &__topo h1 {
-    margin: 0 0 0.25rem;
-    font-size: 1.5rem;
+    margin: 0;
+    font-size: var(--tam-titulo-grande);
+    font-weight: 700;
+    letter-spacing: var(--letra-titulo);
   }
 
   &__nota {
-    margin: 0 0 1.25rem;
+    margin: 2px 0 0;
     color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
+    font-size: var(--tam-apoio);
   }
 
   &__carregando {
@@ -18,61 +20,59 @@
 
   &__acoes {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
+    gap: var(--esp-2);
+    margin: var(--esp-5) 0;
   }
 }
-
-
-/* -------------------------------------------------------------- botões */
-
-
 
 /* ---------------------------------------------------------- formulário */
 
 .form-habito {
-  margin-bottom: 1.5rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
+  margin-bottom: var(--esp-5);
+  padding: var(--esp-4) var(--esp-5);
+  border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  box-shadow: var(--sombra-cartao);
 
   h2 {
-    margin: 0 0 0.85rem;
-    font-size: 1.05rem;
+    margin: 0 0 var(--esp-4);
+    font-size: var(--tam-destaque);
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   &__linha {
     display: flex;
-    gap: 0.75rem;
+    gap: var(--esp-3);
   }
 
   &__acoes {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    gap: var(--esp-2);
+    margin-top: var(--esp-4);
   }
 }
-
 
 .dias {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: var(--esp-1);
 
   &__botao {
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--cor-borda);
-    border-radius: 8px;
-    background: var(--cor-fundo);
+    min-height: 36px;
+    padding: 0 var(--esp-3);
+    border: 1px solid var(--cor-borda-campo);
+    border-radius: var(--raio-pilula);
+    background: transparent;
     color: var(--cor-texto-fraco);
-    font-size: 0.82rem;
+    font-family: inherit;
+    font-size: var(--tam-nota);
     cursor: pointer;
 
     &--ativo {
-      border-color: var(--cor-primaria);
-      background: var(--cor-primaria-fraca);
-      color: var(--cor-primaria);
+      border-color: transparent;
+      background: var(--cor-primaria);
+      color: var(--cor-sobre-cor);
       font-weight: 600;
     }
   }
@@ -90,12 +90,12 @@
   display: grid;
   grid-template-columns: 4px 1fr auto;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.6rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-2);
+  padding: var(--esp-4);
+  border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  box-shadow: var(--sombra-cartao);
 
   /* Arquivado continua legível, mas sai do foco. */
   &--arquivado {
@@ -110,32 +110,100 @@
 
   &__nome {
     margin: 0;
+    font-size: var(--tam-corpo);
     font-weight: 600;
+    letter-spacing: var(--letra-corpo);
   }
 
   &__detalhe {
-    margin: 0.15rem 0 0;
+    margin: 1px 0 0;
     color: var(--cor-texto-fraco);
-    font-size: 0.82rem;
+    font-size: var(--tam-nota);
   }
 
   &__marcar {
     display: flex;
-    gap: 0.4rem;
     align-items: center;
+    gap: var(--esp-2);
+  }
+
+  /* A trilha e o numero ocupam a linha inteira sob o nome: o numero e a
+     legenda dela, nao um dado solto. */
+  &__sequencia {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-3);
+    grid-column: 2 / -1;
+    margin-top: var(--esp-3);
+  }
+
+  &__streak {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-1);
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+    white-space: nowrap;
+
+    /* Sequencia viva ganha a unica cor quente do app. */
+    &--ativa {
+      color: var(--cor-laranja);
+      font-weight: 600;
+    }
   }
 
   &__menu {
     display: flex;
-    gap: 0.75rem;
+    gap: var(--esp-4);
     grid-column: 2 / -1;
-    margin-top: 0.35rem;
+    margin-top: var(--esp-3);
+  }
+}
+
+/* A sequencia atual aparece como o rastro aceso que encosta em hoje - o
+   buraco a esquerda e o dia em que ela quebrou, e da para ver, nao so
+   contar. */
+.trilha {
+  display: flex;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+
+  &__dia {
+    flex: 1;
+    height: 12px;
+    border-radius: 2px;
+    background: var(--cor-trilho);
+
+    &:first-child {
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+
+    &--feito {
+      background: var(--cor-laranja-cheia);
+    }
+
+    /* Pulado nao soma e nao quebra: fica visivel, sem acender. */
+    &--pulado {
+      background: color-mix(in srgb, var(--cor-laranja-cheia) 35%, transparent);
+    }
+
+    /* Descanso planejado nao e falha, entao nem desenha buraco. */
+    &--folga {
+      background: color-mix(in srgb, var(--cor-trilho) 45%, transparent);
+    }
   }
 }
 
 .marca {
-  color: var(--cor-primaria);
-  font-size: 0.82rem;
+  color: var(--cor-verde);
+  font-size: var(--tam-nota);
   font-weight: 600;
 
   &--pulado {
@@ -147,20 +215,19 @@
 
 .confirma {
   grid-column: 2 / -1;
-  margin-top: 0.6rem;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid var(--cor-vermelho);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--cor-vermelho) 8%, transparent);
+  margin-top: var(--esp-3);
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-botao);
+  background: var(--cor-vermelho-fraca);
 
   &__texto {
-    margin: 0 0 0.7rem;
-    font-size: 0.85rem;
+    margin: 0 0 var(--esp-3);
+    font-size: var(--tam-apoio);
   }
 
   &__acoes {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--esp-2);
   }
 }
 
@@ -168,14 +235,14 @@
 
 .historico {
   grid-column: 2 / -1;
-  margin-top: 0.6rem;
-  padding-top: 0.6rem;
+  margin-top: var(--esp-3);
+  padding-top: var(--esp-3);
   border-top: 1px solid var(--cor-borda);
 
   &__lista {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: var(--esp-1);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -183,11 +250,11 @@
 
   &__item {
     display: flex;
-    gap: 0.35rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 999px;
+    gap: var(--esp-1);
+    padding: 2px var(--esp-2);
+    border-radius: var(--raio-pilula);
     background: var(--cor-fundo);
-    font-size: 0.78rem;
+    font-size: var(--tam-legenda);
   }
 
   &__data {
@@ -196,7 +263,7 @@
   }
 
   &__status {
-    color: var(--cor-primaria);
+    color: var(--cor-verde);
     font-weight: 600;
 
     &--pulado {
@@ -206,9 +273,6 @@
   }
 }
 
-/* ------------------------------------------------------- estado vazio */
-
-
 @media (max-width: 560px) {
   .habito {
     grid-template-columns: 4px 1fr;
@@ -216,7 +280,7 @@
 
   .habito__marcar {
     grid-column: 2;
-    margin-top: 0.5rem;
+    margin-top: var(--esp-2);
   }
 
   .form-habito__linha {

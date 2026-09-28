@@ -294,6 +294,39 @@ class HabitoControllerTest {
         }
 
         @Test
+        @DisplayName("a janela recente traz 14 dias, do mais antigo ao de hoje")
+        void janelaRecente() throws Exception {
+            long id = criarHabito(tokenCarlos, "Ler");
+            marcar(id, "2026-09-06", "FEITO").andExpect(status().isOk());
+
+            marcar(id, "2026-09-07", "FEITO")
+                    .andExpect(jsonPath("$.ultimosDias.length()").value(14))
+                    .andExpect(jsonPath("$.ultimosDias[0].data").value("2026-08-25"))
+                    .andExpect(jsonPath("$.ultimosDias[13].data").value("2026-09-07"))
+                    .andExpect(jsonPath("$.ultimosDias[13].status").value("FEITO"))
+                    .andExpect(jsonPath("$.ultimosDias[12].status").value("FEITO"))
+                    // O dia sem marcacao vem no lugar dele, com status nulo: e o
+                    // buraco que deixa a quebra visivel na tela.
+                    .andExpect(jsonPath("$.ultimosDias[11].status").doesNotExist())
+                    .andExpect(jsonPath("$.ultimosDias[11].devido").value(true));
+        }
+
+        @Test
+        @DisplayName("descanso planejado vem como nao devido, e nao como buraco")
+        void janelaRespeitaAgenda() throws Exception {
+            mockMvc.perform(comAuth(post("/api/v1/habitos"), tokenCarlos)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(corpo(Map.of(
+                                    "nome", "Academia",
+                                    "tipoAgenda", "DIAS_SEMANA",
+                                    "diasSemana", List.of("TER", "QUI")))))
+                    .andExpect(status().isCreated())
+                    // 25/08 e terca: cobrado. 07/09 e segunda: descanso.
+                    .andExpect(jsonPath("$.ultimosDias[0].devido").value(true))
+                    .andExpect(jsonPath("$.ultimosDias[13].devido").value(false));
+        }
+
+        @Test
         @DisplayName("marcar o mesmo dia duas vezes nao duplica nem da conflito")
         void marcarDuasVezes() throws Exception {
             long id = criarHabito(tokenCarlos, "Ler");

@@ -16,8 +16,7 @@ import {
 import { Bloco, Dia } from '../../core/rotina/rotina.models';
 import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
-
-const MAXIMO_SEGMENTOS = 12;
+import { segmentosDe } from '../../core/ui/progresso';
 
 /** Onde o momento atual cai em relação aos blocos do dia. */
 type Situacao = 'antes' | 'durante' | 'entre' | 'depois' | 'sem-blocos';
@@ -72,19 +71,9 @@ export class Hoje implements OnInit {
     return { feitos, total, porcento: Math.round((feitos / total) * 100) };
   });
 
-  /**
-   * Um segmento por item devido hoje, em vez de uma fração contínua: assim
-   * dá para ver quantas coisas o dia tem, não só que proporção caiu.
-   *
-   * Nulo num dia cheio demais, quando os segmentos ficariam finos demais para
-   * serem lidos e a barra contínua volta a ser melhor.
-   */
   protected readonly segmentos = computed(() => {
     const p = this.progresso();
-    if (!p || p.total > MAXIMO_SEGMENTOS) {
-      return null;
-    }
-    return Array.from({ length: p.total }, (_, i) => i < p.feitos);
+    return p ? segmentosDe(p.feitos, p.total) : null;
   });
 
   /**

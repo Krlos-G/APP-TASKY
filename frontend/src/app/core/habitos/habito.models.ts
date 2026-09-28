@@ -5,6 +5,14 @@ export type TipoAgenda = 'DIARIO' | 'DIAS_SEMANA' | 'VEZES_POR_SEMANA';
 
 export type StatusHabito = 'FEITO' | 'PULADO';
 
+/** Um dia da janela recente de um hábito. */
+export interface DiaDoHabito {
+  data: string;
+  /** Nulo é "não marcado". Com `devido` falso, é descanso planejado. */
+  status: StatusHabito | null;
+  devido: boolean;
+}
+
 export interface Habito {
   id: number;
   nome: string;
@@ -19,6 +27,8 @@ export interface Habito {
   /** Nulo é "ainda não marcado", diferente de PULADO. */
   statusHoje: StatusHabito | null;
   devidoHoje: boolean;
+  /** Do mais antigo ao de hoje. */
+  ultimosDias: DiaDoHabito[];
 }
 
 export interface HabitoRequest {

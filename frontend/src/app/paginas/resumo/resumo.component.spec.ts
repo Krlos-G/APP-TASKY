@@ -79,7 +79,8 @@ describe('Resumo', () => {
     // 2 feitos de 4 itens: 1 habito + 1 tarefa.
     expect(barras(fixture)[0].getAttribute('aria-valuenow')).toBe('2');
     expect(barras(fixture)[0].getAttribute('aria-valuemax')).toBe('4');
-    expect(texto(fixture)).toContain('50%');
+    // O dia mostra a contagem; a porcentagem ficou so na semana.
+    expect(texto(fixture)).toContain('2/4');
   });
 
   it('dia sem nada planejado nao mostra barra, e sim um aviso', () => {
@@ -150,7 +151,7 @@ describe('Resumo', () => {
     );
 
     const nomes = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('.sequencia__nome'),
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.sequencia .item__nome'),
     ).map((n) => n.textContent?.trim());
 
     expect(nomes).toEqual(['Ler', 'Meditar', 'Correr']);

@@ -6,6 +6,7 @@ import { Resumo as ResumoDoDia } from '../../core/resumo/resumo.models';
 import { dataDeIso, formatarDataPorExtenso, formatarStreak } from '../../core/tempo/formatos';
 import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
+import { segmentosDe } from '../../core/ui/progresso';
 
 interface Progresso {
   feitos: number;
@@ -44,6 +45,11 @@ export class Resumo implements OnInit {
       return null;
     }
     return progresso(dia.habitosFeitos + dia.tarefasFeitas, dia.habitosDevidos + dia.tarefasDoDia);
+  });
+
+  protected readonly segmentosDoDia = computed(() => {
+    const p = this.progressoDoDia();
+    return p ? segmentosDe(p.feitos, p.total) : null;
   });
 
   protected readonly progressoDaSemana = computed<Progresso | null>(() => {

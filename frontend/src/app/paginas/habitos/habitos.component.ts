@@ -7,9 +7,10 @@ import { DIAS_SEMANA, DiaSemana, NOME_CURTO_DO_DIA } from '../../core/rotina/rot
 import { TimeProvider } from '../../core/tempo/time-provider.service';
 import { formatarDataCurta, formatarStreak } from '../../core/tempo/formatos';
 import { RespostaErro } from '../../core/auth/auth.models';
+import { Icone } from '../../core/ui/icone.component';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [Icone, ReactiveFormsModule],
   selector: 'app-habitos',
   styleUrl: './habitos.component.scss',
   templateUrl: './habitos.component.html',

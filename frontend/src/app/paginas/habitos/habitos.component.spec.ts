@@ -6,9 +6,17 @@ import {
 } from '@angular/common/http/testing';
 import { Habitos } from './habitos.component';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
-import { Habito } from '../../core/habitos/habito.models';
+import { DiaDoHabito, Habito } from '../../core/habitos/habito.models';
 
 const HOJE = '2026-09-07';
+
+/** Os 14 dias da trilha, todos em branco salvo o que o teste pedir. */
+function janela(feitos: string[] = []): DiaDoHabito[] {
+  return Array.from({ length: 14 }, (_, i) => {
+    const dia = new Date(Date.UTC(2026, 7, 25 + i)).toISOString().slice(0, 10);
+    return { data: dia, status: feitos.includes(dia) ? 'FEITO' : null, devido: true };
+  });
+}
 
 function habito(parcial: Partial<Habito> = {}): Habito {
   return {
@@ -24,6 +32,7 @@ function habito(parcial: Partial<Habito> = {}): Habito {
     streak: 0,
     statusHoje: null,
     devidoHoje: true,
+    ultimosDias: janela(),
     ...parcial,
   };
 }
