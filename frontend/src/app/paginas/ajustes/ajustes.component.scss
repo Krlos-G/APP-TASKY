@@ -7,84 +7,9 @@
   }
 }
 
-.aviso {
-  margin: 0 0 1rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: 8px;
-  background: var(--cor-primaria-fraca);
-  color: var(--cor-primaria);
-  font-size: 0.875rem;
-}
 
-.cartao {
-  margin-bottom: 1rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  background: var(--cor-superficie);
 
-  &__titulo {
-    margin: 0 0 0.35rem;
-    font-size: 1rem;
-  }
 
-  &__nota {
-    margin: 0;
-    color: var(--cor-texto-fraco);
-    font-size: 0.85rem;
-  }
-
-  &__acoes {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 0.5rem;
-    margin-top: 0.9rem;
-  }
-}
-
-.campo {
-  display: block;
-
-  &__rotulo {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: var(--cor-texto-fraco);
-    font-size: 0.8rem;
-  }
-
-  &__entrada {
-    padding: 0.5rem 0.7rem;
-    border: 1px solid var(--cor-borda);
-    border-radius: 8px;
-    background: var(--cor-fundo);
-    color: var(--cor-texto);
-    font-family: inherit;
-    font-size: 0.95rem;
-  }
-}
-
-.botao {
-  padding: 0.55rem 1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: 8px;
-  background: var(--cor-fundo);
-  color: var(--cor-texto);
-  font-size: 0.9rem;
-  cursor: pointer;
-
-  &--primario {
-    border-color: var(--cor-primaria);
-    background: var(--cor-primaria);
-    color: #fff;
-    font-weight: 600;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-}
 
 .dados {
   display: grid;
@@ -106,4 +31,8 @@
       font-size: 0.75rem;
     }
   }
+}
+
+.cartao {
+  margin-bottom: 1rem;
 }

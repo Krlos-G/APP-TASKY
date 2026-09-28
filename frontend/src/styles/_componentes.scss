@@ -1,0 +1,214 @@
+/* Componentes compartilhados.
+ *
+ * Estavam copiados em ate seis telas e ja tinham divergido entre si. Aqui eles
+ * definem a aparencia; cada tela cuida so do proprio arranjo. */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  min-height: var(--toque);
+  padding: 0 var(--esp-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-botao);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-family: inherit;
+  font-size: var(--tam-apoio);
+  font-weight: 500;
+  letter-spacing: var(--letra-corpo);
+  text-decoration: none;
+  cursor: pointer;
+
+  &--primario {
+    border-color: transparent;
+    background: var(--cor-primaria);
+    color: var(--cor-sobre-cor);
+    font-weight: 600;
+  }
+
+  &--perigo {
+    border-color: var(--cor-vermelho);
+    color: var(--cor-vermelho);
+  }
+
+  &--curto {
+    min-height: 36px;
+    padding: 0 var(--esp-3);
+    font-size: var(--tam-nota);
+  }
+
+  &--texto {
+    min-height: auto;
+    padding: var(--esp-1) var(--esp-2);
+    border-color: transparent;
+    background: none;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
+/* Acao secundaria dentro de uma linha, onde um botao inteiro pesaria demais. */
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cor-primaria-texto);
+  font-family: inherit;
+  font-size: var(--tam-nota);
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
+
+  &--perigo {
+    color: var(--cor-vermelho);
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+
+  &__rotulo {
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+  }
+
+  &__entrada {
+    width: 100%;
+    min-height: var(--toque);
+    padding: var(--esp-2) var(--esp-3);
+    border: 1px solid var(--cor-borda-campo);
+    border-radius: var(--raio-campo);
+    background: var(--cor-campo);
+    color: var(--cor-texto);
+    font-family: inherit;
+    /* Abaixo de 16px o Safari do iPhone da zoom sozinho ao focar o campo. */
+    font-size: var(--tam-corpo);
+
+    &:disabled {
+      opacity: 0.45;
+    }
+
+    &[aria-invalid='true'] {
+      border-color: var(--cor-vermelho);
+    }
+  }
+
+  &__cor {
+    width: 100%;
+    height: var(--toque);
+    padding: 3px;
+    border: 1px solid var(--cor-borda-campo);
+    border-radius: var(--raio-campo);
+    background: var(--cor-campo);
+  }
+
+  &__dica {
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-legenda);
+  }
+
+  &__erro {
+    color: var(--cor-vermelho);
+    font-size: var(--tam-nota);
+  }
+}
+
+.cartao {
+  padding: var(--esp-4) var(--esp-5);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-cartao);
+
+  &__titulo {
+    margin: 0;
+    font-size: var(--tam-destaque);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  &__nota {
+    margin: var(--esp-1) 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-apoio);
+  }
+
+  &__periodo {
+    margin: var(--esp-1) 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+  }
+
+  &__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--esp-2);
+    margin-top: var(--esp-4);
+  }
+}
+
+/* Marcador curto numa linha: "atrasada", "1 atrasada". */
+.selo {
+  padding: 2px var(--esp-2);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-vermelho-fraca);
+  color: var(--cor-vermelho);
+  font-size: var(--tam-legenda);
+  font-weight: 600;
+}
+
+.vazio {
+  margin: var(--esp-2) 0;
+  color: var(--cor-texto-fraco);
+  font-size: var(--tam-apoio);
+}
+
+.vazio-cartao {
+  padding: var(--esp-6);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-cartao);
+  text-align: center;
+
+  &__titulo {
+    margin: 0;
+    font-size: var(--tam-destaque);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  &__nota {
+    margin: var(--esp-1) 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-apoio);
+  }
+}
+
+.alerta {
+  margin: 0 0 var(--esp-4);
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-botao);
+  background: var(--cor-vermelho-fraca);
+  color: var(--cor-vermelho);
+  font-size: var(--tam-apoio);
+}
+
+.aviso {
+  margin: 0 0 var(--esp-4);
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-botao);
+  background: var(--cor-primaria-fraca);
+  color: var(--cor-primaria-texto);
+  font-size: var(--tam-apoio);
+}
