@@ -167,6 +167,17 @@ describe('Hoje', () => {
     expect(itens[2].classList).not.toContain('linha__item--passado');
   });
 
+  it('o selo "agora" sobrevive a um titulo longo', () => {
+    comHora(10, 48);
+    const fixture = montar(DIA_COM_ROTINA);
+
+    // O nome e quem trunca. Com o selo dentro dele, um titulo longo levava o
+    // selo embora junto com o texto cortado.
+    const atual = (fixture.nativeElement as HTMLElement).querySelector('.linha__item--atual');
+    expect(atual?.querySelector('.linha__nome .linha__agora')).toBeNull();
+    expect(atual?.querySelector('.linha__agora')).toBeTruthy();
+  });
+
   it('mostra a data por extenso sem cair no dia anterior', () => {
     comHora(10, 0);
     const fixture = montar(DIA_COM_ROTINA);
@@ -192,7 +203,7 @@ describe('Hoje', () => {
       });
 
       const conteudo = texto(fixture);
-      expect(conteudo).toContain('Hábitos de hoje');
+      expect(conteudo).toContain('Hábitos');
       expect(conteudo).toContain('1/2');
       expect(conteudo).toContain('3 dias seguidos');
       expect(conteudo).toContain('começar hoje');
@@ -217,7 +228,7 @@ describe('Hoje', () => {
       });
 
       expect(texto(fixture)).toContain('Nenhuma rotina para hoje');
-      expect(texto(fixture)).toContain('Hábitos de hoje');
+      expect(texto(fixture)).toContain('Hábitos');
     });
 
     it('marcar muda a tela antes da resposta do servidor', () => {
@@ -316,7 +327,7 @@ describe('Hoje', () => {
       });
 
       const conteudo = texto(fixture);
-      expect(conteudo).toContain('Tarefas de hoje');
+      expect(conteudo).toContain('Tarefas');
       expect(conteudo).toContain('14:30');
       expect(conteudo).toContain('1h30');
       expect(conteudo).toContain('1/2');

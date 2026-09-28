@@ -1,16 +1,17 @@
 import { Component, effect, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
+import { Icone, NomeIcone } from './core/ui/icone.component';
 import { UsuarioService } from './core/usuario/usuario.service';
 
 interface ItemNavegacao {
   rota: string;
   rotulo: string;
-  icone: string;
+  icone: NomeIcone;
 }
 
 @Component({
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [Icone, RouterOutlet, RouterLink, RouterLinkActive],
   selector: 'app-root',
   styleUrl: './app.component.scss',
   templateUrl: './app.component.html',
@@ -32,10 +33,10 @@ export class App {
    * sem duplicar markup.
    */
   protected readonly itens: ItemNavegacao[] = [
-    { rota: '/hoje', rotulo: 'Hoje', icone: '📅' },
-    { rota: '/resumo', rotulo: 'Resumo', icone: '📊' },
-    { rota: '/habitos', rotulo: 'Hábitos', icone: '🔥' },
-    { rota: '/tarefas', rotulo: 'Tarefas', icone: '✓' },
+    { rota: '/hoje', rotulo: 'Hoje', icone: 'hoje' },
+    { rota: '/resumo', rotulo: 'Resumo', icone: 'resumo' },
+    { rota: '/habitos', rotulo: 'Hábitos', icone: 'habitos' },
+    { rota: '/tarefas', rotulo: 'Tarefas', icone: 'tarefas' },
   ];
 
   constructor() {
