@@ -423,3 +423,50 @@
     font-weight: 400;
   }
 }
+
+/* ------------------------------------------------- botao de adicionar */
+
+/* Mesmo material da barra de abas, logo acima dela: os dois elementos
+   flutuantes da tela sao lidos como um conjunto, nao como dois enfeites.
+   Serve a <a> e a <button>, que e o que muda de tela para tela. */
+.adicionar {
+  position: fixed;
+  right: var(--esp-3);
+  bottom: calc(env(safe-area-inset-bottom) + var(--altura-tab-bar) + var(--esp-2) + var(--esp-3));
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 1px solid var(--cor-vidro-borda);
+  border-radius: 50%;
+  background: var(--cor-vidro);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: var(--sombra-flutuante);
+  color: var(--cor-primaria-texto);
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .adicionar {
+    border-color: var(--cor-borda);
+    background: var(--cor-superficie);
+  }
+}
+
+/* No desktop nao ha barra embaixo: o botao desce para o canto. */
+@media (min-width: 768px) {
+  .adicionar {
+    right: var(--esp-6);
+    bottom: var(--esp-6);
+  }
+}
+
+/* Folga para o botao flutuante nunca cobrir a ultima linha da lista. */
+.tela-com-adicionar {
+  padding-bottom: 72px;
+}

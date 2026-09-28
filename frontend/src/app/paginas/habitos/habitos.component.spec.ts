@@ -73,6 +73,12 @@ describe('Habitos', () => {
     return (fixture.nativeElement as HTMLElement).textContent ?? '';
   }
 
+  function novoHabito(fixture: ReturnType<typeof montar>): HTMLButtonElement {
+    return (fixture.nativeElement as HTMLElement).querySelector(
+      '.adicionar',
+    ) as HTMLButtonElement;
+  }
+
   function botao(fixture: ReturnType<typeof montar>, rotulo: string): HTMLButtonElement {
     const todos = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('button'),
@@ -157,7 +163,7 @@ describe('Habitos', () => {
   it('nao envia habito de dias fixos sem nenhum dia escolhido', () => {
     const fixture = montar([]);
 
-    botao(fixture, 'Novo hábito').click();
+    novoHabito(fixture).click();
     fixture.detectChanges();
 
     const elemento = fixture.nativeElement as HTMLElement;
@@ -180,7 +186,7 @@ describe('Habitos', () => {
   it('cria habito de dias fixos com os dias escolhidos', () => {
     const fixture = montar([]);
 
-    botao(fixture, 'Novo hábito').click();
+    novoHabito(fixture).click();
     fixture.detectChanges();
 
     const elemento = fixture.nativeElement as HTMLElement;

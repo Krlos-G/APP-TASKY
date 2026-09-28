@@ -1,4 +1,4 @@
-<section class="habitos">
+<section class="habitos tela-com-adicionar">
   <header class="habitos__topo">
     <h1>Hábitos</h1>
     <p class="habitos__nota">
@@ -11,9 +11,6 @@
   }
 
   <div class="habitos__acoes">
-    <button class="botao botao--primario" type="button" (click)="abrirNovo()">
-      Novo hábito
-    </button>
     <button class="botao" type="button" (click)="alternarArquivados()">
       {{ mostrarArquivados() ? 'Ocultar arquivados' : 'Mostrar arquivados' }}
     </button>
@@ -218,5 +215,11 @@
         </li>
       }
     </ul>
+  }
+
+  @if (!formAberto()) {
+    <button class="adicionar" type="button" aria-label="Novo hábito" (click)="abrirNovo()">
+      <app-icone nome="mais" [tamanho]="26" />
+    </button>
   }
 </section>

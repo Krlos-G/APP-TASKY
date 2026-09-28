@@ -292,8 +292,11 @@
 .campo {
   margin-bottom: 0.85rem;
 
+  /* Em tela estreita o formulario vira coluna, e ai o flex-basis passa a
+     valer como altura - sem o max-width a amostra de cor ocupa a linha. */
   &--cor {
     flex: 0 0 4rem;
+    max-width: 4rem;
     margin-bottom: 0;
   }
 }

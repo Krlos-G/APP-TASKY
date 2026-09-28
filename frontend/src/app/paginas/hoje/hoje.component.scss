@@ -1,8 +1,5 @@
 .hoje {
   max-width: 640px;
-  /* Folga para o botao flutuante nunca cobrir a ultima linha da lista -
-     que era o defeito de quando ele existia sem isto. */
-  padding-bottom: 72px;
 
   &__titulo {
     margin: 0;
@@ -161,40 +158,6 @@
 }
 
 
-/* Mesmo material da barra de abas, logo acima dela: os dois elementos
-   flutuantes da tela sao lidos como um conjunto, nao como dois enfeites. */
-.adicionar {
-  position: fixed;
-  right: var(--esp-3);
-  bottom: calc(env(safe-area-inset-bottom) + var(--altura-tab-bar) + var(--esp-2) + var(--esp-3));
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border: 1px solid var(--cor-vidro-borda);
-  border-radius: 50%;
-  background: var(--cor-vidro);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  box-shadow: var(--sombra-flutuante);
-  color: var(--cor-primaria-texto);
-  text-decoration: none;
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .adicionar {
-    border-color: var(--cor-borda);
-    background: var(--cor-superficie);
-  }
-}
-
-/* No desktop nao ha barra embaixo: o botao desce para o canto. */
-@media (min-width: 768px) {
-  .adicionar {
-    right: var(--esp-6);
-    bottom: var(--esp-6);
-  }
-}
 
 @media (max-width: 480px) {
   .linha__item {
