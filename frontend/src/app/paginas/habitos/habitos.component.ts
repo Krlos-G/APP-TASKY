@@ -8,6 +8,7 @@ import { TimeProvider } from '../../core/tempo/time-provider.service';
 import { formatarDataCurta, formatarStreak } from '../../core/tempo/formatos';
 import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
+import { COR_PADRAO, CorDisponivel, CORES, coresCom } from '../../core/ui/cores';
 
 @Component({
   imports: [Icone, ReactiveFormsModule],
@@ -29,6 +30,7 @@ export class Habitos implements OnInit {
   protected readonly mostrarArquivados = signal(false);
 
   protected readonly formAberto = signal(false);
+  protected readonly cores = signal<CorDisponivel[]>(CORES);
   /** Nulo com o formulário aberto significa que ele está criando. */
   protected readonly emEdicao = signal<number | null>(null);
 
@@ -44,7 +46,7 @@ export class Habitos implements OnInit {
     tipoAgenda: ['DIARIO' as TipoAgenda],
     horaPreferida: [''],
     horaLembrete: [''],
-    cor: ['#4f46e5'],
+    cor: [COR_PADRAO],
   });
 
   ngOnInit(): void {
@@ -78,8 +80,9 @@ export class Habitos implements OnInit {
       tipoAgenda: 'DIARIO',
       horaPreferida: '',
       horaLembrete: '',
-      cor: '#4f46e5',
+      cor: COR_PADRAO,
     });
+    this.cores.set(CORES);
     this.formAberto.set(true);
   }
 
@@ -91,8 +94,9 @@ export class Habitos implements OnInit {
       tipoAgenda: habito.tipoAgenda,
       horaPreferida: habito.horaPreferida?.slice(0, 5) ?? '',
       horaLembrete: habito.horaLembrete?.slice(0, 5) ?? '',
-      cor: habito.cor ?? '#4f46e5',
+      cor: habito.cor ?? COR_PADRAO,
     });
+    this.cores.set(coresCom(habito.cor));
     this.formAberto.set(true);
   }
 
