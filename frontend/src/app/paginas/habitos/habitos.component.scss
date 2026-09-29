@@ -78,6 +78,8 @@
   padding: var(--esp-4);
   border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
   box-shadow: var(--sombra-cartao);
 
   /* Arquivado continua legível, mas sai do foco. */
@@ -236,7 +238,7 @@
     gap: var(--esp-1);
     padding: 2px var(--esp-2);
     border-radius: var(--raio-pilula);
-    background: var(--cor-fundo);
+    background: var(--cor-painel);
     font-size: var(--tam-legenda);
   }
 

@@ -36,6 +36,8 @@
   padding: var(--esp-4) var(--esp-5);
   border-radius: var(--raio-cartao);
   background: var(--cor-primaria-fraca);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
 
   /* Fora do bloco corrente o destaque é desnecessário: não há nada
      acontecendo agora que mereça a cor de ênfase. */
@@ -78,6 +80,8 @@
   padding: 0;
   border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
   box-shadow: var(--sombra-cartao);
   list-style: none;
 

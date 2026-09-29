@@ -44,6 +44,8 @@
   margin-bottom: var(--esp-2);
   border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
   box-shadow: var(--sombra-cartao);
 
   &__topo {
@@ -176,7 +178,7 @@
 .bloco-form {
   padding: var(--esp-4);
   border-radius: var(--raio-botao);
-  background: var(--cor-fundo);
+  background: var(--cor-painel);
 
   &__titulo {
     margin: 0 0 var(--esp-3);
@@ -203,6 +205,13 @@
     margin: var(--esp-3) 0 0;
   }
 
+  /* O modelo em volta ja desfoca; desfocar de novo aqui dentro so custaria. */
+  .campo,
+  .cores {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
 }
 
 /* -------------------------------------------------------------- semana */
@@ -214,6 +223,8 @@
   padding: 0;
   border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
   box-shadow: var(--sombra-cartao);
   list-style: none;
 

@@ -1,5 +1,8 @@
 <main class="login">
   <div class="login__cartao cartao">
+    <div class="login__icone" aria-hidden="true">
+      <app-icone nome="tarefas" [tamanho]="30" />
+    </div>
     <h1 class="login__marca">Tasky</h1>
     <p class="login__subtitulo">Sua rotina, hábitos e tarefas do dia.</p>
 
@@ -39,7 +42,7 @@
         <p class="login__falha" role="alert">{{ erro() }}</p>
       }
 
-      <button class="login__botao" type="submit" [disabled]="enviando()">
+      <button class="botao botao--primario botao--grande" type="submit" [disabled]="enviando()">
         {{ enviando() ? 'Entrando…' : 'Entrar' }}
       </button>
     </form>

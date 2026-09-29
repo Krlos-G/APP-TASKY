@@ -266,3 +266,31 @@ resultado não te agradar, corrigir ali custa uma tela — depois da Etapa 6, cu
 **Fatia 8 — PWA + deploy.** É lá que *"recebo lembrete no iPhone no horário"* finalmente se prova,
 e ela fica melhor depois desta: o polimento de PWA (ícone, splash, `theme-color`, tela de início)
 sai já com a paleta e os ícones definitivos, em vez de ser refeito depois.
+
+---
+
+## Mudança de direção: vidro e gradiente (29/09)
+
+Depois das Etapas 1–5, o Carlos trouxe referências de Figma e a direção evoluiu do "sóbrio +
+nativo" para **vidro sobre gradiente**, coerente com a barra de abas e o botão flutuante, que já
+eram de vidro:
+
+- **Fundo:** gradiente suave na família do azul do sistema (azul no canto de cima, lavanda no de
+  baixo; azul-marinho e índigo no escuro), numa camada fixa atrás de tudo — no iPhone o
+  `background-attachment: fixed` é ignorado.
+- **Vidro fosco de verdade nas superfícies** (`backdrop-filter`), a pedido do Carlos. Para o blur
+  ter o que desfocar, o fundo ganhou **esferas de cor com contorno**: sobre um gradiente liso o
+  blur fica invisível. Só a superfície de fora desfoca — campo dentro de cartão não desfoca de
+  novo, porque blur dentro de blur custa em dobro e embaça o texto.
+- **Contraste medido no pior caso** (texto cinza sobre o miolo de uma esfera): os primeiros valores
+  reprovavam (4,2:1 no claro, 2,5:1 no escuro). O escuro virou **vidro fumê**, que escurece a esfera
+  em vez de clarear, e o cinza secundário foi ajustado nos dois temas — agora 5,5:1 ou mais.
+- **Custo não medido de verdade:** no ambiente de desenvolvimento a rolagem dá 30 quadros com e sem
+  blur (é o teto do ambiente), então o veredito é do Safari no iPhone. Se engasgar, `--desfoque`
+  é um token só: `none` desliga o blur dos cartões de uma vez, sem mexer em mais nada.
+- **Borda branca interna** (`inset`) nas superfícies — é o que as faz ler como vidro.
+- **Botão primário em gradiente** com brilho azul embaixo.
+- **Campo-cartão** (rótulo dentro, valor grande, ícone à esquerda nos seletores), também tirado de
+  uma referência dele.
+
+Tudo passa por token: a mudança de visual foi quase inteira nos valores de `_tokens.scss`.

@@ -22,6 +22,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* O gradiente mora numa camada fixa atras de tudo. No iPhone o
+   background-attachment: fixed e ignorado, e o gradiente esticaria junto com
+   a pagina inteira em vez de ficar parado atras dela. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--fundo-app);
+  pointer-events: none;
+}
+
 :focus-visible {
   outline: 2px solid var(--cor-primaria);
   outline-offset: 2px;

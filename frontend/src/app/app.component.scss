@@ -110,8 +110,8 @@
     border-right: 1px solid var(--cor-borda);
     border-radius: 0;
     background: var(--cor-superficie);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    backdrop-filter: var(--desfoque);
+    -webkit-backdrop-filter: var(--desfoque);
     box-shadow: none;
 
     &__rodape {

@@ -23,7 +23,8 @@
 
   &--primario {
     border-color: transparent;
-    background: var(--cor-primaria);
+    background: var(--gradiente-primario);
+    box-shadow: var(--sombra-primaria);
     color: var(--cor-sobre-cor);
     font-weight: 600;
   }
@@ -93,6 +94,8 @@
   padding: var(--esp-3) var(--esp-4);
   border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
   box-shadow: var(--sombra-cartao);
 
   /* Sem caixa em volta do input, quem mostra o foco e o erro e o cartao. */
@@ -215,6 +218,8 @@ label.campo {
    ele afunda para o cinza, como antes. */
 .cartao .campo {
   background: var(--cor-campo);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow: none;
 
   &:focus-within {
@@ -230,6 +235,8 @@ label.campo {
   padding: var(--esp-4) var(--esp-5);
   border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
   box-shadow: var(--sombra-cartao);
 
   &__titulo {
@@ -280,6 +287,8 @@ label.campo {
   padding: var(--esp-6);
   border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
   box-shadow: var(--sombra-cartao);
   text-align: center;
 
@@ -380,6 +389,8 @@ label.campo {
   padding: 0;
   border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
   box-shadow: var(--sombra-cartao);
   list-style: none;
 }
@@ -582,6 +593,8 @@ label.campo {
   border: 0;
   border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
   box-shadow: var(--sombra-cartao);
 
   /* legend dentro de fieldset flutua na borda por padrao; float: left a poe

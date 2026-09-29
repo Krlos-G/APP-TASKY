@@ -49,19 +49,36 @@
   /* Alvo minimo de toque da Apple. */
   --toque: 44px;
 
-  --cor-fundo: #f2f2f7;
-  --cor-superficie: #ffffff;
-  /* Um campo dentro de um cartao precisa ser mais fundo que ele, senao some. */
-  --cor-campo: #f2f2f7;
-  --cor-borda: #e5e5ea;
-  /* Mais forte que a borda comum: o campo precisa se sustentar tanto sobre o
-   * cartao quanto direto sobre o fundo da pagina. */
-  --cor-borda-campo: #c7c7cc;
-  --cor-trilho: #d8d8de;
+  /* Fundo do app: gradiente suave na familia do azul do sistema. A cor
+   * solida fica de reserva e para o que precisa de um tom so. */
+  --cor-fundo: #eef2fb;
+  /* Esferas de cor com contorno por cima de um tom ambiente. O contorno e o
+   * que da ao blur dos cartoes algo para desfocar: sobre um gradiente liso o
+   * vidro fica invisivel. */
+  --fundo-app:
+    radial-gradient(circle at 12% 16%, rgb(110 168 255 / 0.48) 0 13vmax, rgb(110 168 255 / 0) 21vmax),
+    radial-gradient(circle at 92% 48%, rgb(170 150 255 / 0.44) 0 12vmax, rgb(170 150 255 / 0) 20vmax),
+    radial-gradient(circle at 20% 88%, rgb(120 210 255 / 0.38) 0 12vmax, rgb(120 210 255 / 0) 20vmax),
+    radial-gradient(110% 70% at 0% 0%, #d8e8ff 0%, rgb(216 232 255 / 0) 62%),
+    radial-gradient(100% 65% at 100% 100%, #e4ddff 0%, rgb(228 221 255 / 0) 62%),
+    linear-gradient(180deg, #eef3fc 0%, #f0eefa 100%);
+
+  /* Vidro fosco: as superficies desfocam as esferas do fundo. So a de fora
+   * desfoca - campo dentro de cartao nao desfoca de novo, porque blur dentro
+   * de blur custa em dobro e embaca o texto. */
+  --cor-superficie: rgb(255 255 255 / 0.58);
+  --desfoque: blur(24px) saturate(140%);
+  /* Dentro de um cartao o campo fica mais branco que ele, para saltar. */
+  --cor-campo: rgb(255 255 255 / 0.78);
+  /* Painel rebaixado dentro de um cartao. */
+  --cor-painel: rgb(118 118 128 / 0.08);
+  --cor-borda: rgb(60 60 67 / 0.12);
+  --cor-borda-campo: rgb(60 60 67 / 0.22);
+  --cor-trilho: rgb(118 118 128 / 0.2);
   --cor-texto: #1c1c1e;
-  /* Mais escuro que o cinza da Apple de proposito: o #8e8e93 dela nao passa
-   * no contraste sobre fundo claro. */
-  --cor-texto-fraco: #6b6b70;
+  /* Mais escuro que o cinza da Apple de proposito: sobre o vidro, no miolo de
+   * uma esfera, o cinza dela cai para 4,2:1. Este segura 5,5:1. */
+  --cor-texto-fraco: #5c5c63;
 
   --cor-primaria: #007aff;
   /* A mesma cor quando ela e texto, onde o azul puro fica claro demais. */
@@ -88,20 +105,38 @@
   --cor-vidro: rgba(255, 255, 255, 0.72);
   --cor-vidro-borda: rgba(0, 0, 0, 0.06);
 
-  --sombra-cartao: 0 1px 2px rgba(0, 0, 0, 0.04);
+  /* A borda branca de dentro e o que faz a superficie ler como vidro. */
+  --sombra-cartao:
+    0 1px 2px rgb(20 40 90 / 0.05),
+    0 8px 24px rgb(20 40 90 / 0.06),
+    inset 0 0 0 1px rgb(255 255 255 / 0.7);
   --sombra-flutuante: 0 10px 30px rgba(0, 0, 0, 0.13);
+
+  --gradiente-primario: linear-gradient(180deg, #3d95ff 0%, #007aff 100%);
+  --sombra-primaria: 0 8px 18px -6px rgb(0 122 255 / 0.55);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --cor-fundo: #000000;
-    --cor-superficie: #1c1c1e;
-    --cor-campo: #2c2c2e;
-    --cor-borda: #38383a;
-    --cor-borda-campo: #48484a;
-    --cor-trilho: #2c2c2e;
+    --cor-fundo: #070912;
+    --fundo-app:
+      radial-gradient(circle at 12% 16%, rgb(40 100 230 / 0.45) 0 13vmax, rgb(40 100 230 / 0) 21vmax),
+      radial-gradient(circle at 92% 48%, rgb(120 80 230 / 0.4) 0 12vmax, rgb(120 80 230 / 0) 20vmax),
+      radial-gradient(circle at 20% 88%, rgb(30 150 220 / 0.3) 0 12vmax, rgb(30 150 220 / 0) 20vmax),
+      radial-gradient(110% 70% at 0% 0%, #0c2a5e 0%, rgb(12 42 94 / 0) 62%),
+      radial-gradient(100% 65% at 100% 100%, #271c5c 0%, rgb(39 28 92 / 0) 62%),
+      linear-gradient(180deg, #070a14 0%, #0a0816 100%);
+
+    /* Vidro fume: escurece a esfera por baixo em vez de clarear. Branco
+     * translucido aqui derrubava o texto cinza para 2,5:1 sobre a esfera azul. */
+    --cor-superficie: rgb(26 28 40 / 0.55);
+    --cor-campo: rgb(255 255 255 / 0.1);
+    --cor-painel: rgb(255 255 255 / 0.04);
+    --cor-borda: rgb(255 255 255 / 0.08);
+    --cor-borda-campo: rgb(255 255 255 / 0.16);
+    --cor-trilho: rgb(255 255 255 / 0.12);
     --cor-texto: #ffffff;
-    --cor-texto-fraco: #8e8e93;
+    --cor-texto-fraco: #a1a1a8;
 
     --cor-primaria: #0a84ff;
     --cor-primaria-texto: #0a84ff;
@@ -120,7 +155,10 @@
     --cor-vidro: rgba(28, 28, 30, 0.66);
     --cor-vidro-borda: rgba(255, 255, 255, 0.1);
 
-    --sombra-cartao: none;
+    --sombra-cartao: inset 0 0 0 1px rgb(255 255 255 / 0.08);
     --sombra-flutuante: 0 12px 34px rgba(0, 0, 0, 0.5);
+
+    --gradiente-primario: linear-gradient(180deg, #3a9dff 0%, #0a84ff 100%);
+    --sombra-primaria: 0 8px 20px -6px rgb(10 132 255 / 0.5);
   }
 }
