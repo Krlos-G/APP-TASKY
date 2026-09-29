@@ -18,19 +18,21 @@
       <h2 class="secao__titulo">Modelos de dia</h2>
 
       <form class="linha-form" [formGroup]="formModelo" (ngSubmit)="criarModelo()">
-        <input
-          class="campo__entrada"
-          type="text"
-          formControlName="nome"
-          maxlength="100"
-          placeholder="Ex.: Dia útil"
-          aria-label="Nome do novo modelo"
-          [attr.aria-invalid]="formModelo.controls.nome.touched && formModelo.controls.nome.invalid"
-        />
-        <button class="botao botao--primario" type="submit">Criar modelo</button>
-        @if (formModelo.controls.nome.touched && formModelo.controls.nome.invalid) {
-          <span class="campo__erro">Dê um nome ao modelo.</span>
-        }
+        <label class="campo">
+          <span class="campo__rotulo">Novo modelo</span>
+          <input
+            class="campo__entrada"
+            type="text"
+            formControlName="nome"
+            maxlength="100"
+            placeholder="Ex.: Dia útil"
+            [attr.aria-invalid]="formModelo.controls.nome.touched && formModelo.controls.nome.invalid"
+          />
+          @if (formModelo.controls.nome.touched && formModelo.controls.nome.invalid) {
+            <span class="campo__erro">Dê um nome ao modelo.</span>
+          }
+        </label>
+        <button class="botao botao--primario" type="submit">Criar</button>
       </form>
 
       @if (semModelos()) {
@@ -132,7 +134,8 @@
                     }
                   </label>
 
-                  <label class="campo">
+                  <label class="campo campo--icone">
+                    <app-icone class="campo__icone" nome="relogio" [tamanho]="22" />
                     <span class="campo__rotulo">Início</span>
                     <input
                       class="campo__entrada"
@@ -145,7 +148,8 @@
                     }
                   </label>
 
-                  <label class="campo">
+                  <label class="campo campo--icone">
+                    <app-icone class="campo__icone" nome="relogio" [tamanho]="22" />
                     <span class="campo__rotulo">Fim</span>
                     <input
                       class="campo__entrada"
@@ -158,7 +162,8 @@
                     }
                   </label>
 
-                  <label class="campo">
+                  <label class="campo campo--icone">
+                    <app-icone class="campo__icone" nome="sino" [tamanho]="22" />
                     <span class="campo__rotulo">Avisar antes (min)</span>
                     <input
                       class="campo__entrada"

@@ -13,7 +13,7 @@
     <form [formGroup]="form" (ngSubmit)="salvar()">
       <section class="secao">
         <h2 class="secao__titulo">Tarefa</h2>
-        <div class="cartao">
+        <div class="edicao__grupo">
           <label class="campo">
             <span class="campo__rotulo">Título</span>
             <input
@@ -59,14 +59,16 @@
 
       <section class="secao">
         <h2 class="secao__titulo">Quando</h2>
-        <div class="cartao">
+        <div class="edicao__grupo">
           <div class="edicao__linha">
-            <label class="campo">
+            <label class="campo campo--icone">
+              <app-icone class="campo__icone" nome="hoje" [tamanho]="22" />
               <span class="campo__rotulo">Fazer no dia</span>
               <input class="campo__entrada" type="date" formControlName="dataPlanejada" />
             </label>
 
-            <label class="campo">
+            <label class="campo campo--icone">
+              <app-icone class="campo__icone" nome="relogio" [tamanho]="22" />
               <span class="campo__rotulo">Horário</span>
               <input class="campo__entrada" type="time" formControlName="horaPlanejada" />
               @if (form.controls.horaPlanejada.disabled) {
@@ -76,12 +78,14 @@
           </div>
 
           <div class="edicao__linha">
-            <label class="campo">
+            <label class="campo campo--icone">
+              <app-icone class="campo__icone" nome="hoje" [tamanho]="22" />
               <span class="campo__rotulo">Prazo</span>
               <input class="campo__entrada" type="date" formControlName="dataLimite" />
             </label>
 
-            <label class="campo">
+            <label class="campo campo--icone">
+              <app-icone class="campo__icone" nome="sino" [tamanho]="22" />
               <span class="campo__rotulo">Lembrete</span>
               <input class="campo__entrada" type="time" formControlName="horaLembrete" />
             </label>
@@ -90,8 +94,8 @@
       </section>
 
       <div class="edicao__acoes">
-        <button class="botao botao--primario" type="submit">Salvar</button>
-        <button class="botao" type="button" (click)="voltar()">Cancelar</button>
+        <button class="botao botao--primario botao--grande" type="submit">Salvar</button>
+        <button class="botao botao--texto" type="button" (click)="voltar()">Cancelar</button>
       </div>
     </form>
 

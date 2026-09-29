@@ -39,6 +39,15 @@
     font-size: var(--tam-nota);
   }
 
+  /* A acao que fecha um formulario: largura toda, no fim, facil de alcancar
+     com o polegar. */
+  &--grande {
+    width: 100%;
+    min-height: 52px;
+    border-radius: var(--raio-cartao);
+    font-size: var(--tam-corpo);
+  }
+
   &--texto {
     min-height: auto;
     padding: var(--esp-1) var(--esp-2);
@@ -73,44 +82,49 @@
   }
 }
 
+/* Campo-cartao: o campo inteiro e o cartao, com o rotulo dentro dele. Voce
+   toca num cartao em vez de preencher uma caixa - e isso que tira do
+   formulario a cara de formulario. */
 .campo {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--esp-1);
+  gap: 2px;
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-cartao);
+
+  /* Sem caixa em volta do input, quem mostra o foco e o erro e o cartao. */
+  &:focus-within {
+    box-shadow: 0 0 0 2px var(--cor-primaria);
+  }
+
+  &:has([aria-invalid='true']) {
+    box-shadow: 0 0 0 2px var(--cor-vermelho);
+  }
 
   &__rotulo {
     color: var(--cor-texto-fraco);
-    font-size: var(--tam-nota);
+    font-size: var(--tam-legenda);
+    font-weight: 500;
   }
 
-  &__entrada {
-    width: 100%;
-    min-height: var(--toque);
-    padding: var(--esp-2) var(--esp-3);
-    border: 1px solid var(--cor-borda-campo);
-    border-radius: var(--raio-campo);
-    background: var(--cor-campo);
-    color: var(--cor-texto);
-    font-family: inherit;
-    /* Abaixo de 16px o Safari do iPhone da zoom sozinho ao focar o campo. */
-    font-size: var(--tam-corpo);
+  /* Icone a esquerda, rotulo e valor empilhados a direita dele. */
+  &--icone {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: var(--esp-3);
 
-    &:disabled {
-      opacity: 0.45;
-    }
-
-    &[aria-invalid='true'] {
-      border-color: var(--cor-vermelho);
+    > :not(.campo__icone) {
+      grid-column: 2;
     }
   }
 
-  &__cor {
-    width: 100%;
-    height: var(--toque);
-    padding: 3px;
-    border: 1px solid var(--cor-borda-campo);
-    border-radius: var(--raio-campo);
-    background: var(--cor-campo);
+  &__icone {
+    grid-row: 1 / span 4;
+    color: var(--cor-primaria-texto);
   }
 
   &__dica {
@@ -121,6 +135,94 @@
   &__erro {
     color: var(--cor-vermelho);
     font-size: var(--tam-nota);
+  }
+}
+
+label.campo {
+  cursor: text;
+}
+
+/* A caixa comum - vale para o input solto, fora de um .campo. */
+.campo__entrada {
+  width: 100%;
+  min-height: var(--toque);
+  padding: var(--esp-2) var(--esp-3);
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: var(--raio-campo);
+  background: var(--cor-campo);
+  color: var(--cor-texto);
+  font-family: inherit;
+  /* Abaixo de 16px o Safari do iPhone da zoom sozinho ao focar o campo. */
+  font-size: var(--tam-corpo);
+
+  &:disabled {
+    opacity: 0.45;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--cor-vermelho);
+  }
+}
+
+/* Dentro do cartao a caixa some: sobra so o valor. */
+.campo .campo__entrada {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-weight: 500;
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+/* O indicador nativo de data e hora continua - no PC e ele que abre o
+   seletor -, so que discreto, para nao competir com o icone do cartao. */
+.campo .campo__entrada::-webkit-calendar-picker-indicator {
+  opacity: 0.35;
+  cursor: pointer;
+}
+
+.campo textarea.campo__entrada {
+  min-height: 3.5em;
+  resize: vertical;
+}
+
+/* O select perde a seta do sistema; quem desenha a seta e o cartao. */
+.campo select.campo__entrada {
+  padding-right: var(--esp-6);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.campo:has(select)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: var(--esp-4);
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--cor-texto-fraco);
+  border-bottom: 2px solid var(--cor-texto-fraco);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+/* Um campo dentro de algo que ja e cartao nao pode ser outro cartao branco:
+   ele afunda para o cinza, como antes. */
+.cartao .campo {
+  background: var(--cor-campo);
+  box-shadow: none;
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px var(--cor-primaria);
+  }
+
+  &:has([aria-invalid='true']) {
+    box-shadow: 0 0 0 2px var(--cor-vermelho);
   }
 }
 
@@ -474,21 +576,33 @@
 /* -------------------------------------------------- paleta de cores */
 
 .cores {
-  margin: 0 0 var(--esp-3);
-  padding: 0;
+  min-width: 0;
+  margin: 0;
+  padding: var(--esp-3) var(--esp-4);
   border: 0;
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-cartao);
 
+  /* legend dentro de fieldset flutua na borda por padrao; float: left a poe
+     de volta no fluxo, como o rotulo dos outros campos. */
   &__rotulo {
+    float: left;
+    width: 100%;
     padding: 0;
     color: var(--cor-texto-fraco);
-    font-size: var(--tam-nota);
+    font-size: var(--tam-legenda);
+    font-weight: 500;
   }
 
+  /* clear: o rotulo acima flutua, e sem isto a lista se espremia ao lado dele
+     com largura zero - as cores caiam para fora do cartao. */
   &__lista {
     display: flex;
     flex-wrap: wrap;
+    clear: both;
     gap: var(--esp-3);
-    margin-top: var(--esp-2);
+    padding-top: var(--esp-2);
   }
 
   &__opcao {

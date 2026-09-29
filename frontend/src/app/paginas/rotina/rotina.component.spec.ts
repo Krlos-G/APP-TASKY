@@ -72,7 +72,7 @@ describe('Rotina', () => {
     const fixture = montar([]);
     const botao = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('button'),
-    ).find((b) => b.textContent?.trim() === 'Criar modelo') as HTMLButtonElement;
+    ).find((b) => b.textContent?.trim() === 'Criar') as HTMLButtonElement;
 
     botao.click();
     fixture.detectChanges();

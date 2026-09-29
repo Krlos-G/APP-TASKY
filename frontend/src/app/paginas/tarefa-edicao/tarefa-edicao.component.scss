@@ -13,9 +13,8 @@
     font-size: var(--tam-apoio);
   }
 
-  /* Dentro do cartao os campos se espacam por gap, nao por margem: assim o
-     ultimo nao deixa um vao sobrando antes da borda. */
-  .cartao {
+  /* Cada campo e um cartao; o grupo so os empilha com respiro entre eles. */
+  &__grupo {
     display: flex;
     flex-direction: column;
     gap: var(--esp-3);
@@ -33,6 +32,8 @@
 
   &__acoes {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: var(--esp-2);
     margin-top: var(--esp-6);
   }
@@ -40,8 +41,11 @@
 
 /* Acao destrutiva em secao propria, longe de Salvar - como o iOS faz. */
 .excluir {
-  margin-top: var(--esp-8);
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: var(--esp-3);
+  margin-top: var(--esp-8);
   text-align: center;
 
   &__texto {

@@ -64,12 +64,14 @@
       }
 
       <div class="form-habito__linha">
-        <label class="campo">
+        <label class="campo campo--icone">
+          <app-icone class="campo__icone" nome="relogio" [tamanho]="22" />
           <span class="campo__rotulo">Horário preferido</span>
           <input class="campo__entrada" type="time" formControlName="horaPreferida" />
         </label>
 
-        <label class="campo">
+        <label class="campo campo--icone">
+          <app-icone class="campo__icone" nome="sino" [tamanho]="22" />
           <span class="campo__rotulo">Lembrete</span>
           <input class="campo__entrada" type="time" formControlName="horaLembrete" />
         </label>
@@ -90,8 +92,8 @@
       </fieldset>
 
       <div class="form-habito__acoes">
-        <button class="botao botao--primario" type="submit">Salvar</button>
-        <button class="botao" type="button" (click)="fechar()">Cancelar</button>
+        <button class="botao botao--primario botao--grande" type="submit">Salvar</button>
+        <button class="botao botao--texto" type="button" (click)="fechar()">Cancelar</button>
       </div>
     </form>
   }

@@ -20,18 +20,20 @@
 }
 
 /* A linha de criar modelo precisa quebrar para a mensagem de erro caber embaixo. */
+/* O cartao do nome e o botao lado a lado; o erro fica dentro do cartao. */
 .linha-form {
   display: flex;
-  flex-wrap: wrap;
+  align-items: stretch;
   gap: var(--esp-2);
   margin-bottom: var(--esp-4);
 
-  .campo__entrada {
+  .campo {
     flex: 1;
+    min-width: 0;
   }
 
-  .campo__erro {
-    flex-basis: 100%;
+  .botao {
+    border-radius: var(--raio-cartao);
   }
 }
 
@@ -201,11 +203,6 @@
     margin: var(--esp-3) 0 0;
   }
 
-  /* O painel ja e o fundo rebaixado: aqui o campo inverte e vira a superficie
-     clara, senao no tema claro os dois teriam o mesmo cinza. */
-  .campo__entrada {
-    background: var(--cor-superficie);
-  }
 }
 
 /* -------------------------------------------------------------- semana */

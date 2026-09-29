@@ -5,6 +5,10 @@
  * nenhum componente precisa saber em qual deles esta. */
 
 :root {
+  /* Sem isto os controles nativos (seletor de data e hora, a lista do
+     select) ficam claros mesmo no tema escuro. */
+  color-scheme: light dark;
+
   --familia: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif;
 
   /* Tipografia espelhando os text styles do iOS. O corpo e 17px. */

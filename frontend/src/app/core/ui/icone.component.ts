@@ -13,6 +13,7 @@ export type NomeIcone =
   | 'lapis'
   | 'lixeira'
   | 'sino'
+  | 'relogio'
   | 'chevron';
 
 /**
@@ -48,6 +49,7 @@ const CAMINHOS: Record<NomeIcone, string[]> = {
   ],
   sino: ['M18 9a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z', 'M13.7 20a2 2 0 0 1-3.4 0'],
   chevron: ['M9 6l6 6-6 6'],
+  relogio: ['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 'M12 7.5V12l3 2'],
 };
 
 @Component({

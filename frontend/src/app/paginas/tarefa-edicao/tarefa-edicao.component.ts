@@ -6,9 +6,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TarefaService } from '../../core/tarefas/tarefa.service';
 import { Prioridade, TarefaRequest } from '../../core/tarefas/tarefa.models';
 import { RespostaErro } from '../../core/auth/auth.models';
+import { Icone } from '../../core/ui/icone.component';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [Icone, ReactiveFormsModule],
   selector: 'app-tarefa-edicao',
   styleUrl: './tarefa-edicao.component.scss',
   templateUrl: './tarefa-edicao.component.html',
