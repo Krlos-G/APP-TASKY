@@ -214,26 +214,37 @@
     <section class="secao">
       <h2 class="secao__titulo">Semana</h2>
 
-      <ul class="semana">
-        @for (dia of diasSemana; track dia) {
-          <li class="semana__dia">
-            <span class="semana__nome">{{ nomeDoDia[dia] }}</span>
-            <select
-              class="campo__entrada"
-              [attr.aria-label]="'Modelo de ' + nomeDoDia[dia]"
-              [value]="modeloDoDia(dia) ?? ''"
-              (change)="atribuir(dia, $any($event.target).value)"
-            >
-              <option value="">— sem rotina —</option>
-              @for (modelo of modelos(); track modelo.id) {
-                <option [value]="modelo.id" [selected]="modeloDoDia(dia) === modelo.id">
-                  {{ modelo.nome }}
-                </option>
-              }
-            </select>
-          </li>
+      @if (semModelos()) {
+        <p class="vazio">Crie um modelo acima para montar a semana.</p>
+      } @else {
+        <!-- Cada modelo com os sete dias: da para ver a semana inteira de uma
+             vez, em vez de ler um select por dia. -->
+        <ul class="semana">
+          @for (modelo of modelos(); track modelo.id) {
+            <li class="semana__modelo">
+              <span class="semana__nome">{{ modelo.nome }}</span>
+              <div class="dias" role="group" [attr.aria-label]="'Dias de ' + modelo.nome">
+                @for (dia of diasSemana; track dia) {
+                  <button
+                    class="dias__botao"
+                    type="button"
+                    [class.dias__botao--ativo]="modeloDoDia(dia) === modelo.id"
+                    [attr.aria-pressed]="modeloDoDia(dia) === modelo.id"
+                    [attr.aria-label]="nomeDoDia[dia]"
+                    (click)="alternarDiaDoModelo(modelo.id, dia)"
+                  >
+                    {{ nomeCurtoDoDia[dia] }}
+                  </button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+
+        @if (diasSemRotina().length > 0) {
+          <p class="secao__rodape">Sem rotina: {{ diasSemRotina().join(', ') }}.</p>
         }
-      </ul>
+      }
     </section>
   }
 </section>

@@ -6,6 +6,7 @@ import {
   DIAS_SEMANA,
   DiaSemana,
   ModeloDia,
+  NOME_CURTO_DO_DIA,
   NOME_DO_DIA,
   Semana,
 } from '../../core/rotina/rotina.models';
@@ -25,9 +26,17 @@ export class Rotina implements OnInit {
 
   protected readonly diasSemana = DIAS_SEMANA;
   protected readonly nomeDoDia = NOME_DO_DIA;
+  protected readonly nomeCurtoDoDia = NOME_CURTO_DO_DIA;
 
   protected readonly modelos = signal<ModeloDia[]>([]);
   protected readonly semana = signal<Semana | null>(null);
+
+  protected readonly diasSemRotina = computed(() => {
+    const semana = this.semana();
+    return DIAS_SEMANA.filter((dia) => !semana?.modeloPorDia[dia]).map((dia) =>
+      NOME_DO_DIA[dia].toLowerCase(),
+    );
+  });
   protected readonly carregando = signal(true);
   protected readonly erro = signal<string | null>(null);
 
@@ -205,7 +214,15 @@ export class Rotina implements OnInit {
     return this.semana()?.modeloPorDia[dia]?.id ?? null;
   }
 
-  protected atribuir(dia: DiaSemana, valor: string): void {
+  /**
+   * Um dia pertence a no maximo um modelo: marcar num modelo tira de outro, e
+   * tocar num dia que ja e deste modelo libera o dia.
+   */
+  protected alternarDiaDoModelo(modeloId: number, dia: DiaSemana): void {
+    this.atribuir(dia, this.modeloDoDia(dia) === modeloId ? null : modeloId);
+  }
+
+  protected atribuir(dia: DiaSemana, modeloId: number | null): void {
     const atual = this.semana();
     if (!atual) {
       return;
@@ -214,7 +231,7 @@ export class Rotina implements OnInit {
     // A API substitui o conjunto, então enviamos os sete dias sempre.
     const mapa = {} as Record<DiaSemana, number | null>;
     for (const d of DIAS_SEMANA) {
-      mapa[d] = d === dia ? (valor ? Number(valor) : null) : this.modeloDoDia(d);
+      mapa[d] = d === dia ? modeloId : this.modeloDoDia(d);
     }
 
     this.rotinaService.definirSemana(mapa).subscribe({

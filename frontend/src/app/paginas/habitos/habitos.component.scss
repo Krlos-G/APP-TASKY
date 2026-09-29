@@ -60,30 +60,6 @@
   }
 }
 
-.dias {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--esp-1);
-
-  &__botao {
-    min-height: 36px;
-    padding: 0 var(--esp-3);
-    border: 1px solid var(--cor-borda-campo);
-    border-radius: var(--raio-pilula);
-    background: transparent;
-    color: var(--cor-texto-fraco);
-    font-family: inherit;
-    font-size: var(--tam-nota);
-    cursor: pointer;
-
-    &--ativo {
-      border-color: transparent;
-      background: var(--cor-primaria);
-      color: var(--cor-sobre-cor);
-      font-weight: 600;
-    }
-  }
-}
 
 /* --------------------------------------------------------------- lista */
 
