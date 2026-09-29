@@ -95,16 +95,16 @@ describe('Tarefas', () => {
   it('concluir troca a tarefa no lugar, sem tira-la da lista', async () => {
     const harness = await abrir('/tarefas?filtro=ATRASADAS', 'ATRASADAS', [tarefa()]);
 
-    (elemento(harness).querySelector('.tarefa__marca') as HTMLButtonElement).click();
+    (elemento(harness).querySelector('.item__marca') as HTMLButtonElement).click();
 
     const req = http.expectOne('/api/v1/tarefas/1/conclusao');
     expect(req.request.method).toBe('PUT');
     req.flush(tarefa({ status: 'FEITA', concluidoEm: '2026-09-16T15:00:00Z' }));
     harness.detectChanges();
 
-    const itens = elemento(harness).querySelectorAll('.tarefa');
+    const itens = elemento(harness).querySelectorAll('.item');
     expect(itens.length).toBe(1);
-    expect(itens[0].classList).toContain('tarefa--feita');
+    expect(itens[0].classList).toContain('item--resolvido');
   });
 
   it('desfazer envia o DELETE da conclusao', async () => {
@@ -112,7 +112,7 @@ describe('Tarefas', () => {
       tarefa({ status: 'FEITA' }),
     ]);
 
-    (elemento(harness).querySelector('.tarefa__marca') as HTMLButtonElement).click();
+    (elemento(harness).querySelector('.item__marca') as HTMLButtonElement).click();
 
     const req = http.expectOne('/api/v1/tarefas/1/conclusao');
     expect(req.request.method).toBe('DELETE');

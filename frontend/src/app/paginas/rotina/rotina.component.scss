@@ -1,15 +1,17 @@
 .rotina {
   max-width: 720px;
 
-  &__topo h1 {
-    margin: 0 0 0.25rem;
-    font-size: 1.5rem;
+  &__titulo {
+    margin: 0;
+    font-size: var(--tam-titulo-grande);
+    font-weight: 700;
+    letter-spacing: var(--letra-titulo);
   }
 
   &__nota {
-    margin: 0 0 1.25rem;
+    margin: 2px 0 0;
     color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
+    font-size: var(--tam-apoio);
   }
 
   &__carregando {
@@ -17,21 +19,12 @@
   }
 }
 
-
-.bloco-secao {
-  margin-bottom: 2.5rem;
-
-  h2 {
-    margin: 0 0 0.5rem;
-    font-size: 1.1rem;
-  }
-}
-
+/* A linha de criar modelo precisa quebrar para a mensagem de erro caber embaixo. */
 .linha-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-4);
 
   .campo__entrada {
     flex: 1;
@@ -45,37 +38,55 @@
 /* ------------------------------------------------------------- modelo */
 
 .modelo {
-  margin-bottom: 0.75rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
+  overflow: hidden;
+  margin-bottom: var(--esp-2);
+  border-radius: var(--raio-cartao);
   background: var(--cor-superficie);
+  box-shadow: var(--sombra-cartao);
 
   &__topo {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 0.75rem;
+    gap: var(--esp-3);
+    min-height: var(--toque);
+    padding: var(--esp-2) var(--esp-4);
   }
 
   &__nome {
+    display: flex;
     flex: 1;
+    align-items: center;
+    gap: var(--esp-2);
+    min-width: 0;
     padding: 0;
     border: none;
     background: transparent;
     color: var(--cor-texto);
-    font-size: 1rem;
+    font-family: inherit;
+    font-size: var(--tam-corpo);
+    font-weight: 600;
+    letter-spacing: var(--letra-corpo);
     text-align: left;
     cursor: pointer;
   }
 
-  &__contagem {
-    margin-left: 0.5rem;
+  &__seta {
     color: var(--cor-texto-fraco);
-    font-size: 0.8rem;
+    transition: transform var(--transicao) var(--curva);
+
+    &--aberta {
+      transform: rotate(90deg);
+    }
+  }
+
+  &__contagem {
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+    font-weight: 400;
   }
 
   &__corpo {
-    padding: 0 0.75rem 0.75rem;
+    padding: 0 var(--esp-4) var(--esp-4);
     border-top: 1px solid var(--cor-borda);
   }
 }
@@ -83,107 +94,150 @@
 /* -------------------------------------------------------------- blocos */
 
 .blocos {
-  margin: 0.75rem 0;
+  margin: var(--esp-2) 0 var(--esp-4);
   padding: 0;
   list-style: none;
 }
 
 .bloco {
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0;
-  border-bottom: 1px solid var(--cor-borda);
+  gap: var(--esp-2) var(--esp-3);
+  min-height: var(--toque);
+  padding: var(--esp-2) 0;
 
-  &:last-child {
-    border-bottom: none;
+  & + & {
+    border-top: 1px solid var(--cor-borda);
   }
 
   &__cor {
+    align-self: stretch;
     width: 4px;
-    height: 20px;
     border-radius: 2px;
+  }
+
+  /* Titulo em cima e horario embaixo, como titulo e detalhe no resto do app:
+     na mesma linha, o horario roubava a largura que o titulo precisa. */
+  &__texto {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
   }
 
   &__horario {
     color: var(--cor-texto-fraco);
-    font-size: 0.85rem;
+    font-size: var(--tam-nota);
     font-variant-numeric: tabular-nums;
   }
 
   &__titulo {
     overflow: hidden;
+    font-size: var(--tam-apoio);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   &__acoes {
     display: flex;
-    gap: 0.25rem;
+  }
+
+  /* Icone sozinho, mas com alvo de toque inteiro: 44px de area clicavel. */
+  &__acao {
+    display: grid;
+    place-items: center;
+    width: var(--toque);
+    height: var(--toque);
+    margin: calc(-1 * var(--esp-2)) 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--raio-botao);
+    background: none;
+    color: var(--cor-primaria-texto);
+    cursor: pointer;
+
+    &--perigo {
+      color: var(--cor-vermelho);
+    }
   }
 
   /* Ocupa a linha inteira abaixo do bloco, sem quebrar a grade. */
   &__aviso {
     grid-column: 1 / -1;
-    color: goldenrod;
-    font-size: 0.78rem;
+    color: var(--cor-laranja);
+    font-size: var(--tam-nota);
   }
 }
 
 /* -------------------------------------------------- formulário de bloco */
 
-.bloco-form .cores {
-  margin: var(--esp-3) 0 0;
-}
-
 .bloco-form {
-  padding: 0.75rem;
-  border: 1px dashed var(--cor-borda);
-  border-radius: var(--raio);
+  padding: var(--esp-4);
+  border-radius: var(--raio-botao);
+  background: var(--cor-fundo);
 
   &__titulo {
-    margin: 0 0 0.6rem;
-    font-size: 0.9rem;
+    margin: 0 0 var(--esp-3);
     color: var(--cor-texto-fraco);
+    font-size: var(--tam-legenda);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   &__campos {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    gap: var(--esp-3);
   }
 
   &__acoes {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
+    gap: var(--esp-2);
+    margin-top: var(--esp-4);
+  }
+
+  .cores {
+    margin: var(--esp-3) 0 0;
+  }
+
+  /* O painel ja e o fundo rebaixado: aqui o campo inverte e vira a superficie
+     clara, senao no tema claro os dois teriam o mesmo cinza. */
+  .campo__entrada {
+    background: var(--cor-superficie);
   }
 }
 
 /* -------------------------------------------------------------- semana */
 
+/* Lista agrupada: o dia a esquerda, o modelo a direita - como uma linha de
+   Ajustes do iOS. */
 .semana {
+  overflow: hidden;
   margin: 0;
   padding: 0;
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-cartao);
   list-style: none;
 
   &__dia {
     display: grid;
     grid-template-columns: 6.5rem 1fr;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.35rem 0;
+    gap: var(--esp-3);
+    min-height: var(--toque);
+    padding: var(--esp-2) var(--esp-4);
+
+    & + & {
+      border-top: 1px solid var(--cor-borda);
+    }
   }
 
   &__nome {
-    font-size: 0.9rem;
+    font-size: var(--tam-corpo);
   }
 }
-
-/* --------------------------------------------------------- utilitários */
-
-
 
 .campo {
   flex: 1;
@@ -192,5 +246,4 @@
   &--largo {
     flex-basis: 100%;
   }
-
 }

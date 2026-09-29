@@ -76,6 +76,10 @@
   /* O verde claro do iOS e vivo demais para texto branco por cima. */
   --cor-sobre-verde: #ffffff;
 
+  /* Segmented control: trilho acinzentado e a pilula clara que desliza nele. */
+  --cor-segmentado: rgba(118, 118, 128, 0.12);
+  --cor-segmentado-ativo: #ffffff;
+
   /* Material da barra de abas: translucido, para o conteudo aparecer atras. */
   --cor-vidro: rgba(255, 255, 255, 0.72);
   --cor-vidro-borda: rgba(0, 0, 0, 0.06);
@@ -105,6 +109,9 @@
     --cor-vermelho-fraca: rgba(255, 69, 58, 0.16);
     --cor-laranja: #ff9f0a;
     --cor-laranja-cheia: #ff9f0a;
+
+    --cor-segmentado: rgba(118, 118, 128, 0.24);
+    --cor-segmentado-ativo: #636366;
 
     --cor-vidro: rgba(28, 28, 30, 0.66);
     --cor-vidro-borda: rgba(255, 255, 255, 0.1);

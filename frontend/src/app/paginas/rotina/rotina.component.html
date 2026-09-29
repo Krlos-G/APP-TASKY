@@ -1,6 +1,6 @@
 <section class="rotina">
   <header class="rotina__topo">
-    <h1>Rotina</h1>
+    <h1 class="rotina__titulo">Rotina</h1>
     <p class="rotina__nota">
       Monte modelos de dia com seus blocos de horário e diga qual vale em cada dia da semana.
     </p>
@@ -14,8 +14,8 @@
     <p class="rotina__carregando">Carregando…</p>
   } @else {
     <!-- ---------------------------------------------------- modelos -->
-    <section class="bloco-secao">
-      <h2>Modelos de dia</h2>
+    <section class="secao">
+      <h2 class="secao__titulo">Modelos de dia</h2>
 
       <form class="linha-form" [formGroup]="formModelo" (ngSubmit)="criarModelo()">
         <input
@@ -46,10 +46,16 @@
               (click)="alternarModelo(modelo.id)"
               [attr.aria-expanded]="modeloAberto() === modelo.id"
             >
-              {{ modeloAberto() === modelo.id ? '▾' : '▸' }} {{ modelo.nome }}
+              <app-icone
+                class="modelo__seta"
+                [class.modelo__seta--aberta]="modeloAberto() === modelo.id"
+                nome="chevron"
+                [tamanho]="16"
+              />
+              {{ modelo.nome }}
               <span class="modelo__contagem">{{ modelo.blocos.length }} blocos</span>
             </button>
-            <button class="botao botao--perigo" type="button" (click)="apagarModelo(modelo)">
+            <button class="link link--perigo" type="button" (click)="apagarModelo(modelo)">
               Apagar
             </button>
           </header>
@@ -68,20 +74,38 @@
                       [style.background]="bloco.cor ?? 'var(--cor-primaria)'"
                       aria-hidden="true"
                     ></span>
-                    <span class="bloco__horario">
-                      {{ bloco.horaInicio.slice(0, 5) }}–{{ bloco.horaFim.slice(0, 5) }}
+                    <span class="bloco__texto">
+                      <span class="bloco__titulo">{{ bloco.titulo }}</span>
+                      <span class="bloco__horario">
+                        {{ bloco.horaInicio.slice(0, 5) }}–{{ bloco.horaFim.slice(0, 5) }}
+                      </span>
                     </span>
-                    <span class="bloco__titulo">{{ bloco.titulo }}</span>
 
+                    <!-- Lapis e lixeira no lugar do texto: a linha e estreita, e o
+                         titulo e o que precisa do espaco. -->
                     <span class="bloco__acoes">
-                      <button class="botao botao--texto" type="button"
-                              (click)="editarBloco(modelo, bloco.id)">Editar</button>
-                      <button class="botao botao--texto" type="button"
-                              (click)="apagarBloco(modelo.id, bloco.id)">Remover</button>
+                      <button
+                        class="bloco__acao"
+                        type="button"
+                        [attr.aria-label]="'Editar ' + bloco.titulo"
+                        title="Editar"
+                        (click)="editarBloco(modelo, bloco.id)"
+                      >
+                        <app-icone nome="lapis" [tamanho]="18" />
+                      </button>
+                      <button
+                        class="bloco__acao bloco__acao--perigo"
+                        type="button"
+                        [attr.aria-label]="'Remover ' + bloco.titulo"
+                        title="Remover"
+                        (click)="apagarBloco(modelo.id, bloco.id)"
+                      >
+                        <app-icone nome="lixeira" [tamanho]="18" />
+                      </button>
                     </span>
 
                     @for (aviso of avisosDoBloco(modelo, bloco.id); track aviso) {
-                      <span class="bloco__aviso">⚠ {{ aviso }}</span>
+                      <span class="bloco__aviso">{{ aviso }}</span>
                     }
                   </li>
                 }
@@ -182,9 +206,8 @@
     </section>
 
     <!-- ----------------------------------------------------- semana -->
-    <section class="bloco-secao">
-      <h2>Semana</h2>
-      <p class="rotina__nota">Qual modelo vale em cada dia.</p>
+    <section class="secao">
+      <h2 class="secao__titulo">Semana</h2>
 
       <ul class="semana">
         @for (dia of diasSemana; track dia) {
