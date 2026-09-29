@@ -10,6 +10,7 @@ import {
   Semana,
 } from '../../core/rotina/rotina.models';
 import { RespostaErro } from '../../core/auth/auth.models';
+import { COR_PADRAO, CorDisponivel, CORES, coresCom } from '../../core/ui/cores';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -36,6 +37,7 @@ export class Rotina implements OnInit {
   protected readonly blocoEmEdicao = signal<number | null>(null);
 
   protected readonly semModelos = computed(() => this.modelos().length === 0);
+  protected readonly cores = signal<CorDisponivel[]>(CORES);
 
   protected readonly formModelo = this.fb.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(100)]],
@@ -45,7 +47,7 @@ export class Rotina implements OnInit {
     titulo: ['', [Validators.required, Validators.maxLength(200)]],
     horaInicio: ['09:00', [Validators.required]],
     horaFim: ['10:00', [Validators.required]],
-    cor: ['#4f46e5'],
+    cor: [COR_PADRAO],
     minutosAntecedenciaLembrete: [''],
   });
 
@@ -120,12 +122,13 @@ export class Rotina implements OnInit {
       titulo: bloco.titulo,
       horaInicio: bloco.horaInicio.slice(0, 5),
       horaFim: bloco.horaFim.slice(0, 5),
-      cor: bloco.cor ?? '#4f46e5',
+      cor: bloco.cor ?? COR_PADRAO,
       minutosAntecedenciaLembrete:
         bloco.minutosAntecedenciaLembrete !== null
           ? String(bloco.minutosAntecedenciaLembrete)
           : '',
     });
+    this.cores.set(coresCom(bloco.cor));
   }
 
   protected cancelarEdicaoDeBloco(): void {
@@ -134,9 +137,10 @@ export class Rotina implements OnInit {
       titulo: '',
       horaInicio: '09:00',
       horaFim: '10:00',
-      cor: '#4f46e5',
+      cor: COR_PADRAO,
       minutosAntecedenciaLembrete: '',
     });
+    this.cores.set(CORES);
   }
 
   protected salvarBloco(modeloId: number): void {

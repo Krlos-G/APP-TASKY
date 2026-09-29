@@ -27,8 +27,13 @@
           class="campo__entrada"
           type="text"
           formControlName="nome"
+          maxlength="100"
           placeholder="Ex.: Ler 20 páginas"
+          [attr.aria-invalid]="form.controls.nome.touched && form.controls.nome.invalid"
         />
+        @if (form.controls.nome.touched && form.controls.nome.invalid) {
+          <span class="campo__erro">Dê um nome ao hábito.</span>
+        }
       </label>
 
       <label class="campo">

@@ -132,12 +132,14 @@ describe('TarefaEdicao', () => {
     expect(campo('horaPlanejada').value).toBe('');
   });
 
-  it('titulo em branco nao chega a ser enviado', async () => {
+  it('titulo em branco nao e enviado, e o usuario ve por que', async () => {
     await abrir('/tarefas/nova');
 
     clicar('Salvar');
 
     http.expectNone((r) => r.method === 'POST');
+    // Nao enviar sem avisar parecia um botao quebrado.
+    expect(elemento().textContent).toContain('Dê um título à tarefa.');
   });
 
   it('editando, carrega a tarefa no formulario e salva com PUT', async () => {

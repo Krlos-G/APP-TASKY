@@ -22,10 +22,15 @@
           class="campo__entrada"
           type="text"
           formControlName="nome"
+          maxlength="100"
           placeholder="Ex.: Dia útil"
           aria-label="Nome do novo modelo"
+          [attr.aria-invalid]="formModelo.controls.nome.touched && formModelo.controls.nome.invalid"
         />
         <button class="botao botao--primario" type="submit">Criar modelo</button>
+        @if (formModelo.controls.nome.touched && formModelo.controls.nome.invalid) {
+          <span class="campo__erro">Dê um nome ao modelo.</span>
+        }
       </form>
 
       @if (semModelos()) {
@@ -90,18 +95,43 @@
                 <div class="bloco-form__campos">
                   <label class="campo campo--largo">
                     <span class="campo__rotulo">Título</span>
-                    <input class="campo__entrada" type="text" formControlName="titulo"
-                           placeholder="Ex.: Foco no trabalho" />
+                    <input
+                      class="campo__entrada"
+                      type="text"
+                      formControlName="titulo"
+                      maxlength="200"
+                      placeholder="Ex.: Foco no trabalho"
+                      [attr.aria-invalid]="formBloco.controls.titulo.touched && formBloco.controls.titulo.invalid"
+                    />
+                    @if (formBloco.controls.titulo.touched && formBloco.controls.titulo.invalid) {
+                      <span class="campo__erro">Dê um título ao bloco.</span>
+                    }
                   </label>
 
                   <label class="campo">
                     <span class="campo__rotulo">Início</span>
-                    <input class="campo__entrada" type="time" formControlName="horaInicio" />
+                    <input
+                      class="campo__entrada"
+                      type="time"
+                      formControlName="horaInicio"
+                      [attr.aria-invalid]="formBloco.controls.horaInicio.touched && formBloco.controls.horaInicio.invalid"
+                    />
+                    @if (formBloco.controls.horaInicio.touched && formBloco.controls.horaInicio.invalid) {
+                      <span class="campo__erro">Informe o horário.</span>
+                    }
                   </label>
 
                   <label class="campo">
                     <span class="campo__rotulo">Fim</span>
-                    <input class="campo__entrada" type="time" formControlName="horaFim" />
+                    <input
+                      class="campo__entrada"
+                      type="time"
+                      formControlName="horaFim"
+                      [attr.aria-invalid]="formBloco.controls.horaFim.touched && formBloco.controls.horaFim.invalid"
+                    />
+                    @if (formBloco.controls.horaFim.touched && formBloco.controls.horaFim.invalid) {
+                      <span class="campo__erro">Informe o horário.</span>
+                    }
                   </label>
 
                   <label class="campo">
@@ -114,12 +144,25 @@
                       formControlName="minutosAntecedenciaLembrete"
                     />
                   </label>
-
-                  <label class="campo campo--cor">
-                    <span class="campo__rotulo">Cor</span>
-                    <input class="campo__cor" type="color" formControlName="cor" />
-                  </label>
                 </div>
+
+                <fieldset class="cores">
+                  <legend class="cores__rotulo">Cor</legend>
+                  <div class="cores__lista">
+                    @for (cor of cores(); track cor.valor) {
+                      <label class="cores__opcao">
+                        <input
+                          class="cores__radio"
+                          type="radio"
+                          formControlName="cor"
+                          [value]="cor.valor"
+                        />
+                        <span class="cores__amostra" [style.background]="cor.valor"></span>
+                        <span class="cores__nome">{{ cor.nome }}</span>
+                      </label>
+                    }
+                  </div>
+                </fieldset>
 
                 <div class="bloco-form__acoes">
                   <button class="botao botao--primario" type="submit">

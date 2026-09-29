@@ -160,6 +160,18 @@ describe('Habitos', () => {
     expect(texto(fixture)).toContain('Nenhum hábito ainda');
   });
 
+  it('habito sem nome avisa em vez de nao fazer nada', () => {
+    const fixture = montar([]);
+
+    novoHabito(fixture).click();
+    fixture.detectChanges();
+    botao(fixture, 'Salvar').click();
+    fixture.detectChanges();
+
+    http.expectNone((r) => r.method === 'POST');
+    expect(texto(fixture)).toContain('Dê um nome ao hábito.');
+  });
+
   it('nao envia habito de dias fixos sem nenhum dia escolhido', () => {
     const fixture = montar([]);
 

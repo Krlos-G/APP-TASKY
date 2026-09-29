@@ -29,11 +29,16 @@
 
 .linha-form {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1rem;
 
   .campo__entrada {
     flex: 1;
+  }
+
+  .campo__erro {
+    flex-basis: 100%;
   }
 }
 
@@ -128,6 +133,10 @@
 
 /* -------------------------------------------------- formulário de bloco */
 
+.bloco-form .cores {
+  margin: var(--esp-3) 0 0;
+}
+
 .bloco-form {
   padding: 0.75rem;
   border: 1px dashed var(--cor-borda);
@@ -184,8 +193,4 @@
     flex-basis: 100%;
   }
 
-  &--cor {
-    flex: 0 0 4rem;
-    min-width: 4rem;
-  }
 }

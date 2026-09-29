@@ -68,6 +68,19 @@ describe('Rotina', () => {
     expect(selects.length).toBe(7);
   });
 
+  it('criar modelo sem nome avisa, em vez de o botao parecer morto', () => {
+    const fixture = montar([]);
+    const botao = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('button'),
+    ).find((b) => b.textContent?.trim() === 'Criar modelo') as HTMLButtonElement;
+
+    botao.click();
+    fixture.detectChanges();
+
+    http.expectNone('/api/v1/rotina/modelos');
+    expect(texto(fixture)).toContain('Dê um nome ao modelo.');
+  });
+
   it('recusa bloco com fim antes do inicio sem ir ao servidor', () => {
     const fixture = montar([modelo(1, 'Dia útil')]);
     const componente = fixture.componentInstance as unknown as {

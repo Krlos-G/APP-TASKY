@@ -17,8 +17,13 @@
           class="campo__entrada"
           type="text"
           formControlName="titulo"
+          maxlength="200"
           placeholder="Ex.: Responder e-mail do cliente"
+          [attr.aria-invalid]="form.controls.titulo.touched && form.controls.titulo.invalid"
         />
+        @if (form.controls.titulo.touched && form.controls.titulo.invalid) {
+          <span class="campo__erro">Dê um título à tarefa.</span>
+        }
       </label>
 
       <label class="campo">
