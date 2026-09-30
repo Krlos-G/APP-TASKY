@@ -1,38 +1,102 @@
 .ajustes {
   max-width: 560px;
 
-  h1 {
-    margin: 0 0 1.25rem;
-    font-size: 1.5rem;
+  &__titulo {
+    margin: 0;
+    font-size: var(--tam-titulo-grande);
+    font-weight: 700;
+    letter-spacing: var(--letra-titulo);
+  }
+
+  /* O campo de horario ocupa a linha; o "Desligar" fica ao lado dele. */
+  &__resumo {
+    align-items: stretch;
+
+    .campo {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__sair {
+    width: 100%;
+    min-height: var(--toque);
+    margin-top: var(--esp-4);
+    border: 0;
+    color: var(--cor-vermelho);
+    font-family: inherit;
+    font-size: var(--tam-corpo);
+    cursor: pointer;
   }
 }
 
+/* Linha de ajuste com icone a esquerda, como no Ajustes do iOS. */
+.ajuste {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
 
+  &__icone {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--gradiente-primario);
+    color: var(--cor-sobre-cor);
+  }
 
+  .cartao__nota {
+    margin: 0;
+    align-self: center;
+  }
+}
 
+.cartao__acoes .botao--grande {
+  flex: 1;
+}
+
+/* ------------------------------------------------------------- conta */
 
 .dados {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.35rem 1rem;
-  margin: 0.75rem 0 0;
+  overflow: hidden;
+  margin: 0;
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
+  box-shadow: var(--sombra-cartao);
+
+  &__linha {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--esp-4);
+    min-height: var(--toque);
+    padding: var(--esp-3) var(--esp-4);
+
+    & + & {
+      border-top: 1px solid var(--cor-borda);
+    }
+  }
 
   dt {
-    color: var(--cor-texto-fraco);
-    font-size: 0.8rem;
+    flex-shrink: 0;
+    font-size: var(--tam-corpo);
   }
 
   dd {
+    min-width: 0;
     margin: 0;
-    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-corpo);
+    text-align: right;
 
     small {
-      color: var(--cor-texto-fraco);
-      font-size: 0.75rem;
+      display: block;
+      font-size: var(--tam-legenda);
     }
   }
-}
-
-.cartao {
-  margin-bottom: 1rem;
 }

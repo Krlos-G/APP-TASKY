@@ -1,6 +1,6 @@
 <section class="ajustes">
   <header>
-    <h1>Ajustes</h1>
+    <h1 class="ajustes__titulo">Ajustes</h1>
   </header>
 
   @if (erro()) {
@@ -11,103 +11,121 @@
   }
 
   <!-- --------------------------------------------------- notificações -->
-  <article class="cartao">
-    <h2 class="cartao__titulo">Notificações</h2>
+  <section class="secao">
+    <h2 class="secao__titulo">Notificações</h2>
+    <article class="cartao">
+      <div class="ajuste">
+        <span class="ajuste__icone" aria-hidden="true">
+          <app-icone nome="sino" [tamanho]="20" />
+        </span>
 
-    @if (precisaInstalar) {
-      <p class="cartao__nota">
-        No iPhone, as notificações só funcionam com o Tasky instalado na tela de início.
-        Toque em <strong>Compartilhar</strong> e depois em
-        <strong>Adicionar à Tela de Início</strong>, e volte aqui.
-      </p>
-    } @else if (!suportado) {
-      <p class="cartao__nota">
-        Este navegador não expõe notificações para o app. Em desenvolvimento isso é
-        esperado: o service worker só roda numa versão publicada.
-      </p>
-    } @else if (!chave()) {
-      <p class="cartao__nota">
-        Não foi possível falar com o servidor sobre notificações.
-      </p>
-    } @else if (!chave()!.habilitado) {
-      <p class="cartao__nota">
-        O servidor está sem chaves de notificação configuradas.
-      </p>
-    } @else {
-      <p class="cartao__nota">
-        {{
-          inscrito()
-            ? 'Este aparelho recebe os lembretes.'
-            : 'Ative para receber os lembretes no horário.'
-        }}
-      </p>
-
-      <div class="cartao__acoes">
-        @if (inscrito()) {
-          <button class="botao" type="button" [disabled]="ocupado()" (click)="desativar()">
-            Desativar neste aparelho
-          </button>
-          <button class="botao" type="button" [disabled]="ocupado()" (click)="testar()">
-            Enviar teste
-          </button>
+        @if (precisaInstalar) {
+          <p class="cartao__nota">
+            No iPhone, as notificações só funcionam com o Tasky instalado na tela de início.
+            Toque em <strong>Compartilhar</strong> e depois em
+            <strong>Adicionar à Tela de Início</strong>, e volte aqui.
+          </p>
+        } @else if (!suportado) {
+          <p class="cartao__nota">
+            Este navegador não expõe notificações para o app. Em desenvolvimento isso é
+            esperado: o service worker só roda numa versão publicada.
+          </p>
+        } @else if (!chave()) {
+          <p class="cartao__nota">Não foi possível falar com o servidor sobre notificações.</p>
+        } @else if (!chave()!.habilitado) {
+          <p class="cartao__nota">O servidor está sem chaves de notificação configuradas.</p>
         } @else {
-          <button
-            class="botao botao--primario"
-            type="button"
-            [disabled]="ocupado()"
-            (click)="ativar()"
-          >
-            Ativar notificações
-          </button>
+          <p class="cartao__nota">
+            {{
+              inscrito()
+                ? 'Este aparelho recebe os lembretes.'
+                : 'Ative para receber os lembretes no horário.'
+            }}
+          </p>
         }
       </div>
-    }
-  </article>
+
+      @if (!precisaInstalar && suportado && chave()?.habilitado) {
+        <div class="cartao__acoes">
+          @if (inscrito()) {
+            <button class="botao" type="button" [disabled]="ocupado()" (click)="testar()">
+              Enviar teste
+            </button>
+            <button class="botao" type="button" [disabled]="ocupado()" (click)="desativar()">
+              Desativar neste aparelho
+            </button>
+          } @else {
+            <button
+              class="botao botao--primario botao--grande"
+              type="button"
+              [disabled]="ocupado()"
+              (click)="ativar()"
+            >
+              Ativar notificações
+            </button>
+          }
+        </div>
+      }
+    </article>
+  </section>
 
   <!-- -------------------------------------------------- resumo diário -->
-  <article class="cartao">
-    <h2 class="cartao__titulo">Resumo do dia</h2>
-    <p class="cartao__nota">Uma notificação de manhã com o que você tem pela frente.</p>
+  <section class="secao">
+    <h2 class="secao__titulo">Resumo do dia</h2>
+    <article class="cartao">
+      <p class="cartao__nota">Uma notificação de manhã com o que você tem pela frente.</p>
 
-    @if (perfil(); as p) {
-      <div class="cartao__acoes">
-        <label class="campo">
-          <span class="campo__rotulo">Horário</span>
-          <input
-            class="campo__entrada"
-            type="time"
-            [value]="p.horaResumoDiario?.slice(0, 5) ?? ''"
-            [disabled]="ocupado()"
-            (change)="definirResumo($any($event.target).value)"
-          />
-        </label>
+      @if (perfil(); as p) {
+        <div class="cartao__acoes ajustes__resumo">
+          <label class="campo campo--icone">
+            <app-icone class="campo__icone" nome="relogio" [tamanho]="22" />
+            <span class="campo__rotulo">Horário</span>
+            <input
+              class="campo__entrada"
+              type="time"
+              [value]="p.horaResumoDiario?.slice(0, 5) ?? ''"
+              [disabled]="ocupado()"
+              (change)="definirResumo($any($event.target).value)"
+            />
+          </label>
 
-        @if (p.horaResumoDiario) {
-          <button class="botao" type="button" [disabled]="ocupado()" (click)="desligarResumo()">
-            Desligar
-          </button>
-        }
-      </div>
-    }
-  </article>
+          @if (p.horaResumoDiario) {
+            <button class="botao" type="button" [disabled]="ocupado()" (click)="desligarResumo()">
+              Desligar
+            </button>
+          }
+        </div>
+      }
+    </article>
+  </section>
 
   <!-- ---------------------------------------------------------- conta -->
-  <article class="cartao">
-    <h2 class="cartao__titulo">Conta</h2>
+  <!-- Rótulo à esquerda e valor à direita, uma linha por dado - como o
+       Ajustes do iOS mostra o que não se edita. -->
+  <section class="secao">
+    <h2 class="secao__titulo">Conta</h2>
 
     @if (perfil(); as p) {
       <dl class="dados">
-        <dt>Nome</dt>
-        <dd>{{ p.nomeExibicao }}</dd>
-        <dt>E-mail</dt>
-        <dd>{{ p.email }}</dd>
-        <dt>Fuso horário</dt>
-        <dd>{{ p.fusoHorario }} <small>vem do aparelho</small></dd>
+        <div class="dados__linha">
+          <dt>Nome</dt>
+          <dd>{{ p.nomeExibicao }}</dd>
+        </div>
+        <div class="dados__linha">
+          <dt>E-mail</dt>
+          <dd>{{ p.email }}</dd>
+        </div>
+        <div class="dados__linha">
+          <dt>Fuso horário</dt>
+          <dd>
+            {{ p.fusoHorario }}
+            <small>vem do aparelho</small>
+          </dd>
+        </div>
       </dl>
     }
 
-    <div class="cartao__acoes">
-      <button class="botao" type="button" (click)="sair()">Sair da conta</button>
-    </div>
-  </article>
+    <!-- Sair fica sozinho no fim, longe do resto, como ação que desfaz a sessão. -->
+    <button class="cartao ajustes__sair" type="button" (click)="sair()">Sair da conta</button>
+  </section>
 </section>
