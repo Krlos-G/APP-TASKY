@@ -47,24 +47,32 @@
           <p class="cartao__nota">Nada planejado para hoje.</p>
         }
 
-        <ul class="numeros">
-          <li class="numero">
-            <strong class="numero__valor">{{ r.dia.habitosFeitos }}/{{ r.dia.habitosDevidos }}</strong>
-            <span class="numero__rotulo">hábitos</span>
-          </li>
-          <li class="numero">
-            <strong class="numero__valor">{{ r.dia.tarefasFeitas }}/{{ r.dia.tarefasDoDia }}</strong>
-            <span class="numero__rotulo">tarefas</span>
-          </li>
-          @if (r.dia.atrasadas > 0) {
-            <li class="numero numero--alerta">
-              <strong class="numero__valor">{{ r.dia.atrasadas }}</strong>
-              <span class="numero__rotulo">
-                {{ r.dia.atrasadas === 1 ? 'atrasada' : 'atrasadas' }}
-              </span>
-            </li>
-          }
-        </ul>
+        @let temHabitos = r.dia.habitosDevidos > 0 || r.dia.habitosFeitos > 0;
+        @let temTarefas = r.dia.tarefasDoDia > 0 || r.dia.tarefasFeitas > 0;
+        @if (temHabitos || temTarefas || r.dia.atrasadas > 0) {
+          <ul class="numeros">
+            @if (temHabitos) {
+              <li class="numero">
+                <strong class="numero__valor">{{ r.dia.habitosFeitos }}/{{ r.dia.habitosDevidos }}</strong>
+                <span class="numero__rotulo">hábitos</span>
+              </li>
+            }
+            @if (temTarefas) {
+              <li class="numero">
+                <strong class="numero__valor">{{ r.dia.tarefasFeitas }}/{{ r.dia.tarefasDoDia }}</strong>
+                <span class="numero__rotulo">tarefas</span>
+              </li>
+            }
+            @if (r.dia.atrasadas > 0) {
+              <li class="numero numero--alerta">
+                <strong class="numero__valor">{{ r.dia.atrasadas }}</strong>
+                <span class="numero__rotulo">
+                  {{ r.dia.atrasadas === 1 ? 'atrasada' : 'atrasadas' }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
       </article>
     </section>
 

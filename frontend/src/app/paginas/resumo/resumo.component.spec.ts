@@ -101,6 +101,26 @@ describe('Resumo', () => {
     expect(barras(fixture).length).toBe(1);
   });
 
+  it('dia sem tarefa nao mostra 0/0 de tarefas', () => {
+    const fixture = montar(
+      resumo({
+        dia: {
+          habitosFeitos: 1,
+          habitosDevidos: 2,
+          tarefasFeitas: 0,
+          tarefasDoDia: 0,
+          atrasadas: 0,
+        },
+      }),
+    );
+
+    const numerosDoDia = (fixture.nativeElement as HTMLElement).querySelector('.numeros')!;
+    const rotulosDoDia = Array.from(numerosDoDia.querySelectorAll('.numero__rotulo')).map((r) =>
+      r.textContent?.trim(),
+    );
+    expect(rotulosDoDia).toEqual(['hábitos']);
+  });
+
   it('o periodo da semana sai por extenso, sem repetir o mes', () => {
     const fixture = montar(resumo());
 
