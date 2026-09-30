@@ -1,17 +1,15 @@
 import { Component, effect, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationStart, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from './core/auth/auth.service';
-import { Icone, NomeIcone } from './core/ui/icone.component';
+import { Icone } from './core/ui/icone.component';
+import { ABAS, direcaoEntre } from './core/ui/abas';
+import { BarraDeslizavel } from './core/ui/barra-deslizavel.directive';
+import { DeslizarEntreAbas } from './core/ui/deslizar-entre-abas.directive';
 import { UsuarioService } from './core/usuario/usuario.service';
 
-interface ItemNavegacao {
-  rota: string;
-  rotulo: string;
-  icone: NomeIcone;
-}
-
 @Component({
-  imports: [Icone, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [BarraDeslizavel, DeslizarEntreAbas, Icone, RouterOutlet, RouterLink, RouterLinkActive],
   selector: 'app-root',
   styleUrl: './app.component.scss',
   templateUrl: './app.component.html',
@@ -32,14 +30,23 @@ export class App {
    * (tab bar no celular, lateral no desktop). Quem decide o formato e o CSS,
    * sem duplicar markup.
    */
-  protected readonly itens: ItemNavegacao[] = [
-    { rota: '/hoje', rotulo: 'Hoje', icone: 'hoje' },
-    { rota: '/resumo', rotulo: 'Resumo', icone: 'resumo' },
-    { rota: '/habitos', rotulo: 'Hábitos', icone: 'habitos' },
-    { rota: '/tarefas', rotulo: 'Tarefas', icone: 'tarefas' },
-  ];
+  protected readonly itens = ABAS;
 
   constructor() {
+    // A tela nova entra pelo lado da aba dela - marcado no começo de toda
+    // navegação, venha ela de um toque, do arrasto na barra ou do deslizar.
+    this.router.events.pipe(takeUntilDestroyed()).subscribe((evento) => {
+      if (!(evento instanceof NavigationStart)) {
+        return;
+      }
+      const direcao = direcaoEntre(this.router.url, evento.url);
+      if (direcao) {
+        document.documentElement.dataset['direcao'] = direcao;
+      } else {
+        delete document.documentElement.dataset['direcao'];
+      }
+    });
+
     // O servidor precisa do fuso gravado para disparar lembrete quando
     // ninguem esta com o app aberto - por isso o aparelho conta o dele a cada
     // sessao, em vez de a tela perguntar.

@@ -218,6 +218,19 @@ se *sente*), e a rota troca ao soltar. Custa nada e não vira tempestade de requ
 Cuidados: `touch-action: none` só na barra, para o arrasto não rolar a página junto; toque simples
 e teclado continuam funcionando como hoje; e nada disso vale com `prefers-reduced-motion`.
 
+### Decidido na implementação (30/09)
+
+- **Ao soltar.** A pílula segue o dedo ao vivo; a rota troca quando o dedo sai da barra. A aba sob
+  o dedo sai de conta (posição ÷ largura), não de `elementFromPoint`.
+- **Deslizar a tela troca de aba** (pedido do Carlos, "como no Instagram"): só entre as 4 abas, sem
+  dar a volta nas pontas — lá a tela resiste. Também ao soltar: passou de um quarto da tela ou foi
+  um peteleco. Não vale começando dentro de formulário, nem com mouse.
+- **A tela nova entra pelo lado da aba dela**, venha a troca de toque, arrasto ou deslize.
+- **Sem View Transitions:** o instantâneo da tela achataria o vidro fosco. A entrada é uma
+  animação CSS, e a direção vem de uma variável na raiz.
+- A tela acompanha o dedo com `left`, não `transform`: o botão flutuante é `position: fixed`
+  dentro da página e passaria a se posicionar a partir dela.
+
 ---
 
 ## Etapa 8 — Fechamento

@@ -8,10 +8,28 @@
 }
 
 .conteudo {
+  /* O deslizar entre abas move o conteudo com left, que precisa disto. */
+  position: relative;
+  /* A tela que entra pela direita, ou que o dedo empurra, sai da largura da
+     tela por um instante. Sem cortar isso, o navegador do celular alarga a
+     pagina e a barra de abas, que e presa as laterais, estica junto. clip e
+     nao hidden: hidden faria do conteudo um conteiner de rolagem. */
+  overflow-x: clip;
   padding: var(--esp-4);
   /* A barra flutua sobre o conteudo: o fim da lista precisa de folga para nao
      ficar embaixo dela, respeitando a area segura do iPhone. */
   padding-bottom: calc(var(--altura-tab-bar) + env(safe-area-inset-bottom) + var(--esp-5));
+  /* O navegador cuida da rolagem vertical e do zoom; o gesto de lado fica
+     com o app, para trocar de aba. */
+  touch-action: pan-y pinch-zoom;
+  transition: left var(--transicao) var(--curva);
+
+  /* Sob o dedo a tela segue sem atraso; ao trocar, volta ao lugar na hora -
+     quem anima e a tela que chega. */
+  &--deslizando,
+  &--trocando {
+    transition: none;
+  }
 }
 
 /* No celular a navegacao e uma capsula de vidro solta do rodape. */
@@ -33,7 +51,40 @@
     display: none;
   }
 
+  /* Trilho da pilula: segura a pilula e as abas na mesma caixa, e deixa o
+     arrasto com o app em vez de rolar a pagina. */
+  &__trilho {
+    position: relative;
+    touch-action: none;
+  }
+
+  /* Uma pilula so, para ela poder escorregar de uma aba para outra - e seguir
+     o dedo, que a coloca em posicoes quebradas entre duas abas. */
+  &__pilula {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: calc(100% / var(--abas, 4));
+    border-radius: var(--raio-pilula);
+    background: var(--cor-primaria-fraca);
+    transform: translateX(calc(var(--pilula, 0) * 100%));
+    transition:
+      transform 320ms var(--curva),
+      opacity var(--transicao) var(--curva);
+    pointer-events: none;
+  }
+
+  &__trilho--arrastando &__pilula {
+    transition: opacity var(--transicao) var(--curva);
+  }
+
+  &__trilho--sem-aba &__pilula {
+    opacity: 0;
+  }
+
   &__lista {
+    position: relative;
     display: flex;
     align-items: stretch;
     margin: 0;
@@ -59,8 +110,9 @@
     letter-spacing: 0;
     text-decoration: none;
 
+    transition: color var(--transicao) var(--curva);
+
     &--ativo {
-      background: var(--cor-primaria-fraca);
       color: var(--cor-primaria-texto);
       font-weight: 600;
     }
@@ -161,6 +213,14 @@
       gap: var(--esp-1);
     }
 
+    &__trilho {
+      touch-action: auto;
+    }
+
+    &__pilula {
+      display: none;
+    }
+
     &__item {
       flex-direction: row;
       justify-content: flex-start;
@@ -168,6 +228,10 @@
       padding: var(--esp-3);
       border-radius: var(--raio-botao);
       font-size: var(--tam-apoio);
+
+      &--ativo {
+        background: var(--cor-primaria-fraca);
+      }
     }
   }
 }
