@@ -1,6 +1,6 @@
 <section class="edicao">
   <header class="edicao__topo">
-    <h1>{{ editando() ? 'Editar tarefa' : 'Nova tarefa' }}</h1>
+    <h1 class="edicao__titulo">{{ editando() ? 'Editar tarefa' : 'Nova tarefa' }}</h1>
   </header>
 
   @if (erro()) {
@@ -8,75 +8,94 @@
   }
 
   @if (carregando()) {
-    <p class="edicao__nota">Carregando…</p>
+    <app-esqueleto tipo="cartoes" [quantidade]="3" />
   } @else {
     <form [formGroup]="form" (ngSubmit)="salvar()">
-      <label class="campo">
-        <span class="campo__rotulo">Título</span>
-        <input
-          class="campo__entrada"
-          type="text"
-          formControlName="titulo"
-          placeholder="Ex.: Responder e-mail do cliente"
-        />
-      </label>
+      <section class="secao">
+        <h2 class="secao__titulo">Tarefa</h2>
+        <div class="edicao__grupo">
+          <label class="campo">
+            <span class="campo__rotulo">Título</span>
+            <input
+              class="campo__entrada"
+              type="text"
+              formControlName="titulo"
+              maxlength="200"
+              placeholder="Ex.: Responder e-mail do cliente"
+              [attr.aria-invalid]="form.controls.titulo.touched && form.controls.titulo.invalid"
+            />
+            @if (form.controls.titulo.touched && form.controls.titulo.invalid) {
+              <span class="campo__erro">Dê um título à tarefa.</span>
+            }
+          </label>
 
-      <label class="campo">
-        <span class="campo__rotulo">Observações</span>
-        <textarea class="campo__entrada" rows="3" formControlName="observacoes"></textarea>
-      </label>
+          <div class="edicao__linha">
+            <label class="campo">
+              <span class="campo__rotulo">Prioridade</span>
+              <select class="campo__entrada" formControlName="prioridade">
+                <option value="BAIXA">Baixa</option>
+                <option value="MEDIA">Média</option>
+                <option value="ALTA">Alta</option>
+              </select>
+            </label>
 
-      <div class="edicao__linha">
-        <label class="campo">
-          <span class="campo__rotulo">Prioridade</span>
-          <select class="campo__entrada" formControlName="prioridade">
-            <option value="BAIXA">Baixa</option>
-            <option value="MEDIA">Média</option>
-            <option value="ALTA">Alta</option>
-          </select>
-        </label>
+            <label class="campo">
+              <span class="campo__rotulo">Estimativa (min)</span>
+              <input
+                class="campo__entrada"
+                type="number"
+                min="1"
+                formControlName="minutosEstimados"
+              />
+            </label>
+          </div>
+        </div>
+      </section>
 
-        <label class="campo">
-          <span class="campo__rotulo">Estimativa (min)</span>
-          <input class="campo__entrada" type="number" min="1" formControlName="minutosEstimados" />
-        </label>
-      </div>
+      <section class="secao">
+        <h2 class="secao__titulo">Quando</h2>
+        <div class="edicao__grupo">
+          <div class="edicao__linha">
+            <label class="campo campo--icone">
+              <app-icone class="campo__icone" nome="hoje" [tamanho]="22" />
+              <span class="campo__rotulo">Fazer no dia</span>
+              <input class="campo__entrada" type="date" formControlName="dataPlanejada" />
+            </label>
 
-      <div class="edicao__linha">
-        <label class="campo">
-          <span class="campo__rotulo">Fazer no dia</span>
-          <input class="campo__entrada" type="date" formControlName="dataPlanejada" />
-        </label>
+            <label class="campo campo--icone">
+              <app-icone class="campo__icone" nome="relogio" [tamanho]="22" />
+              <span class="campo__rotulo">Horário</span>
+              <input class="campo__entrada" type="time" formControlName="horaPlanejada" />
+              @if (form.controls.horaPlanejada.disabled) {
+                <span class="campo__dica">escolha o dia primeiro</span>
+              }
+            </label>
+          </div>
 
-        <label class="campo">
-          <span class="campo__rotulo">Horário</span>
-          <input class="campo__entrada" type="time" formControlName="horaPlanejada" />
-          @if (form.controls.horaPlanejada.disabled) {
-            <span class="campo__dica">escolha o dia primeiro</span>
-          }
-        </label>
-      </div>
+          <div class="edicao__linha">
+            <label class="campo campo--icone">
+              <app-icone class="campo__icone" nome="hoje" [tamanho]="22" />
+              <span class="campo__rotulo">Prazo</span>
+              <input class="campo__entrada" type="date" formControlName="dataLimite" />
+            </label>
 
-      <div class="edicao__linha">
-        <label class="campo">
-          <span class="campo__rotulo">Prazo</span>
-          <input class="campo__entrada" type="date" formControlName="dataLimite" />
-        </label>
-
-        <label class="campo">
-          <span class="campo__rotulo">Lembrete</span>
-          <input class="campo__entrada" type="time" formControlName="horaLembrete" />
-        </label>
-      </div>
+            <label class="campo campo--icone">
+              <app-icone class="campo__icone" nome="sino" [tamanho]="22" />
+              <span class="campo__rotulo">Lembrete</span>
+              <input class="campo__entrada" type="time" formControlName="horaLembrete" />
+            </label>
+          </div>
+        </div>
+      </section>
 
       <div class="edicao__acoes">
-        <button class="botao botao--primario" type="submit">Salvar</button>
-        <button class="botao" type="button" (click)="voltar()">Cancelar</button>
+        <button class="botao botao--primario botao--grande" type="submit">Salvar</button>
+        <button class="botao botao--texto" type="button" (click)="voltar()">Cancelar</button>
       </div>
     </form>
 
     @if (editando()) {
-      <div class="excluir">
+      <div class="cartao excluir">
         @if (confirmandoExclusao()) {
           <p class="excluir__texto">Excluir esta tarefa? Não dá para desfazer.</p>
           <div class="excluir__acoes">

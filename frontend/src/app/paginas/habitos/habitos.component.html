@@ -1,4 +1,4 @@
-<section class="habitos">
+<section class="habitos tela-com-adicionar">
   <header class="habitos__topo">
     <h1>Hábitos</h1>
     <p class="habitos__nota">
@@ -11,9 +11,6 @@
   }
 
   <div class="habitos__acoes">
-    <button class="botao botao--primario" type="button" (click)="abrirNovo()">
-      Novo hábito
-    </button>
     <button class="botao" type="button" (click)="alternarArquivados()">
       {{ mostrarArquivados() ? 'Ocultar arquivados' : 'Mostrar arquivados' }}
     </button>
@@ -30,8 +27,13 @@
           class="campo__entrada"
           type="text"
           formControlName="nome"
+          maxlength="100"
           placeholder="Ex.: Ler 20 páginas"
+          [attr.aria-invalid]="form.controls.nome.touched && form.controls.nome.invalid"
         />
+        @if (form.controls.nome.touched && form.controls.nome.invalid) {
+          <span class="campo__erro">Dê um nome ao hábito.</span>
+        }
       </label>
 
       <label class="campo">
@@ -62,32 +64,43 @@
       }
 
       <div class="form-habito__linha">
-        <label class="campo">
+        <label class="campo campo--icone">
+          <app-icone class="campo__icone" nome="relogio" [tamanho]="22" />
           <span class="campo__rotulo">Horário preferido</span>
           <input class="campo__entrada" type="time" formControlName="horaPreferida" />
         </label>
 
-        <label class="campo">
+        <label class="campo campo--icone">
+          <app-icone class="campo__icone" nome="sino" [tamanho]="22" />
           <span class="campo__rotulo">Lembrete</span>
           <input class="campo__entrada" type="time" formControlName="horaLembrete" />
         </label>
 
-        <label class="campo campo--cor">
-          <span class="campo__rotulo">Cor</span>
-          <input class="campo__cor" type="color" formControlName="cor" />
-        </label>
       </div>
 
+      <fieldset class="cores">
+        <legend class="cores__rotulo">Cor</legend>
+        <div class="cores__lista">
+          @for (cor of cores(); track cor.valor) {
+            <label class="cores__opcao">
+              <input class="cores__radio" type="radio" formControlName="cor" [value]="cor.valor" />
+              <span class="cores__amostra" [style.background]="cor.valor"></span>
+              <span class="cores__nome">{{ cor.nome }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+
       <div class="form-habito__acoes">
-        <button class="botao botao--primario" type="submit">Salvar</button>
-        <button class="botao" type="button" (click)="fechar()">Cancelar</button>
+        <button class="botao botao--primario botao--grande" type="submit">Salvar</button>
+        <button class="botao botao--texto" type="button" (click)="fechar()">Cancelar</button>
       </div>
     </form>
   }
 
   <!-- ------------------------------------------------------------ lista -->
   @if (carregando()) {
-    <p class="habitos__carregando">Carregando…</p>
+    <app-esqueleto tipo="cartoes" [quantidade]="3" />
   } @else if (semHabitos()) {
     <div class="vazio-cartao">
       <p class="vazio-cartao__titulo">Nenhum hábito ainda</p>
@@ -112,7 +125,6 @@
               @if (habito.horaPreferida) {
                 · {{ habito.horaPreferida.slice(0, 5) }}
               }
-              · {{ streakPorExtenso(habito) }}
               @if (habito.arquivado) {
                 · arquivado
               }
@@ -142,6 +154,30 @@
               }
             </div>
           }
+
+          <div class="habito__sequencia">
+            <div
+              class="trilha"
+              [attr.aria-label]="'Últimos 14 dias: ' + streakPorExtenso(habito)"
+              role="img"
+            >
+              @for (dia of habito.ultimosDias; track dia.data) {
+                <span
+                  class="trilha__dia"
+                  [class.trilha__dia--feito]="dia.status === 'FEITO'"
+                  [class.trilha__dia--pulado]="dia.status === 'PULADO'"
+                  [class.trilha__dia--folga]="!dia.devido && dia.status === null"
+                ></span>
+              }
+            </div>
+
+            <span class="habito__streak" [class.habito__streak--ativa]="habito.streak > 0">
+              @if (habito.streak > 0) {
+                <app-icone nome="habitos" [tamanho]="15" />
+              }
+              {{ streakPorExtenso(habito) }}
+            </span>
+          </div>
 
           <div class="habito__menu">
             <button class="link" type="button" (click)="alternarHistorico(habito)">
@@ -195,5 +231,11 @@
         </li>
       }
     </ul>
+  }
+
+  @if (!formAberto()) {
+    <button class="adicionar" type="button" aria-label="Novo hábito" (click)="abrirNovo()">
+      <app-icone nome="mais" [tamanho]="26" />
+    </button>
   }
 </section>

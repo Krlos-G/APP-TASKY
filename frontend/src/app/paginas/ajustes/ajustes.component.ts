@@ -7,9 +7,10 @@ import { AuthService } from '../../core/auth/auth.service';
 import { ChavePush, PushService, TesteEnvio } from '../../core/push/push.service';
 import { Perfil, UsuarioService } from '../../core/usuario/usuario.service';
 import { RespostaErro } from '../../core/auth/auth.models';
+import { Icone } from '../../core/ui/icone.component';
 
 @Component({
-  imports: [],
+  imports: [Icone],
   selector: 'app-ajustes',
   styleUrl: './ajustes.component.scss',
   templateUrl: './ajustes.component.html',

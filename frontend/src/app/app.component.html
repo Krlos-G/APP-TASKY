@@ -3,21 +3,24 @@
     <nav class="nav" aria-label="Navegação principal">
       <span class="nav__marca">Tasky</span>
 
-      <ul class="nav__lista">
-        @for (item of itens; track item.rota) {
-          <li>
-            <a
-              class="nav__item"
-              [routerLink]="item.rota"
-              routerLinkActive="nav__item--ativo"
-              [attr.aria-label]="item.rotulo"
-            >
-              <span class="nav__icone" aria-hidden="true">{{ item.icone }}</span>
-              <span class="nav__rotulo">{{ item.rotulo }}</span>
-            </a>
-          </li>
-        }
-      </ul>
+      <div class="nav__trilho" appBarraDeslizavel>
+        <span class="nav__pilula" aria-hidden="true"></span>
+        <ul class="nav__lista">
+          @for (item of itens; track item.rota) {
+            <li>
+              <a
+                class="nav__item"
+                [routerLink]="item.rota"
+                routerLinkActive="nav__item--ativo"
+                [attr.aria-label]="item.rotulo"
+              >
+                <app-icone [nome]="item.icone" [tamanho]="24" />
+                <span class="nav__rotulo">{{ item.rotulo }}</span>
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
 
       <div class="nav__rodape">
         <span class="nav__usuario">{{ usuario()?.nome }}</span>
@@ -26,7 +29,7 @@
     </nav>
   }
 
-  <main class="conteudo">
+  <main class="conteudo" appDeslizarEntreAbas>
     <router-outlet />
   </main>
 </div>

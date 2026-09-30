@@ -1,0 +1,691 @@
+/* Componentes compartilhados.
+ *
+ * Estavam copiados em ate seis telas e ja tinham divergido entre si. Aqui eles
+ * definem a aparencia; cada tela cuida so do proprio arranjo. */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  min-height: var(--toque);
+  padding: 0 var(--esp-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-botao);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-family: inherit;
+  font-size: var(--tam-apoio);
+  font-weight: 500;
+  letter-spacing: var(--letra-corpo);
+  text-decoration: none;
+  cursor: pointer;
+
+  &--primario {
+    border-color: transparent;
+    background: var(--gradiente-primario);
+    box-shadow: var(--sombra-primaria);
+    color: var(--cor-sobre-cor);
+    font-weight: 600;
+  }
+
+  &--perigo {
+    border-color: var(--cor-vermelho);
+    color: var(--cor-vermelho);
+  }
+
+  &--curto {
+    min-height: 36px;
+    padding: 0 var(--esp-3);
+    font-size: var(--tam-nota);
+  }
+
+  /* A acao que fecha um formulario: largura toda, no fim, facil de alcancar
+     com o polegar. */
+  &--grande {
+    width: 100%;
+    min-height: 52px;
+    border-radius: var(--raio-cartao);
+    font-size: var(--tam-corpo);
+  }
+
+  &--texto {
+    min-height: auto;
+    padding: var(--esp-1) var(--esp-2);
+    border-color: transparent;
+    background: none;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
+/* Acao secundaria dentro de uma linha, onde um botao inteiro pesaria demais. */
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cor-primaria-texto);
+  font-family: inherit;
+  font-size: var(--tam-nota);
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
+
+  &--perigo {
+    color: var(--cor-vermelho);
+  }
+}
+
+/* Campo-cartao: o campo inteiro e o cartao, com o rotulo dentro dele. Voce
+   toca num cartao em vez de preencher uma caixa - e isso que tira do
+   formulario a cara de formulario. */
+.campo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
+  box-shadow: var(--sombra-cartao);
+
+  /* Sem caixa em volta do input, quem mostra o foco e o erro e o cartao. */
+  &:focus-within {
+    box-shadow: 0 0 0 2px var(--cor-primaria);
+  }
+
+  &:has([aria-invalid='true']) {
+    box-shadow: 0 0 0 2px var(--cor-vermelho);
+  }
+
+  &__rotulo {
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-legenda);
+    font-weight: 500;
+  }
+
+  /* Icone a esquerda, rotulo e valor empilhados a direita dele. */
+  &--icone {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: var(--esp-3);
+
+    > :not(.campo__icone) {
+      grid-column: 2;
+    }
+  }
+
+  &__icone {
+    grid-row: 1 / span 4;
+    color: var(--cor-primaria-texto);
+  }
+
+  &__dica {
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-legenda);
+  }
+
+  &__erro {
+    color: var(--cor-vermelho);
+    font-size: var(--tam-nota);
+  }
+}
+
+label.campo {
+  cursor: text;
+}
+
+/* A caixa comum - vale para o input solto, fora de um .campo. */
+.campo__entrada {
+  width: 100%;
+  min-height: var(--toque);
+  padding: var(--esp-2) var(--esp-3);
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: var(--raio-campo);
+  background: var(--cor-campo);
+  color: var(--cor-texto);
+  font-family: inherit;
+  /* Abaixo de 16px o Safari do iPhone da zoom sozinho ao focar o campo. */
+  font-size: var(--tam-corpo);
+
+  &:disabled {
+    opacity: 0.45;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--cor-vermelho);
+  }
+}
+
+/* Dentro do cartao a caixa some: sobra so o valor. */
+.campo .campo__entrada {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-weight: 500;
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+/* O indicador nativo de data e hora continua - no PC e ele que abre o
+   seletor -, so que discreto, para nao competir com o icone do cartao. */
+.campo .campo__entrada::-webkit-calendar-picker-indicator {
+  opacity: 0.35;
+  cursor: pointer;
+}
+
+.campo textarea.campo__entrada {
+  min-height: 3.5em;
+  resize: vertical;
+}
+
+/* O select perde a seta do sistema; quem desenha a seta e o cartao. */
+.campo select.campo__entrada {
+  padding-right: var(--esp-6);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.campo:has(select)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: var(--esp-4);
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--cor-texto-fraco);
+  border-bottom: 2px solid var(--cor-texto-fraco);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+/* Um campo dentro de algo que ja e cartao nao pode ser outro cartao branco:
+   ele afunda para o cinza, como antes. */
+.cartao .campo {
+  background: var(--cor-campo);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px var(--cor-primaria);
+  }
+
+  &:has([aria-invalid='true']) {
+    box-shadow: 0 0 0 2px var(--cor-vermelho);
+  }
+}
+
+.cartao {
+  padding: var(--esp-4) var(--esp-5);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
+  box-shadow: var(--sombra-cartao);
+
+  &__titulo {
+    margin: 0;
+    font-size: var(--tam-destaque);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  &__nota {
+    margin: var(--esp-1) 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-apoio);
+  }
+
+  &__periodo {
+    margin: var(--esp-1) 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+  }
+
+  &__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--esp-2);
+    margin-top: var(--esp-4);
+  }
+}
+
+/* Marcador curto numa linha: "atrasada", "1 atrasada". */
+.selo {
+  padding: 2px var(--esp-2);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-vermelho-fraca);
+  color: var(--cor-vermelho);
+  font-size: var(--tam-legenda);
+  font-weight: 600;
+}
+
+.vazio {
+  margin: var(--esp-2) 0;
+  color: var(--cor-texto-fraco);
+  font-size: var(--tam-apoio);
+}
+
+.vazio-cartao {
+  padding: var(--esp-6);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
+  box-shadow: var(--sombra-cartao);
+  text-align: center;
+
+  &__titulo {
+    margin: 0;
+    font-size: var(--tam-destaque);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  &__nota {
+    margin: var(--esp-1) 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-apoio);
+  }
+}
+
+.alerta {
+  margin: 0 0 var(--esp-4);
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-botao);
+  background: var(--cor-vermelho-fraca);
+  color: var(--cor-vermelho);
+  font-size: var(--tam-apoio);
+}
+
+.aviso {
+  margin: 0 0 var(--esp-4);
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-botao);
+  background: var(--cor-primaria-fraca);
+  color: var(--cor-primaria-texto);
+  font-size: var(--tam-apoio);
+}
+
+/* ------------------------------ seções e listas agrupadas (iOS grouped) */
+
+.secao {
+  margin-top: var(--esp-6);
+
+  &__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--esp-3);
+    margin: 0 0 var(--esp-2) var(--esp-1);
+  }
+
+  /* Cabecalho de lista agrupada, como nos apps da Apple. */
+  &__titulo {
+    margin: 0 0 var(--esp-2) var(--esp-1);
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-legenda);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    &--alerta {
+      color: var(--cor-vermelho);
+    }
+  }
+
+  &__topo &__titulo {
+    margin: 0;
+  }
+
+  &__contagem {
+    padding: 1px var(--esp-2);
+    border-radius: var(--raio-pilula);
+    background: var(--cor-vermelho-fraca);
+    color: var(--cor-vermelho);
+    font-size: var(--tam-legenda);
+    font-weight: 600;
+  }
+
+  &__contador {
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__acao {
+    color: var(--cor-primaria-texto);
+    font-size: var(--tam-nota);
+    text-decoration: none;
+  }
+
+  &__rodape {
+    margin: var(--esp-2) 0 0 var(--esp-1);
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-legenda);
+  }
+}
+
+.itens {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
+  box-shadow: var(--sombra-cartao);
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--esp-3);
+  /* Alvo de toque minimo da Apple. */
+  min-height: var(--toque);
+  padding: var(--esp-2) var(--esp-4);
+
+  /* Separador recuado ate depois do circulo, como nas listas do iOS: ele
+     separa os textos, nao corta o cartao ao meio. */
+  & + & {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: calc(var(--esp-4) + 26px + var(--esp-3));
+      height: 1px;
+      background: var(--cor-borda);
+    }
+  }
+
+  /* O separador pertence a linha de baixo, entao e o modificador dela que
+     manda: sem circulo a frente, o recuo volta a ser o padrao. */
+  & + &--simples::before {
+    left: var(--esp-4);
+  }
+
+  /* Linha que e um link inteiro: o padding vai para dentro do <a>, senao o
+     alvo de toque fica menor que a linha. */
+  &--link {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+
+  /* Concluido so escurece. O circulo cheio ja diz "feito" - riscar por cima
+     seria dizer a mesma coisa duas vezes. */
+  &--resolvido {
+    opacity: 0.55;
+  }
+
+  &__marca {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 2px solid var(--cor-borda-campo);
+    border-radius: 50%;
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+
+    &--feito {
+      border-color: var(--cor-verde);
+      background: var(--cor-verde);
+      color: var(--cor-sobre-verde);
+    }
+
+    &--pulado {
+      color: var(--cor-texto-fraco);
+    }
+  }
+
+  &__corpo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  &__nome {
+    margin: 0;
+    overflow: hidden;
+    font-size: var(--tam-corpo);
+    letter-spacing: var(--letra-corpo);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__detalhe {
+    margin: 1px 0 0;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-nota);
+  }
+}
+
+/* --------------------------------------------------------- progresso */
+
+.progresso {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+
+  /* Um segmento por item. Mostra quantas coisas existem, e nao so que
+     proporcao delas caiu - que e o que uma barra unica esconde. */
+  &__trilha {
+    display: flex;
+    flex: 1;
+    gap: 4px;
+
+    /* Cheio demais para segmentos legiveis: volta a ser barra. */
+    &--continua {
+      overflow: hidden;
+      border-radius: 4px;
+      background: var(--cor-trilho);
+    }
+  }
+
+  &__segmento {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--cor-trilho);
+
+    &--cheio {
+      background: var(--cor-primaria);
+    }
+  }
+
+  &__barra {
+    display: block;
+    height: 8px;
+    background: var(--cor-primaria);
+  }
+
+  &__numero {
+    font-size: var(--tam-corpo);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__total {
+    color: var(--cor-texto-fraco);
+    font-weight: 400;
+  }
+}
+
+/* ------------------------------------------------- botao de adicionar */
+
+/* Mesmo material da barra de abas, logo acima dela: os dois elementos
+   flutuantes da tela sao lidos como um conjunto, nao como dois enfeites.
+   Serve a <a> e a <button>, que e o que muda de tela para tela. */
+.adicionar {
+  position: fixed;
+  right: var(--esp-3);
+  bottom: calc(env(safe-area-inset-bottom) + var(--altura-tab-bar) + var(--esp-2) + var(--esp-3));
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 1px solid var(--cor-vidro-borda);
+  border-radius: 50%;
+  background: var(--cor-vidro);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: var(--sombra-flutuante);
+  color: var(--cor-primaria-texto);
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .adicionar {
+    border-color: var(--cor-borda);
+    background: var(--cor-superficie);
+  }
+}
+
+/* No desktop nao ha barra embaixo: o botao desce para o canto. */
+@media (min-width: 768px) {
+  .adicionar {
+    right: var(--esp-6);
+    bottom: var(--esp-6);
+  }
+}
+
+/* Folga para o botao flutuante nunca cobrir a ultima linha da lista. */
+.tela-com-adicionar {
+  padding-bottom: 72px;
+}
+
+/* -------------------------------------------------- paleta de cores */
+
+.cores {
+  min-width: 0;
+  margin: 0;
+  padding: var(--esp-3) var(--esp-4);
+  border: 0;
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
+  box-shadow: var(--sombra-cartao);
+
+  /* legend dentro de fieldset flutua na borda por padrao; float: left a poe
+     de volta no fluxo, como o rotulo dos outros campos. */
+  &__rotulo {
+    float: left;
+    width: 100%;
+    padding: 0;
+    color: var(--cor-texto-fraco);
+    font-size: var(--tam-legenda);
+    font-weight: 500;
+  }
+
+  /* clear: o rotulo acima flutua, e sem isto a lista se espremia ao lado dele
+     com largura zero - as cores caiam para fora do cartao. */
+  &__lista {
+    display: flex;
+    flex-wrap: wrap;
+    clear: both;
+    gap: var(--esp-3);
+    padding-top: var(--esp-2);
+  }
+
+  &__opcao {
+    cursor: pointer;
+  }
+
+  /* O radio some, mas continua sendo ele que guarda o valor e responde ao
+     teclado - a bolinha e so a parte visivel dele. */
+  &__radio {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  &__amostra {
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+
+  &__radio:checked + &__amostra {
+    box-shadow:
+      0 0 0 2px var(--cor-superficie),
+      0 0 0 4px var(--cor-texto);
+  }
+
+  &__radio:focus-visible + &__amostra {
+    outline: 2px solid var(--cor-primaria);
+    outline-offset: 4px;
+  }
+
+  &__nome {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ---------------------------------------------------- dias da semana */
+
+/* Os sete dias numa linha so, em larguras iguais: quebrar em duas linhas
+   deixava o domingo sozinho embaixo e a semana dificil de ler. */
+.dias {
+  display: flex;
+  gap: var(--esp-1);
+
+  &__botao {
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+    padding: 0;
+    border: 1px solid var(--cor-borda-campo);
+    border-radius: var(--raio-botao);
+    background: transparent;
+    color: var(--cor-texto-fraco);
+    font-family: inherit;
+    font-size: var(--tam-legenda);
+    font-weight: 500;
+    cursor: pointer;
+
+    &--ativo {
+      border-color: transparent;
+      background: var(--cor-primaria);
+      color: var(--cor-sobre-cor);
+      font-weight: 600;
+    }
+  }
+}

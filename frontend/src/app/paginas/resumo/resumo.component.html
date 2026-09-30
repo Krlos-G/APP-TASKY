@@ -1,6 +1,6 @@
 <section class="resumo">
   <header class="resumo__topo">
-    <h1>Resumo</h1>
+    <h1 class="resumo__titulo">Resumo</h1>
     @if (dataPorExtenso()) {
       <p class="resumo__data">{{ dataPorExtenso() }}</p>
     }
@@ -11,98 +11,137 @@
   }
 
   @if (carregando()) {
-    <p class="resumo__nota">Carregando…</p>
+    <app-esqueleto tipo="cartoes" [quantidade]="2" />
   } @else if (resumo(); as r) {
     <!-- ------------------------------------------------------------ hoje -->
-    <article class="cartao">
-      <h2 class="cartao__titulo">Hoje</h2>
+    <section class="secao">
+      <h2 class="secao__titulo">Hoje</h2>
 
-      @if (progressoDoDia(); as p) {
-        <div class="barra">
-          <div
-            class="barra__trilha"
-            role="progressbar"
-            [attr.aria-valuenow]="p.feitos"
-            [attr.aria-valuemax]="p.total"
-            [attr.aria-label]="'Progresso de hoje: ' + p.feitos + ' de ' + p.total"
-          >
-            <span class="barra__preenchida" [style.width.%]="p.porcento"></span>
+      <article class="cartao">
+        @if (progressoDoDia(); as p) {
+          <div class="progresso">
+            <div
+              class="progresso__trilha"
+              [class.progresso__trilha--continua]="!segmentosDoDia()"
+              role="progressbar"
+              [attr.aria-valuenow]="p.feitos"
+              [attr.aria-valuemax]="p.total"
+              [attr.aria-label]="'Progresso de hoje: ' + p.feitos + ' de ' + p.total"
+            >
+              @if (segmentosDoDia(); as segs) {
+                @for (cheio of segs; track $index) {
+                  <span
+                    class="progresso__segmento"
+                    [class.progresso__segmento--cheio]="cheio"
+                  ></span>
+                }
+              } @else {
+                <span class="progresso__barra" [style.width.%]="p.porcento"></span>
+              }
+            </div>
+            <span class="progresso__numero">
+              {{ p.feitos }}<span class="progresso__total">/{{ p.total }}</span>
+            </span>
           </div>
-          <span class="barra__numero">{{ p.porcento }}%</span>
-        </div>
-      } @else {
-        <p class="resumo__nota">Nada planejado para hoje.</p>
-      }
-
-      <ul class="numeros">
-        <li>
-          <strong>{{ r.dia.habitosFeitos }}/{{ r.dia.habitosDevidos }}</strong>
-          <span>hábitos</span>
-        </li>
-        <li>
-          <strong>{{ r.dia.tarefasFeitas }}/{{ r.dia.tarefasDoDia }}</strong>
-          <span>tarefas</span>
-        </li>
-        @if (r.dia.atrasadas > 0) {
-          <li class="numeros__alerta">
-            <strong>{{ r.dia.atrasadas }}</strong>
-            <span>{{ r.dia.atrasadas === 1 ? 'atrasada' : 'atrasadas' }}</span>
-          </li>
+        } @else {
+          <p class="cartao__nota">Nada planejado para hoje.</p>
         }
-      </ul>
-    </article>
+
+        @let temHabitos = r.dia.habitosDevidos > 0 || r.dia.habitosFeitos > 0;
+        @let temTarefas = r.dia.tarefasDoDia > 0 || r.dia.tarefasFeitas > 0;
+        @if (temHabitos || temTarefas || r.dia.atrasadas > 0) {
+          <ul class="numeros">
+            @if (temHabitos) {
+              <li class="numero">
+                <strong class="numero__valor">{{ r.dia.habitosFeitos }}/{{ r.dia.habitosDevidos }}</strong>
+                <span class="numero__rotulo">hábitos</span>
+              </li>
+            }
+            @if (temTarefas) {
+              <li class="numero">
+                <strong class="numero__valor">{{ r.dia.tarefasFeitas }}/{{ r.dia.tarefasDoDia }}</strong>
+                <span class="numero__rotulo">tarefas</span>
+              </li>
+            }
+            @if (r.dia.atrasadas > 0) {
+              <li class="numero numero--alerta">
+                <strong class="numero__valor">{{ r.dia.atrasadas }}</strong>
+                <span class="numero__rotulo">
+                  {{ r.dia.atrasadas === 1 ? 'atrasada' : 'atrasadas' }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </article>
+    </section>
 
     <!-- ---------------------------------------------------------- semana -->
-    <article class="cartao">
-      <h2 class="cartao__titulo">Esta semana</h2>
-      <p class="cartao__periodo">{{ periodo() }}</p>
+    <section class="secao">
+      <div class="secao__topo">
+        <h2 class="secao__titulo">Esta semana</h2>
+        <span class="secao__contador">{{ periodo() }}</span>
+      </div>
 
-      @if (progressoDaSemana(); as p) {
-        <div class="barra">
-          <div
-            class="barra__trilha"
-            role="progressbar"
-            [attr.aria-valuenow]="p.feitos"
-            [attr.aria-valuemax]="p.total"
-            [attr.aria-label]="'Hábitos da semana: ' + p.feitos + ' de ' + p.total"
-          >
-            <span class="barra__preenchida" [style.width.%]="p.porcento"></span>
+      <article class="cartao">
+        @if (progressoDaSemana(); as p) {
+          <div class="progresso">
+            <div
+              class="progresso__trilha progresso__trilha--continua"
+              role="progressbar"
+              [attr.aria-valuenow]="p.feitos"
+              [attr.aria-valuemax]="p.total"
+              [attr.aria-label]="'Hábitos da semana: ' + p.feitos + ' de ' + p.total"
+            >
+              <span class="progresso__barra" [style.width.%]="p.porcento"></span>
+            </div>
+            <span class="progresso__numero">{{ p.porcento }}%</span>
           </div>
-          <span class="barra__numero">{{ p.porcento }}%</span>
-        </div>
-      }
+        }
 
-      <ul class="numeros">
-        <li>
-          <strong>{{ r.semana.habitosFeitos }}/{{ r.semana.habitosCobrados }}</strong>
-          <span>hábitos cumpridos</span>
-        </li>
-        <li>
-          <strong>{{ r.semana.tarefasConcluidas }}</strong>
-          <span>{{ r.semana.tarefasConcluidas === 1 ? 'tarefa concluída' : 'tarefas concluídas' }}</span>
-        </li>
-      </ul>
-    </article>
+        <ul class="numeros">
+          <li class="numero">
+            <strong class="numero__valor">
+              {{ r.semana.habitosFeitos }}/{{ r.semana.habitosCobrados }}
+            </strong>
+            <span class="numero__rotulo">hábitos cumpridos</span>
+          </li>
+          <li class="numero">
+            <strong class="numero__valor">{{ r.semana.tarefasConcluidas }}</strong>
+            <span class="numero__rotulo">
+              {{ r.semana.tarefasConcluidas === 1 ? 'tarefa concluída' : 'tarefas concluídas' }}
+            </span>
+          </li>
+        </ul>
+      </article>
+    </section>
 
     <!-- ------------------------------------------------------ sequências -->
-    <section class="sequencias">
-      <h2 class="cartao__titulo">Sequências</h2>
+    <section class="secao">
+      <h2 class="secao__titulo">Sequências</h2>
 
       @if (r.streaks.length === 0) {
-        <p class="resumo__nota">
-          Nenhum hábito ainda. <a routerLink="/habitos">Crie o primeiro</a> e a contagem começa.
-        </p>
+        <article class="cartao">
+          <p class="cartao__nota">
+            Nenhum hábito ainda. <a routerLink="/habitos">Crie o primeiro</a> e a contagem começa.
+          </p>
+        </article>
       } @else {
-        <ul class="sequencias__lista">
+        <ul class="itens">
           @for (sequencia of r.streaks; track sequencia.id) {
-            <li class="sequencia">
+            <li class="item item--simples sequencia">
               <span
                 class="sequencia__cor"
                 [style.background]="sequencia.cor ?? 'var(--cor-primaria)'"
                 aria-hidden="true"
               ></span>
-              <span class="sequencia__nome">{{ sequencia.nome }}</span>
-              <span class="sequencia__streak">{{ streakPorExtenso(sequencia.streak) }}</span>
+              <span class="item__nome">{{ sequencia.nome }}</span>
+              <span class="sequencia__streak" [class.sequencia__streak--ativa]="sequencia.streak > 0">
+                @if (sequencia.streak > 0) {
+                  <app-icone nome="habitos" [tamanho]="15" />
+                }
+                {{ streakPorExtenso(sequencia.streak) }}
+              </span>
             </li>
           }
         </ul>
@@ -110,21 +149,30 @@
     </section>
   }
 
-  <nav class="atalhos">
-    <a class="atalho" routerLink="/rotina">
-      <span class="atalho__icone" aria-hidden="true">🗓️</span>
-      <span>
-        <strong>Rotina</strong>
-        <small>Monte os modelos de dia e a semana</small>
-      </span>
-    </a>
+  <!-- ---------------------------------------------------------- atalhos -->
+  <nav class="secao" aria-label="Atalhos">
+    <ul class="itens">
+      <li class="item item--simples item--link">
+        <a class="atalho" routerLink="/rotina">
+          <app-icone class="atalho__icone" nome="rotina" [tamanho]="22" />
+          <span class="item__corpo">
+            <span class="item__nome">Rotina</span>
+            <span class="item__detalhe">Monte os modelos de dia e a semana</span>
+          </span>
+          <app-icone class="atalho__seta" nome="chevron" [tamanho]="18" />
+        </a>
+      </li>
 
-    <a class="atalho" routerLink="/ajustes">
-      <span class="atalho__icone" aria-hidden="true">⚙️</span>
-      <span>
-        <strong>Ajustes</strong>
-        <small>Notificações, resumo do dia e conta</small>
-      </span>
-    </a>
+      <li class="item item--simples item--link">
+        <a class="atalho" routerLink="/ajustes">
+          <app-icone class="atalho__icone" nome="ajustes" [tamanho]="22" />
+          <span class="item__corpo">
+            <span class="item__nome">Ajustes</span>
+            <span class="item__detalhe">Notificações, resumo do dia e conta</span>
+          </span>
+          <app-icone class="atalho__seta" nome="chevron" [tamanho]="18" />
+        </a>
+      </li>
+    </ul>
   </nav>
 </section>

@@ -6,9 +6,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TarefaService } from '../../core/tarefas/tarefa.service';
 import { Prioridade, TarefaRequest } from '../../core/tarefas/tarefa.models';
 import { RespostaErro } from '../../core/auth/auth.models';
+import { Icone } from '../../core/ui/icone.component';
+import { Esqueleto } from '../../core/ui/esqueleto.component';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [Esqueleto, Icone, ReactiveFormsModule],
   selector: 'app-tarefa-edicao',
   styleUrl: './tarefa-edicao.component.scss',
   templateUrl: './tarefa-edicao.component.html',
@@ -31,7 +33,6 @@ export class TarefaEdicao implements OnInit {
 
   protected readonly form = this.fb.nonNullable.group({
     titulo: ['', [Validators.required, Validators.maxLength(200)]],
-    observacoes: [''],
     prioridade: ['MEDIA' as Prioridade],
     minutosEstimados: [''],
     dataPlanejada: [''],
@@ -86,7 +87,6 @@ export class TarefaEdicao implements OnInit {
     const valores = this.form.getRawValue();
     const pedido: TarefaRequest = {
       titulo: valores.titulo.trim(),
-      observacoes: valores.observacoes || null,
       prioridade: valores.prioridade,
       minutosEstimados: valores.minutosEstimados ? Number(valores.minutosEstimados) : null,
       dataPlanejada: valores.dataPlanejada || null,
@@ -129,7 +129,6 @@ export class TarefaEdicao implements OnInit {
         this.id.set(tarefa.id);
         this.form.patchValue({
           titulo: tarefa.titulo,
-          observacoes: tarefa.observacoes ?? '',
           prioridade: tarefa.prioridade,
           minutosEstimados: tarefa.minutosEstimados ? String(tarefa.minutosEstimados) : '',
           dataPlanejada: tarefa.dataPlanejada ?? '',

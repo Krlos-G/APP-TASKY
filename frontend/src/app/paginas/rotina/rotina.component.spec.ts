@@ -61,11 +61,46 @@ describe('Rotina', () => {
     expect(texto(fixture)).toContain('1 blocos');
   });
 
-  it('a semana lista os sete dias', () => {
-    const fixture = montar([modelo(1, 'Dia útil')]);
+  it('cada modelo mostra os sete dias da semana', () => {
+    const fixture = montar([modelo(1, 'Dia útil'), modelo(2, 'Fim de semana')]);
 
-    const selects = (fixture.nativeElement as HTMLElement).querySelectorAll('select');
-    expect(selects.length).toBe(7);
+    const grupos = (fixture.nativeElement as HTMLElement).querySelectorAll('.semana .dias');
+    expect(grupos.length).toBe(2);
+    expect(grupos[0].querySelectorAll('.dias__botao').length).toBe(7);
+  });
+
+  it('marcar um dia num modelo tira ele do outro, e tocar de novo libera', () => {
+    const fixture = montar([modelo(1, 'Dia útil'), modelo(2, 'Fim de semana')], {
+      SEG: 1, TER: null, QUA: null, QUI: null, SEX: null, SAB: null, DOM: null,
+    });
+    const componente = fixture.componentInstance as unknown as {
+      alternarDiaDoModelo(modeloId: number, dia: string): void;
+    };
+
+    // Segunda era do Dia util; marcar no Fim de semana move o dia.
+    componente.alternarDiaDoModelo(2, 'SEG');
+    const mover = http.expectOne('/api/v1/rotina/semana');
+    expect(mover.request.body.modeloPorDia.SEG).toBe(2);
+    mover.flush({ modeloPorDia: { SEG: { id: 2, nome: 'Fim de semana' } } });
+
+    // Tocar de novo no mesmo modelo deixa o dia sem rotina.
+    componente.alternarDiaDoModelo(2, 'SEG');
+    const liberar = http.expectOne('/api/v1/rotina/semana');
+    expect(liberar.request.body.modeloPorDia.SEG).toBeNull();
+    liberar.flush({ modeloPorDia: {} });
+  });
+
+  it('criar modelo sem nome avisa, em vez de o botao parecer morto', () => {
+    const fixture = montar([]);
+    const botao = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('button'),
+    ).find((b) => b.textContent?.trim() === 'Criar') as HTMLButtonElement;
+
+    botao.click();
+    fixture.detectChanges();
+
+    http.expectNone('/api/v1/rotina/modelos');
+    expect(texto(fixture)).toContain('Dê um nome ao modelo.');
   });
 
   it('recusa bloco com fim antes do inicio sem ir ao servidor', () => {
@@ -116,10 +151,10 @@ describe('Rotina', () => {
       SEG: null, TER: null, QUA: null, QUI: null, SEX: null, SAB: null, DOM: null,
     });
     const componente = fixture.componentInstance as unknown as {
-      atribuir(dia: string, valor: string): void;
+      atribuir(dia: string, modeloId: number | null): void;
     };
 
-    componente.atribuir('SEG', '1');
+    componente.atribuir('SEG', 1);
 
     const req = http.expectOne('/api/v1/rotina/semana');
     expect(req.request.method).toBe('PUT');

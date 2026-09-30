@@ -8,9 +8,10 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { RespostaErro } from '../../core/auth/auth.models';
+import { Icone } from '../../core/ui/icone.component';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [Icone, ReactiveFormsModule],
   selector: 'app-login',
   styleUrl: './login.component.scss',
   templateUrl: './login.component.html',

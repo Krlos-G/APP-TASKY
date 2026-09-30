@@ -1,0 +1,50 @@
+/* Base global do Tasky. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: var(--familia);
+  font-size: var(--tam-corpo);
+  line-height: 1.35;
+  letter-spacing: var(--letra-corpo);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* O gradiente mora numa camada fixa atras de tudo. No iPhone o
+   background-attachment: fixed e ignorado, e o gradiente esticaria junto com
+   a pagina inteira em vez de ficar parado atras dela. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--fundo-app);
+  pointer-events: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
+
+/* Texto que so o leitor de tela le - some da vista, nao da acessibilidade. */
+.so-leitor {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

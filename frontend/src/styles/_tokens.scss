@@ -1,0 +1,168 @@
+/* Tokens do Tasky.
+ *
+ * Os cinzas e as cores vem da paleta do iOS: e o vocabulario que o aparelho
+ * ja ensinou a ler. Cada token existe nos dois modos com o mesmo nome, entao
+ * nenhum componente precisa saber em qual deles esta. */
+
+:root {
+  /* Sem isto os controles nativos (seletor de data e hora, a lista do
+     select) ficam claros mesmo no tema escuro. */
+  color-scheme: light dark;
+
+  --familia: -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  /* Tipografia espelhando os text styles do iOS. O corpo e 17px. */
+  --tam-titulo-grande: 34px;
+  --tam-titulo: 28px;
+  --tam-seccao: 22px;
+  --tam-destaque: 20px;
+  --tam-corpo: 17px;
+  --tam-apoio: 15px;
+  --tam-nota: 13px;
+  --tam-legenda: 12px;
+  --letra-titulo: -0.026em;
+  --letra-corpo: -0.01em;
+
+  /* Escala de 4pt. */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 20px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+
+  --raio-cartao: 18px;
+  --raio-botao: 12px;
+  --raio-campo: 12px;
+  --raio-pilula: 999px;
+  /* Alias do raio antigo, ainda usado pelas telas que faltam repintar. */
+  --raio: var(--raio-cartao);
+
+  --transicao-rapida: 140ms;
+  --transicao: 220ms;
+  /* A curva do iOS: sai rapido, chega devagar. */
+  --curva: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Passa um pouco do alvo e volta - o pulo curto de quando algo e marcado. */
+  --curva-pulo: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --altura-tab-bar: 66px;
+  --largura-lateral: 220px;
+  /* Alvo minimo de toque da Apple. */
+  --toque: 44px;
+
+  /* Fundo do app: gradiente suave na familia do azul do sistema. A cor
+   * solida fica de reserva e para o que precisa de um tom so. */
+  --cor-fundo: #eef2fb;
+  /* Esferas de cor com contorno por cima de um tom ambiente. O contorno e o
+   * que da ao blur dos cartoes algo para desfocar: sobre um gradiente liso o
+   * vidro fica invisivel. */
+  --fundo-app:
+    radial-gradient(circle at 12% 16%, rgb(110 168 255 / 0.48) 0 13vmax, rgb(110 168 255 / 0) 21vmax),
+    radial-gradient(circle at 92% 48%, rgb(170 150 255 / 0.44) 0 12vmax, rgb(170 150 255 / 0) 20vmax),
+    radial-gradient(circle at 20% 88%, rgb(120 210 255 / 0.38) 0 12vmax, rgb(120 210 255 / 0) 20vmax),
+    radial-gradient(110% 70% at 0% 0%, #d8e8ff 0%, rgb(216 232 255 / 0) 62%),
+    radial-gradient(100% 65% at 100% 100%, #e4ddff 0%, rgb(228 221 255 / 0) 62%),
+    linear-gradient(180deg, #eef3fc 0%, #f0eefa 100%);
+
+  /* Vidro fosco: as superficies desfocam as esferas do fundo. So a de fora
+   * desfoca - campo dentro de cartao nao desfoca de novo, porque blur dentro
+   * de blur custa em dobro e embaca o texto. */
+  --cor-superficie: rgb(255 255 255 / 0.58);
+  --desfoque: blur(24px) saturate(140%);
+  /* Dentro de um cartao o campo fica mais branco que ele, para saltar. */
+  --cor-campo: rgb(255 255 255 / 0.78);
+  /* Painel rebaixado dentro de um cartao. */
+  --cor-painel: rgb(118 118 128 / 0.08);
+  --cor-borda: rgb(60 60 67 / 0.12);
+  --cor-borda-campo: rgb(60 60 67 / 0.22);
+  --cor-trilho: rgb(118 118 128 / 0.2);
+  --cor-esqueleto-brilho: rgb(255 255 255 / 0.75);
+  --cor-texto: #1c1c1e;
+  /* Mais escuro que o cinza da Apple de proposito: sobre o vidro, no miolo de
+   * uma esfera, o cinza dela cai para 4,2:1. Este segura 5,5:1. */
+  --cor-texto-fraco: #5c5c63;
+
+  --cor-primaria: #007aff;
+  /* A mesma cor quando ela e texto, onde o azul puro fica claro demais. */
+  --cor-primaria-texto: #0060cc;
+  --cor-primaria-fraca: rgba(0, 122, 255, 0.11);
+
+  --cor-verde: #2aae4f;
+  --cor-vermelho: #d70015;
+  --cor-vermelho-fraca: rgba(215, 0, 21, 0.1);
+  /* Laranja do streak em duas versoes: a legivel, para texto, e a viva, para
+   * preenchimento - onde a exigencia de contraste e menor. */
+  --cor-laranja: #c2610a;
+  --cor-laranja-cheia: #ff9500;
+
+  --cor-sobre-cor: #ffffff;
+  /* O verde claro do iOS e vivo demais para texto branco por cima. */
+  --cor-sobre-verde: #ffffff;
+
+  /* Segmented control: trilho acinzentado e a pilula clara que desliza nele. */
+  --cor-segmentado: rgba(118, 118, 128, 0.12);
+  --cor-segmentado-ativo: #ffffff;
+
+  /* Material da barra de abas: translucido, para o conteudo aparecer atras. */
+  --cor-vidro: rgba(255, 255, 255, 0.72);
+  --cor-vidro-borda: rgba(0, 0, 0, 0.06);
+
+  /* A borda branca de dentro e o que faz a superficie ler como vidro. */
+  --sombra-cartao:
+    0 1px 2px rgb(20 40 90 / 0.05),
+    0 8px 24px rgb(20 40 90 / 0.06),
+    inset 0 0 0 1px rgb(255 255 255 / 0.7);
+  --sombra-flutuante: 0 10px 30px rgba(0, 0, 0, 0.13);
+
+  --gradiente-primario: linear-gradient(180deg, #3d95ff 0%, #007aff 100%);
+  --sombra-primaria: 0 8px 18px -6px rgb(0 122 255 / 0.55);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cor-fundo: #070912;
+    --fundo-app:
+      radial-gradient(circle at 12% 16%, rgb(40 100 230 / 0.45) 0 13vmax, rgb(40 100 230 / 0) 21vmax),
+      radial-gradient(circle at 92% 48%, rgb(120 80 230 / 0.4) 0 12vmax, rgb(120 80 230 / 0) 20vmax),
+      radial-gradient(circle at 20% 88%, rgb(30 150 220 / 0.3) 0 12vmax, rgb(30 150 220 / 0) 20vmax),
+      radial-gradient(110% 70% at 0% 0%, #0c2a5e 0%, rgb(12 42 94 / 0) 62%),
+      radial-gradient(100% 65% at 100% 100%, #271c5c 0%, rgb(39 28 92 / 0) 62%),
+      linear-gradient(180deg, #070a14 0%, #0a0816 100%);
+
+    /* Vidro fume: escurece a esfera por baixo em vez de clarear. Branco
+     * translucido aqui derrubava o texto cinza para 2,5:1 sobre a esfera azul. */
+    --cor-superficie: rgb(26 28 40 / 0.55);
+    --cor-campo: rgb(255 255 255 / 0.1);
+    --cor-painel: rgb(255 255 255 / 0.04);
+    --cor-borda: rgb(255 255 255 / 0.08);
+    --cor-borda-campo: rgb(255 255 255 / 0.16);
+    --cor-trilho: rgb(255 255 255 / 0.12);
+    --cor-esqueleto-brilho: rgb(255 255 255 / 0.22);
+    --cor-texto: #ffffff;
+    --cor-texto-fraco: #a1a1a8;
+
+    --cor-primaria: #0a84ff;
+    --cor-primaria-texto: #0a84ff;
+    --cor-primaria-fraca: rgba(10, 132, 255, 0.16);
+
+    --cor-verde: #30d158;
+    --cor-sobre-verde: #000000;
+    --cor-vermelho: #ff453a;
+    --cor-vermelho-fraca: rgba(255, 69, 58, 0.16);
+    --cor-laranja: #ff9f0a;
+    --cor-laranja-cheia: #ff9f0a;
+
+    --cor-segmentado: rgba(118, 118, 128, 0.24);
+    --cor-segmentado-ativo: #636366;
+
+    --cor-vidro: rgba(28, 28, 30, 0.66);
+    --cor-vidro-borda: rgba(255, 255, 255, 0.1);
+
+    --sombra-cartao: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+    --sombra-flutuante: 0 12px 34px rgba(0, 0, 0, 0.5);
+
+    --gradiente-primario: linear-gradient(180deg, #3a9dff 0%, #0a84ff 100%);
+    --sombra-primaria: 0 8px 20px -6px rgb(10 132 255 / 0.5);
+  }
+}

@@ -3,92 +3,62 @@
   align-items: center;
   justify-content: center;
   min-height: 100dvh;
-  padding: 1.5rem;
+  padding: var(--esp-6) var(--esp-4);
 
+  /* O cartao de vidro sobre o gradiente e a primeira coisa que o app mostra. */
   &__cartao {
     width: 100%;
     max-width: 380px;
-    padding: 2rem 1.75rem;
-    background: var(--cor-superficie);
-    border: 1px solid var(--cor-borda);
-    border-radius: var(--raio);
+    padding: var(--esp-8) var(--esp-6);
+    text-align: center;
+  }
+
+  &__icone {
+    display: inline-grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    margin-bottom: var(--esp-4);
+    border-radius: 16px;
+    background: var(--gradiente-primario);
+    box-shadow: var(--sombra-primaria);
+    color: var(--cor-sobre-cor);
   }
 
   &__marca {
     margin: 0;
-    font-size: 1.75rem;
-    color: var(--cor-primaria);
+    font-size: var(--tam-titulo);
+    font-weight: 700;
+    letter-spacing: var(--letra-titulo);
   }
 
   &__subtitulo {
-    margin: 0.25rem 0 1.75rem;
+    margin: var(--esp-1) 0 var(--esp-6);
     color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
+    font-size: var(--tam-apoio);
   }
 
   &__form {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--esp-3);
+    text-align: left;
+
+    .botao--grande {
+      margin-top: var(--esp-2);
+    }
+
+    .botao:disabled {
+      cursor: progress;
+    }
   }
 
   &__falha {
     margin: 0;
-    padding: 0.7rem 0.85rem;
-    border-radius: 8px;
-    background: color-mix(in srgb, crimson 12%, transparent);
-    color: crimson;
-    font-size: 0.875rem;
-  }
-
-  &__botao {
-    padding: 0.8rem;
-    border: none;
-    border-radius: 8px;
-    background: var(--cor-primaria);
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: progress;
-    }
-  }
-}
-
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-
-  &__rotulo {
-    font-size: 0.85rem;
-    color: var(--cor-texto-fraco);
-  }
-
-  &__entrada {
-    padding: 0.7rem 0.8rem;
-    border: 1px solid var(--cor-borda);
-    border-radius: 8px;
-    background: var(--cor-fundo);
-    color: var(--cor-texto);
-    /* 16px evita o zoom automatico do Safari no iPhone ao focar o campo. */
-    font-size: 16px;
-
-    &:focus {
-      outline: 2px solid var(--cor-primaria);
-      outline-offset: 1px;
-    }
-
-    &[aria-invalid='true'] {
-      border-color: crimson;
-    }
-  }
-
-  &__erro {
-    color: crimson;
-    font-size: 0.8rem;
+    padding: var(--esp-3) var(--esp-4);
+    border-radius: var(--raio-botao);
+    background: var(--cor-vermelho-fraca);
+    color: var(--cor-vermelho);
+    font-size: var(--tam-apoio);
   }
 }

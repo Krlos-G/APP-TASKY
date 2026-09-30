@@ -1,6 +1,6 @@
 <section class="rotina">
   <header class="rotina__topo">
-    <h1>Rotina</h1>
+    <h1 class="rotina__titulo">Rotina</h1>
     <p class="rotina__nota">
       Monte modelos de dia com seus blocos de horário e diga qual vale em cada dia da semana.
     </p>
@@ -11,21 +11,28 @@
   }
 
   @if (carregando()) {
-    <p class="rotina__carregando">Carregando…</p>
+    <app-esqueleto tipo="cartoes" [quantidade]="2" />
   } @else {
     <!-- ---------------------------------------------------- modelos -->
-    <section class="bloco-secao">
-      <h2>Modelos de dia</h2>
+    <section class="secao">
+      <h2 class="secao__titulo">Modelos de dia</h2>
 
       <form class="linha-form" [formGroup]="formModelo" (ngSubmit)="criarModelo()">
-        <input
-          class="campo__entrada"
-          type="text"
-          formControlName="nome"
-          placeholder="Ex.: Dia útil"
-          aria-label="Nome do novo modelo"
-        />
-        <button class="botao botao--primario" type="submit">Criar modelo</button>
+        <label class="campo">
+          <span class="campo__rotulo">Novo modelo</span>
+          <input
+            class="campo__entrada"
+            type="text"
+            formControlName="nome"
+            maxlength="100"
+            placeholder="Ex.: Dia útil"
+            [attr.aria-invalid]="formModelo.controls.nome.touched && formModelo.controls.nome.invalid"
+          />
+          @if (formModelo.controls.nome.touched && formModelo.controls.nome.invalid) {
+            <span class="campo__erro">Dê um nome ao modelo.</span>
+          }
+        </label>
+        <button class="botao botao--primario" type="submit">Criar</button>
       </form>
 
       @if (semModelos()) {
@@ -41,10 +48,16 @@
               (click)="alternarModelo(modelo.id)"
               [attr.aria-expanded]="modeloAberto() === modelo.id"
             >
-              {{ modeloAberto() === modelo.id ? '▾' : '▸' }} {{ modelo.nome }}
+              <app-icone
+                class="modelo__seta"
+                [class.modelo__seta--aberta]="modeloAberto() === modelo.id"
+                nome="chevron"
+                [tamanho]="16"
+              />
+              {{ modelo.nome }}
               <span class="modelo__contagem">{{ modelo.blocos.length }} blocos</span>
             </button>
-            <button class="botao botao--perigo" type="button" (click)="apagarModelo(modelo)">
+            <button class="link link--perigo" type="button" (click)="apagarModelo(modelo)">
               Apagar
             </button>
           </header>
@@ -63,20 +76,38 @@
                       [style.background]="bloco.cor ?? 'var(--cor-primaria)'"
                       aria-hidden="true"
                     ></span>
-                    <span class="bloco__horario">
-                      {{ bloco.horaInicio.slice(0, 5) }}–{{ bloco.horaFim.slice(0, 5) }}
+                    <span class="bloco__texto">
+                      <span class="bloco__titulo">{{ bloco.titulo }}</span>
+                      <span class="bloco__horario">
+                        {{ bloco.horaInicio.slice(0, 5) }}–{{ bloco.horaFim.slice(0, 5) }}
+                      </span>
                     </span>
-                    <span class="bloco__titulo">{{ bloco.titulo }}</span>
 
+                    <!-- Lapis e lixeira no lugar do texto: a linha e estreita, e o
+                         titulo e o que precisa do espaco. -->
                     <span class="bloco__acoes">
-                      <button class="botao botao--texto" type="button"
-                              (click)="editarBloco(modelo, bloco.id)">Editar</button>
-                      <button class="botao botao--texto" type="button"
-                              (click)="apagarBloco(modelo.id, bloco.id)">Remover</button>
+                      <button
+                        class="bloco__acao"
+                        type="button"
+                        [attr.aria-label]="'Editar ' + bloco.titulo"
+                        title="Editar"
+                        (click)="editarBloco(modelo, bloco.id)"
+                      >
+                        <app-icone nome="lapis" [tamanho]="18" />
+                      </button>
+                      <button
+                        class="bloco__acao bloco__acao--perigo"
+                        type="button"
+                        [attr.aria-label]="'Remover ' + bloco.titulo"
+                        title="Remover"
+                        (click)="apagarBloco(modelo.id, bloco.id)"
+                      >
+                        <app-icone nome="lixeira" [tamanho]="18" />
+                      </button>
                     </span>
 
                     @for (aviso of avisosDoBloco(modelo, bloco.id); track aviso) {
-                      <span class="bloco__aviso">⚠ {{ aviso }}</span>
+                      <span class="bloco__aviso">{{ aviso }}</span>
                     }
                   </li>
                 }
@@ -90,21 +121,49 @@
                 <div class="bloco-form__campos">
                   <label class="campo campo--largo">
                     <span class="campo__rotulo">Título</span>
-                    <input class="campo__entrada" type="text" formControlName="titulo"
-                           placeholder="Ex.: Foco no trabalho" />
+                    <input
+                      class="campo__entrada"
+                      type="text"
+                      formControlName="titulo"
+                      maxlength="200"
+                      placeholder="Ex.: Foco no trabalho"
+                      [attr.aria-invalid]="formBloco.controls.titulo.touched && formBloco.controls.titulo.invalid"
+                    />
+                    @if (formBloco.controls.titulo.touched && formBloco.controls.titulo.invalid) {
+                      <span class="campo__erro">Dê um título ao bloco.</span>
+                    }
                   </label>
 
-                  <label class="campo">
+                  <label class="campo campo--icone">
+                    <app-icone class="campo__icone" nome="relogio" [tamanho]="22" />
                     <span class="campo__rotulo">Início</span>
-                    <input class="campo__entrada" type="time" formControlName="horaInicio" />
+                    <input
+                      class="campo__entrada"
+                      type="time"
+                      formControlName="horaInicio"
+                      [attr.aria-invalid]="formBloco.controls.horaInicio.touched && formBloco.controls.horaInicio.invalid"
+                    />
+                    @if (formBloco.controls.horaInicio.touched && formBloco.controls.horaInicio.invalid) {
+                      <span class="campo__erro">Informe o horário.</span>
+                    }
                   </label>
 
-                  <label class="campo">
+                  <label class="campo campo--icone">
+                    <app-icone class="campo__icone" nome="relogio" [tamanho]="22" />
                     <span class="campo__rotulo">Fim</span>
-                    <input class="campo__entrada" type="time" formControlName="horaFim" />
+                    <input
+                      class="campo__entrada"
+                      type="time"
+                      formControlName="horaFim"
+                      [attr.aria-invalid]="formBloco.controls.horaFim.touched && formBloco.controls.horaFim.invalid"
+                    />
+                    @if (formBloco.controls.horaFim.touched && formBloco.controls.horaFim.invalid) {
+                      <span class="campo__erro">Informe o horário.</span>
+                    }
                   </label>
 
-                  <label class="campo">
+                  <label class="campo campo--icone">
+                    <app-icone class="campo__icone" nome="sino" [tamanho]="22" />
                     <span class="campo__rotulo">Avisar antes (min)</span>
                     <input
                       class="campo__entrada"
@@ -114,12 +173,25 @@
                       formControlName="minutosAntecedenciaLembrete"
                     />
                   </label>
-
-                  <label class="campo campo--cor">
-                    <span class="campo__rotulo">Cor</span>
-                    <input class="campo__cor" type="color" formControlName="cor" />
-                  </label>
                 </div>
+
+                <fieldset class="cores">
+                  <legend class="cores__rotulo">Cor</legend>
+                  <div class="cores__lista">
+                    @for (cor of cores(); track cor.valor) {
+                      <label class="cores__opcao">
+                        <input
+                          class="cores__radio"
+                          type="radio"
+                          formControlName="cor"
+                          [value]="cor.valor"
+                        />
+                        <span class="cores__amostra" [style.background]="cor.valor"></span>
+                        <span class="cores__nome">{{ cor.nome }}</span>
+                      </label>
+                    }
+                  </div>
+                </fieldset>
 
                 <div class="bloco-form__acoes">
                   <button class="botao botao--primario" type="submit">
@@ -139,30 +211,40 @@
     </section>
 
     <!-- ----------------------------------------------------- semana -->
-    <section class="bloco-secao">
-      <h2>Semana</h2>
-      <p class="rotina__nota">Qual modelo vale em cada dia.</p>
+    <section class="secao">
+      <h2 class="secao__titulo">Semana</h2>
 
-      <ul class="semana">
-        @for (dia of diasSemana; track dia) {
-          <li class="semana__dia">
-            <span class="semana__nome">{{ nomeDoDia[dia] }}</span>
-            <select
-              class="campo__entrada"
-              [attr.aria-label]="'Modelo de ' + nomeDoDia[dia]"
-              [value]="modeloDoDia(dia) ?? ''"
-              (change)="atribuir(dia, $any($event.target).value)"
-            >
-              <option value="">— sem rotina —</option>
-              @for (modelo of modelos(); track modelo.id) {
-                <option [value]="modelo.id" [selected]="modeloDoDia(dia) === modelo.id">
-                  {{ modelo.nome }}
-                </option>
-              }
-            </select>
-          </li>
+      @if (semModelos()) {
+        <p class="vazio">Crie um modelo acima para montar a semana.</p>
+      } @else {
+        <!-- Cada modelo com os sete dias: da para ver a semana inteira de uma
+             vez, em vez de ler um select por dia. -->
+        <ul class="semana">
+          @for (modelo of modelos(); track modelo.id) {
+            <li class="semana__modelo">
+              <span class="semana__nome">{{ modelo.nome }}</span>
+              <div class="dias" role="group" [attr.aria-label]="'Dias de ' + modelo.nome">
+                @for (dia of diasSemana; track dia) {
+                  <button
+                    class="dias__botao"
+                    type="button"
+                    [class.dias__botao--ativo]="modeloDoDia(dia) === modelo.id"
+                    [attr.aria-pressed]="modeloDoDia(dia) === modelo.id"
+                    [attr.aria-label]="nomeDoDia[dia]"
+                    (click)="alternarDiaDoModelo(modelo.id, dia)"
+                  >
+                    {{ nomeCurtoDoDia[dia] }}
+                  </button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+
+        @if (diasSemRotina().length > 0) {
+          <p class="secao__rodape">Sem rotina: {{ diasSemRotina().join(', ') }}.</p>
         }
-      </ul>
+      }
     </section>
   }
 </section>

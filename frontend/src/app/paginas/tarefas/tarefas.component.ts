@@ -7,9 +7,11 @@ import { TarefaService } from '../../core/tarefas/tarefa.service';
 import { FILTROS_TAREFA, FiltroTarefa, Tarefa } from '../../core/tarefas/tarefa.models';
 import { formatarDataCurta, formatarDuracao } from '../../core/tempo/formatos';
 import { RespostaErro } from '../../core/auth/auth.models';
+import { Icone } from '../../core/ui/icone.component';
+import { Esqueleto } from '../../core/ui/esqueleto.component';
 
 @Component({
-  imports: [RouterLink],
+  imports: [Esqueleto, Icone, RouterLink],
   selector: 'app-tarefas',
   styleUrl: './tarefas.component.scss',
   templateUrl: './tarefas.component.html',

@@ -1,15 +1,17 @@
 .resumo {
   max-width: 640px;
 
-  &__topo h1 {
+  &__titulo {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: var(--tam-titulo-grande);
+    font-weight: 700;
+    letter-spacing: var(--letra-titulo);
   }
 
   &__data {
-    margin: 0.15rem 0 1.25rem;
+    margin: 2px 0 0;
     color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
+    font-size: var(--tam-apoio);
 
     &::first-letter {
       text-transform: uppercase;
@@ -17,153 +19,93 @@
   }
 
   &__nota {
-    margin: 0.25rem 0;
+    margin: var(--esp-4) 0 0;
     color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
-
-    a {
-      color: var(--cor-primaria);
-    }
+    font-size: var(--tam-apoio);
   }
 }
 
-.cartao {
-  margin-bottom: 1rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  background: var(--cor-superficie);
-
-  &__titulo {
-    margin: 0;
-    font-size: 1rem;
-  }
-
-  &__periodo {
-    margin: 0.15rem 0 0;
-    color: var(--cor-texto-fraco);
-    font-size: 0.82rem;
-  }
+.cartao__nota a {
+  color: var(--cor-primaria-texto);
 }
 
-.barra {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0.85rem 0;
-
-  &__trilha {
-    flex: 1;
-    height: 6px;
-    border-radius: 3px;
-    background: var(--cor-borda);
-    overflow: hidden;
-  }
-
-  &__preenchida {
-    display: block;
-    height: 100%;
-    background: var(--cor-primaria);
-  }
-
-  &__numero {
-    color: var(--cor-texto-fraco);
-    font-size: 0.8rem;
-    font-variant-numeric: tabular-nums;
-  }
-}
+/* ------------------------------------------------------------- números */
 
 .numeros {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  margin: 0;
+  gap: var(--esp-6);
+  margin: var(--esp-4) 0 0;
   padding: 0;
   list-style: none;
+}
 
-  li {
-    display: flex;
-    flex-direction: column;
-  }
+/* O dado principal da tela: numero grande, rotulo pequeno embaixo. */
+.numero {
+  display: flex;
+  flex-direction: column;
 
-  strong {
-    font-size: 1.35rem;
+  &__valor {
+    font-size: var(--tam-titulo);
+    font-weight: 700;
+    letter-spacing: var(--letra-titulo);
     font-variant-numeric: tabular-nums;
   }
 
-  span {
+  &__rotulo {
+    margin-top: 2px;
     color: var(--cor-texto-fraco);
-    font-size: 0.78rem;
+    font-size: var(--tam-nota);
   }
 
-  &__alerta strong {
-    color: crimson;
-  }
-}
-
-.sequencias {
-  margin-bottom: 1.5rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  background: var(--cor-superficie);
-
-  &__lista {
-    margin: 0.6rem 0 0;
-    padding: 0;
-    list-style: none;
+  &--alerta &__valor {
+    color: var(--cor-vermelho);
   }
 }
+
+/* --------------------------------------------------------- sequências */
 
 .sequencia {
-  display: grid;
-  grid-template-columns: 4px 1fr auto;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.4rem 0;
-
   &__cor {
-    height: 20px;
+    width: 4px;
+    height: 24px;
     border-radius: 2px;
   }
 
-  &__nome {
-    overflow: hidden;
-    font-size: 0.95rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   &__streak {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-1);
     color: var(--cor-texto-fraco);
-    font-size: 0.8rem;
+    font-size: var(--tam-nota);
+    white-space: nowrap;
+
+    /* Sequencia viva ganha a unica cor quente do app. */
+    &--ativa {
+      color: var(--cor-laranja);
+      font-weight: 600;
+    }
   }
 }
 
-.atalhos {
-  display: grid;
-  gap: 0.5rem;
-  margin: 1rem 0;
-}
+/* ------------------------------------------------------------ atalhos */
 
 .atalho {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  background: var(--cor-superficie);
-  color: var(--cor-texto);
+  gap: var(--esp-3);
+  width: 100%;
+  min-height: var(--toque);
+  padding: var(--esp-2) 0;
+  color: inherit;
   text-decoration: none;
 
   &__icone {
-    font-size: 1.5rem;
+    color: var(--cor-primaria-texto);
   }
 
-  small {
-    display: block;
+  &__seta {
     color: var(--cor-texto-fraco);
-    font-size: 0.8rem;
   }
 }

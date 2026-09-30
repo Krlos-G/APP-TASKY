@@ -1,125 +1,57 @@
 .tarefas {
   max-width: 720px;
 
-  &__topo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-
-    h1 {
-      margin: 0;
-      font-size: 1.5rem;
-    }
+  &__titulo {
+    margin: 0;
+    font-size: var(--tam-titulo-grande);
+    font-weight: 700;
+    letter-spacing: var(--letra-titulo);
   }
 
   &__nota {
+    margin: var(--esp-6) 0 0;
     color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
+    font-size: var(--tam-apoio);
+    text-align: center;
+  }
+
+  .itens {
+    margin-top: var(--esp-5);
   }
 }
 
-.botao {
-  padding: 0.5rem 0.95rem;
-  border-radius: 8px;
-  background: var(--cor-primaria);
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-/* Rola na horizontal em tela estreita: cinco abas não cabem no iPhone. */
+/* Segmented control, o controle que o iOS usa para alternar vistas de uma
+   mesma lista. Os segmentos dividem a largura por igual. */
 .abas {
   display: flex;
-  gap: 0.35rem;
-  margin-bottom: 1rem;
-  overflow-x: auto;
-  scrollbar-width: none;
+  margin-top: var(--esp-4);
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--cor-segmentado);
 
   &__item {
-    flex: 0 0 auto;
-    padding: 0.4rem 0.8rem;
-    border: 1px solid var(--cor-borda);
-    border-radius: 999px;
-    color: var(--cor-texto-fraco);
-    font-size: 0.85rem;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    /* Cinco segmentos num iPhone de 375px deixam ~68px cada, e "Concluidas"
+       no SF Pro a 13px nao cabe: 12px e sem padding lateral da folga real. */
+    padding: 6px 0;
+    border-radius: 7px;
+    color: var(--cor-texto);
+    font-size: var(--tam-legenda);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-align: center;
     text-decoration: none;
+    text-overflow: ellipsis;
     white-space: nowrap;
 
     &--ativa {
-      border-color: var(--cor-primaria);
-      background: var(--cor-primaria-fraca);
-      color: var(--cor-primaria);
+      background: var(--cor-segmentado-ativo);
+      box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.12),
+        0 3px 1px rgba(0, 0, 0, 0.04);
       font-weight: 600;
     }
   }
-}
-
-.lista {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.tarefa {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.6rem 0.5rem;
-  border-bottom: 1px solid var(--cor-borda);
-
-  &--feita {
-    opacity: 0.55;
-  }
-
-  &__marca {
-    width: 26px;
-    height: 26px;
-    border: 1.5px solid var(--cor-borda);
-    border-radius: 50%;
-    background: transparent;
-    color: #fff;
-    font-size: 0.85rem;
-    cursor: pointer;
-
-    &--feita {
-      border-color: var(--cor-primaria);
-      background: var(--cor-primaria);
-    }
-  }
-
-  &__corpo {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  &__titulo {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &--feita &__titulo {
-    text-decoration: line-through;
-  }
-
-  &__detalhe {
-    margin-top: 0.1rem;
-    color: var(--cor-texto-fraco);
-    font-size: 0.78rem;
-  }
-}
-
-.selo {
-  padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, crimson 14%, transparent);
-  color: crimson;
-  font-size: 0.72rem;
-  font-weight: 600;
 }

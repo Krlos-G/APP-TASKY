@@ -6,13 +6,17 @@ import {
   DIAS_SEMANA,
   DiaSemana,
   ModeloDia,
+  NOME_CURTO_DO_DIA,
   NOME_DO_DIA,
   Semana,
 } from '../../core/rotina/rotina.models';
 import { RespostaErro } from '../../core/auth/auth.models';
+import { COR_PADRAO, CorDisponivel, CORES, coresCom } from '../../core/ui/cores';
+import { Icone } from '../../core/ui/icone.component';
+import { Esqueleto } from '../../core/ui/esqueleto.component';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [Esqueleto, Icone, ReactiveFormsModule],
   selector: 'app-rotina',
   styleUrl: './rotina.component.scss',
   templateUrl: './rotina.component.html',
@@ -23,9 +27,17 @@ export class Rotina implements OnInit {
 
   protected readonly diasSemana = DIAS_SEMANA;
   protected readonly nomeDoDia = NOME_DO_DIA;
+  protected readonly nomeCurtoDoDia = NOME_CURTO_DO_DIA;
 
   protected readonly modelos = signal<ModeloDia[]>([]);
   protected readonly semana = signal<Semana | null>(null);
+
+  protected readonly diasSemRotina = computed(() => {
+    const semana = this.semana();
+    return DIAS_SEMANA.filter((dia) => !semana?.modeloPorDia[dia]).map((dia) =>
+      NOME_DO_DIA[dia].toLowerCase(),
+    );
+  });
   protected readonly carregando = signal(true);
   protected readonly erro = signal<string | null>(null);
 
@@ -36,6 +48,7 @@ export class Rotina implements OnInit {
   protected readonly blocoEmEdicao = signal<number | null>(null);
 
   protected readonly semModelos = computed(() => this.modelos().length === 0);
+  protected readonly cores = signal<CorDisponivel[]>(CORES);
 
   protected readonly formModelo = this.fb.nonNullable.group({
     nome: ['', [Validators.required, Validators.maxLength(100)]],
@@ -45,7 +58,7 @@ export class Rotina implements OnInit {
     titulo: ['', [Validators.required, Validators.maxLength(200)]],
     horaInicio: ['09:00', [Validators.required]],
     horaFim: ['10:00', [Validators.required]],
-    cor: ['#4f46e5'],
+    cor: [COR_PADRAO],
     minutosAntecedenciaLembrete: [''],
   });
 
@@ -120,12 +133,13 @@ export class Rotina implements OnInit {
       titulo: bloco.titulo,
       horaInicio: bloco.horaInicio.slice(0, 5),
       horaFim: bloco.horaFim.slice(0, 5),
-      cor: bloco.cor ?? '#4f46e5',
+      cor: bloco.cor ?? COR_PADRAO,
       minutosAntecedenciaLembrete:
         bloco.minutosAntecedenciaLembrete !== null
           ? String(bloco.minutosAntecedenciaLembrete)
           : '',
     });
+    this.cores.set(coresCom(bloco.cor));
   }
 
   protected cancelarEdicaoDeBloco(): void {
@@ -134,9 +148,10 @@ export class Rotina implements OnInit {
       titulo: '',
       horaInicio: '09:00',
       horaFim: '10:00',
-      cor: '#4f46e5',
+      cor: COR_PADRAO,
       minutosAntecedenciaLembrete: '',
     });
+    this.cores.set(CORES);
   }
 
   protected salvarBloco(modeloId: number): void {
@@ -200,7 +215,15 @@ export class Rotina implements OnInit {
     return this.semana()?.modeloPorDia[dia]?.id ?? null;
   }
 
-  protected atribuir(dia: DiaSemana, valor: string): void {
+  /**
+   * Um dia pertence a no maximo um modelo: marcar num modelo tira de outro, e
+   * tocar num dia que ja e deste modelo libera o dia.
+   */
+  protected alternarDiaDoModelo(modeloId: number, dia: DiaSemana): void {
+    this.atribuir(dia, this.modeloDoDia(dia) === modeloId ? null : modeloId);
+  }
+
+  protected atribuir(dia: DiaSemana, modeloId: number | null): void {
     const atual = this.semana();
     if (!atual) {
       return;
@@ -209,7 +232,7 @@ export class Rotina implements OnInit {
     // A API substitui o conjunto, então enviamos os sete dias sempre.
     const mapa = {} as Record<DiaSemana, number | null>;
     for (const d of DIAS_SEMANA) {
-      mapa[d] = d === dia ? (valor ? Number(valor) : null) : this.modeloDoDia(d);
+      mapa[d] = d === dia ? modeloId : this.modeloDoDia(d);
     }
 
     this.rotinaService.definirSemana(mapa).subscribe({

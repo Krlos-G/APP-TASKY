@@ -1,6 +1,6 @@
-<section class="hoje">
+<section class="hoje tela-com-adicionar">
   <header class="hoje__topo">
-    <h1>Hoje</h1>
+    <h1 class="hoje__titulo">Hoje</h1>
     @if (dataPorExtenso()) {
       <p class="hoje__data">{{ dataPorExtenso() }}</p>
     }
@@ -9,14 +9,23 @@
       <div class="progresso">
         <div
           class="progresso__trilha"
+          [class.progresso__trilha--continua]="!segmentos()"
           role="progressbar"
           [attr.aria-valuenow]="p.feitos"
           [attr.aria-valuemax]="p.total"
           [attr.aria-label]="'Progresso do dia: ' + p.feitos + ' de ' + p.total"
         >
-          <span class="progresso__barra" [style.width.%]="p.porcento"></span>
+          @if (segmentos(); as segs) {
+            @for (cheio of segs; track $index) {
+              <span class="progresso__segmento" [class.progresso__segmento--cheio]="cheio"></span>
+            }
+          } @else {
+            <span class="progresso__barra" [style.width.%]="p.porcento"></span>
+          }
         </div>
-        <span class="progresso__numero">{{ p.feitos }}/{{ p.total }}</span>
+        <span class="progresso__numero">
+          {{ p.feitos }}<span class="progresso__total">/{{ p.total }}</span>
+        </span>
       </div>
     }
   </header>
@@ -26,16 +35,16 @@
   }
 
   @if (carregando()) {
-    <p class="hoje__carregando">Carregando…</p>
+    <app-esqueleto tipo="lista" [quantidade]="4" />
   } @else if (dia(); as d) {
     <!-- --------------------------------------------------- atrasadas -->
     <!-- No topo e sem sumir: é o que se esquece se não estiver na cara. -->
     @if (atrasadas().length > 0) {
-      <section class="atrasadas">
-        <h2 class="atrasadas__titulo">
-          Atrasadas
-          <span class="atrasadas__contagem">{{ atrasadas().length }}</span>
-        </h2>
+      <section class="secao">
+        <header class="secao__topo">
+          <h2 class="secao__titulo secao__titulo--alerta">Atrasadas</h2>
+          <span class="secao__contagem">{{ atrasadas().length }}</span>
+        </header>
 
         <ul class="itens">
           @for (tarefa of atrasadas(); track tarefa.id) {
@@ -50,7 +59,9 @@
                 "
                 (click)="alternarTarefa(tarefa)"
               >
-                {{ tarefa.status === 'FEITA' ? '✓' : '' }}
+                @if (tarefa.status === 'FEITA') {
+                  <app-icone nome="check" [tamanho]="15" />
+                }
               </button>
 
               <a
@@ -93,8 +104,8 @@
             <span class="agora__rotulo">AGORA</span>
             <p class="agora__titulo">{{ agora().atual!.titulo }}</p>
             <p class="agora__detalhe">
-              {{ hhmm(agora().atual!.horaInicio) }}–{{ hhmm(agora().atual!.horaFim) }}
-              · faltam {{ duracao(agora().minutosRestantes) }}
+              {{ hhmm(agora().atual!.horaInicio) }}–{{ hhmm(agora().atual!.horaFim) }} · faltam
+              {{ duracao(agora().minutosRestantes) }}
               @if (agora().proximo; as prox) {
                 · depois: {{ prox.titulo }} {{ hhmm(prox.horaInicio) }}
               }
@@ -106,8 +117,8 @@
             <span class="agora__rotulo">A SEGUIR</span>
             <p class="agora__titulo">{{ agora().proximo!.titulo }}</p>
             <p class="agora__detalhe">
-              começa às {{ hhmm(agora().proximo!.horaInicio) }}
-              · em {{ duracao(agora().minutosRestantes) }}
+              começa às {{ hhmm(agora().proximo!.horaInicio) }} · em
+              {{ duracao(agora().minutosRestantes) }}
             </p>
           </div>
         }
@@ -116,8 +127,8 @@
             <span class="agora__rotulo">INTERVALO</span>
             <p class="agora__titulo">{{ agora().proximo!.titulo }}</p>
             <p class="agora__detalhe">
-              começa às {{ hhmm(agora().proximo!.horaInicio) }}
-              · em {{ duracao(agora().minutosRestantes) }}
+              começa às {{ hhmm(agora().proximo!.horaInicio) }} · em
+              {{ duracao(agora().minutosRestantes) }}
             </p>
           </div>
         }
@@ -131,34 +142,38 @@
       }
 
       <!-- --------------------------------------------- linha do tempo -->
-      <ol class="linha">
-        @for (bloco of d.blocos; track bloco.id) {
-          <li
-            class="linha__item"
-            [class.linha__item--atual]="ehAtual(bloco)"
-            [class.linha__item--passado]="jaPassou(bloco)"
-          >
-            <span class="linha__horario">{{ hhmm(bloco.horaInicio) }}</span>
-            <span
-              class="linha__marca"
-              [style.background]="bloco.cor ?? 'var(--cor-primaria)'"
-              aria-hidden="true"
-            ></span>
-            <span class="linha__titulo">
-              {{ bloco.titulo }}
-              @if (ehAtual(bloco)) {
-                <span class="linha__agora">agora</span>
-              }
-            </span>
-            <span class="linha__fim">até {{ hhmm(bloco.horaFim) }}</span>
-          </li>
-        }
-      </ol>
+      <section class="secao">
+        <header class="secao__topo">
+          <h2 class="secao__titulo">Rotina do dia</h2>
+          <a class="secao__acao" routerLink="/rotina">Editar</a>
+        </header>
 
-      <p class="hoje__rodape">
-        Modelo <strong>{{ d.nomeDoModelo }}</strong> ·
-        <a routerLink="/rotina">editar rotina</a>
-      </p>
+        <ol class="linha">
+          @for (bloco of d.blocos; track bloco.id) {
+            <li
+              class="linha__item"
+              [class.linha__item--atual]="ehAtual(bloco)"
+              [class.linha__item--passado]="jaPassou(bloco)"
+            >
+              <span class="linha__horario">{{ hhmm(bloco.horaInicio) }}</span>
+              <span
+                class="linha__marca"
+                [style.background]="bloco.cor ?? 'var(--cor-primaria)'"
+                aria-hidden="true"
+              ></span>
+              <span class="linha__titulo">
+                <span class="linha__nome">{{ bloco.titulo }}</span>
+                @if (ehAtual(bloco)) {
+                  <span class="linha__agora">agora</span>
+                }
+              </span>
+              <span class="linha__fim">até {{ hhmm(bloco.horaFim) }}</span>
+            </li>
+          }
+        </ol>
+
+        <p class="secao__rodape">Modelo {{ d.nomeDoModelo }}</p>
+      </section>
     }
 
     <!-- ----------------------------------------------------- hábitos -->
@@ -166,7 +181,7 @@
     @if (habitos().length > 0) {
       <section class="secao">
         <header class="secao__topo">
-          <h2>Hábitos de hoje</h2>
+          <h2 class="secao__titulo">Hábitos</h2>
           <span class="secao__contador">{{ feitos() }}/{{ habitos().length }}</span>
         </header>
 
@@ -184,7 +199,11 @@
                 "
                 (click)="alternar(habito, habito.status === null ? 'FEITO' : null)"
               >
-                {{ habito.status === 'FEITO' ? '✓' : habito.status === 'PULADO' ? '–' : '' }}
+                @if (habito.status === 'FEITO') {
+                  <app-icone nome="check" [tamanho]="15" />
+                } @else if (habito.status === 'PULADO') {
+                  <app-icone nome="menos" [tamanho]="15" />
+                }
               </button>
 
               <div class="item__corpo">
@@ -193,12 +212,8 @@
               </div>
 
               @if (habito.status === null) {
-                <button
-                  class="item__pular"
-                  type="button"
-                  (click)="alternar(habito, 'PULADO')"
-                >
-                  pular
+                <button class="item__pular" type="button" (click)="alternar(habito, 'PULADO')">
+                  Pular
                 </button>
               }
             </li>
@@ -211,7 +226,7 @@
     @if (tarefas().length > 0) {
       <section class="secao">
         <header class="secao__topo">
-          <h2>Tarefas de hoje</h2>
+          <h2 class="secao__titulo">Tarefas</h2>
           <span class="secao__contador">{{ tarefasFeitas() }}/{{ tarefas().length }}</span>
         </header>
 
@@ -228,7 +243,9 @@
                 "
                 (click)="alternarTarefa(tarefa)"
               >
-                {{ tarefa.status === 'FEITA' ? '✓' : '' }}
+                @if (tarefa.status === 'FEITA') {
+                  <app-icone nome="check" [tamanho]="15" />
+                }
               </button>
 
               <a
@@ -253,11 +270,11 @@
 
     <a
       class="adicionar"
-      routerLink="/tarefas/nova"
+      [routerLink]="['/tarefas', 'nova']"
       [queryParams]="{ data: d.data, origem: '/hoje' }"
       aria-label="Nova tarefa"
     >
-      +
+      <app-icone nome="mais" [tamanho]="26" />
     </a>
   }
 </section>

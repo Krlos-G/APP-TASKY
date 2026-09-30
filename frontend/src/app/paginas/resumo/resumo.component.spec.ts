@@ -79,7 +79,8 @@ describe('Resumo', () => {
     // 2 feitos de 4 itens: 1 habito + 1 tarefa.
     expect(barras(fixture)[0].getAttribute('aria-valuenow')).toBe('2');
     expect(barras(fixture)[0].getAttribute('aria-valuemax')).toBe('4');
-    expect(texto(fixture)).toContain('50%');
+    // O dia mostra a contagem; a porcentagem ficou so na semana.
+    expect(texto(fixture)).toContain('2/4');
   });
 
   it('dia sem nada planejado nao mostra barra, e sim um aviso', () => {
@@ -98,6 +99,26 @@ describe('Resumo', () => {
     expect(texto(fixture)).toContain('Nada planejado para hoje.');
     // So sobra a barra da semana.
     expect(barras(fixture).length).toBe(1);
+  });
+
+  it('dia sem tarefa nao mostra 0/0 de tarefas', () => {
+    const fixture = montar(
+      resumo({
+        dia: {
+          habitosFeitos: 1,
+          habitosDevidos: 2,
+          tarefasFeitas: 0,
+          tarefasDoDia: 0,
+          atrasadas: 0,
+        },
+      }),
+    );
+
+    const numerosDoDia = (fixture.nativeElement as HTMLElement).querySelector('.numeros')!;
+    const rotulosDoDia = Array.from(numerosDoDia.querySelectorAll('.numero__rotulo')).map((r) =>
+      r.textContent?.trim(),
+    );
+    expect(rotulosDoDia).toEqual(['hábitos']);
   });
 
   it('o periodo da semana sai por extenso, sem repetir o mes', () => {
@@ -150,7 +171,7 @@ describe('Resumo', () => {
     );
 
     const nomes = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('.sequencia__nome'),
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.sequencia .item__nome'),
     ).map((n) => n.textContent?.trim());
 
     expect(nomes).toEqual(['Ler', 'Meditar', 'Correr']);

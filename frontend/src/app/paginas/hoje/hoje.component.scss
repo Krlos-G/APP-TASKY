@@ -1,15 +1,17 @@
 .hoje {
   max-width: 640px;
 
-  &__topo h1 {
+  &__titulo {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: var(--tam-titulo-grande);
+    font-weight: 700;
+    letter-spacing: var(--letra-titulo);
   }
 
   &__data {
-    margin: 0.15rem 0 1.25rem;
+    margin: 2px 0 0;
     color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
+    font-size: var(--tam-apoio);
     /* Só a inicial: capitalize maiusculiza toda palavra e produziria
        "Domingo, 6 De Setembro". */
     &::first-letter {
@@ -17,42 +19,35 @@
     }
   }
 
-  &__carregando {
-    color: var(--cor-texto-fraco);
-  }
 
-  &__rodape {
-    margin-top: 1.5rem;
-    color: var(--cor-texto-fraco);
-    font-size: 0.85rem;
-
-    a {
-      color: var(--cor-primaria);
-    }
+  .progresso {
+    margin-top: var(--esp-4);
   }
 }
+
 
 /* ------------------------------------------------------- bloco atual */
 
 .agora {
-  margin-bottom: 1.5rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--cor-primaria);
-  border-radius: var(--raio);
+  margin-top: var(--esp-6);
+  padding: var(--esp-4) var(--esp-5);
+  border-radius: var(--raio-cartao);
   background: var(--cor-primaria-fraca);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
 
   /* Fora do bloco corrente o destaque é desnecessário: não há nada
      acontecendo agora que mereça a cor de ênfase. */
   &--calmo {
-    border-color: var(--cor-borda);
     background: var(--cor-superficie);
+    box-shadow: var(--sombra-cartao);
   }
 
   &__rotulo {
-    color: var(--cor-primaria);
-    font-size: 0.7rem;
+    color: var(--cor-primaria-texto);
+    font-size: var(--tam-legenda);
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
   }
 
   &--calmo &__rotulo {
@@ -60,32 +55,53 @@
   }
 
   &__titulo {
-    margin: 0.3rem 0 0.2rem;
-    font-size: 1.25rem;
+    margin: var(--esp-1) 0 2px;
+    font-size: var(--tam-destaque);
     font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   &__detalhe {
     margin: 0;
     color: var(--cor-texto-fraco);
-    font-size: 0.85rem;
+    font-size: var(--tam-apoio);
   }
 }
 
-/* ----------------------------------------------------- linha do tempo */
+
+/* ------------------------------------------------------ linha do tempo */
 
 .linha {
+  overflow: hidden;
   margin: 0;
   padding: 0;
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
+  box-shadow: var(--sombra-cartao);
   list-style: none;
 
   &__item {
     display: grid;
     grid-template-columns: 3.2rem auto 1fr auto;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.6rem 0.5rem;
-    border-radius: 8px;
+    gap: var(--esp-3);
+    padding: var(--esp-3) var(--esp-4);
+
+    & + & {
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: var(--esp-4);
+        height: 1px;
+        background: var(--cor-borda);
+      }
+    }
 
     &--atual {
       background: var(--cor-primaria-fraca);
@@ -99,254 +115,50 @@
 
   &__horario {
     color: var(--cor-texto-fraco);
-    font-size: 0.85rem;
+    font-size: var(--tam-nota);
     font-variant-numeric: tabular-nums;
   }
 
   &__marca {
     width: 4px;
-    height: 22px;
+    height: 24px;
     border-radius: 2px;
   }
 
+  /* Quem corta e o nome, nunca a linha: a pilula "agora" fica fora dele, senao
+     um titulo longo levaria o selo embora junto com o texto. */
   &__titulo {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-2);
+    min-width: 0;
+  }
+
+  &__nome {
     overflow: hidden;
+    font-size: var(--tam-apoio);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   &__agora {
-    margin-left: 0.4rem;
-    padding: 0.05rem 0.4rem;
-    border-radius: 999px;
+    flex-shrink: 0;
+    padding: 1px var(--esp-2);
+    border-radius: var(--raio-pilula);
     background: var(--cor-primaria);
-    color: #fff;
-    font-size: 0.68rem;
+    color: var(--cor-sobre-cor);
+    font-size: var(--tam-legenda);
     font-weight: 600;
   }
 
   &__fim {
     color: var(--cor-texto-fraco);
-    font-size: 0.78rem;
+    font-size: var(--tam-legenda);
     font-variant-numeric: tabular-nums;
   }
 }
 
-/* ------------------------------------- seções de hábitos e tarefas */
 
-.progresso {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-
-  &__trilha {
-    flex: 1;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--cor-borda);
-    overflow: hidden;
-  }
-
-  &__barra {
-    display: block;
-    height: 100%;
-    background: var(--cor-primaria);
-  }
-
-  &__numero {
-    color: var(--cor-texto-fraco);
-    font-size: 0.78rem;
-    font-variant-numeric: tabular-nums;
-  }
-}
-
-.atrasadas {
-  margin-bottom: 1.5rem;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid color-mix(in srgb, crimson 35%, transparent);
-  border-radius: var(--raio);
-
-  &__titulo {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin: 0 0 0.35rem;
-    color: crimson;
-    font-size: 0.9rem;
-  }
-
-  &__contagem {
-    padding: 0 0.4rem;
-    border-radius: 999px;
-    background: color-mix(in srgb, crimson 16%, transparent);
-    font-size: 0.75rem;
-  }
-}
-
-.secao {
-  margin-top: 1.75rem;
-
-  &__topo {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-
-    h2 {
-      margin: 0;
-      font-size: 1rem;
-    }
-  }
-
-  &__contador {
-    color: var(--cor-texto-fraco);
-    font-size: 0.85rem;
-    font-variant-numeric: tabular-nums;
-  }
-}
-
-.itens {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.item {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.55rem 0.5rem;
-
-  &--resolvido {
-    opacity: 0.6;
-  }
-
-  &__marca {
-    width: 26px;
-    height: 26px;
-    border: 1.5px solid var(--cor-borda);
-    border-radius: 50%;
-    background: transparent;
-    color: transparent;
-    font-size: 0.85rem;
-    line-height: 1;
-    cursor: pointer;
-
-    &--feito {
-      border-color: var(--cor-primaria);
-      background: var(--cor-primaria);
-      color: #fff;
-    }
-
-    &--pulado {
-      color: var(--cor-texto-fraco);
-    }
-  }
-
-  &__corpo {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  &__nome {
-    margin: 0;
-    overflow: hidden;
-    font-size: 0.95rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &--resolvido &__nome {
-    text-decoration: line-through;
-  }
-
-  &__detalhe {
-    margin: 0.1rem 0 0;
-    color: var(--cor-texto-fraco);
-    font-size: 0.78rem;
-  }
-
-  /* Pular é saída de emergência, não a ação principal: fica discreto. */
-  &__pular {
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--cor-texto-fraco);
-    font-size: 0.78rem;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-}
-
-.selo {
-  padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, crimson 14%, transparent);
-  color: crimson;
-  font-size: 0.72rem;
-  font-weight: 600;
-}
-
-/* Acima da barra de navegação, que tem --altura-tab-bar no mobile. */
-.adicionar {
-  position: fixed;
-  right: 1.25rem;
-  bottom: calc(var(--altura-tab-bar) + 1rem);
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--cor-primaria);
-  color: #fff;
-  font-size: 1.6rem;
-  line-height: 1;
-  text-decoration: none;
-}
-
-/* ------------------------------------------------------- estado vazio */
-
-.vazio-cartao {
-  padding: 1.5rem;
-  border: 1px dashed var(--cor-borda);
-  border-radius: var(--raio);
-  text-align: center;
-
-  &__titulo {
-    margin: 0 0 0.35rem;
-    font-size: 1.05rem;
-    font-weight: 600;
-  }
-
-  &__nota {
-    margin: 0 0 1.1rem;
-    color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
-  }
-}
-
-.botao {
-  display: inline-block;
-  padding: 0.6rem 1.1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: 8px;
-  color: var(--cor-texto);
-  font-size: 0.9rem;
-  text-decoration: none;
-  cursor: pointer;
-
-  &--primario {
-    border-color: var(--cor-primaria);
-    background: var(--cor-primaria);
-    color: #fff;
-    font-weight: 600;
-  }
-}
 
 @media (max-width: 480px) {
   .linha__item {
@@ -359,4 +171,20 @@
     grid-column: 3;
     justify-self: start;
   }
+}
+
+/* Ha um botao logo abaixo da nota neste cartao. */
+.vazio-cartao__nota {
+  margin-bottom: 1.1rem;
+}
+
+/* Pular e saida de emergencia, nao a acao principal: fica discreto. */
+.item__pular {
+  padding: var(--esp-1) var(--esp-2);
+  border: 0;
+  background: none;
+  color: var(--cor-texto-fraco);
+  font-family: inherit;
+  font-size: var(--tam-nota);
+  cursor: pointer;
 }

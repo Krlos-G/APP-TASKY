@@ -1,0 +1,228 @@
+/* Movimento do Tasky.
+ *
+ * Tudo que anda mora aqui, para o "reduzir movimento" do aparelho poder
+ * desligar de uma vez, no fim do arquivo. */
+
+/* -------------------------------------------------------------- toque */
+
+/* Encolher um pouco ao pressionar e o que faz um toque parecer fisico. */
+.botao,
+.adicionar,
+.dias__botao,
+.item__marca,
+.cores__amostra,
+.bloco__acao {
+  transition:
+    transform var(--transicao-rapida) var(--curva),
+    opacity var(--transicao-rapida) var(--curva),
+    background-color var(--transicao) var(--curva),
+    border-color var(--transicao) var(--curva),
+    color var(--transicao) var(--curva);
+}
+
+.botao:not(:disabled):active,
+.dias__botao:active,
+.bloco__acao:active,
+.cores__opcao:active .cores__amostra {
+  transform: scale(0.96);
+}
+
+.adicionar:active {
+  transform: scale(0.92);
+}
+
+.item__marca:active {
+  transform: scale(0.88);
+}
+
+/* ---------------------------------------------------------- marcacao */
+
+/* O circulo cheio chega com um pulo curto: passa um pouco do tamanho e
+   volta, como os controles do iOS. */
+.item__marca--feito {
+  animation: marcar 340ms var(--curva-pulo);
+}
+
+@keyframes marcar {
+  0% {
+    transform: scale(0.7);
+  }
+  55% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Concluido escurece aos poucos, em vez de pular de um quadro para outro. */
+.item {
+  transition: opacity var(--transicao) var(--curva);
+}
+
+/* ------------------------------------------------ entrada das listas */
+
+/* Sem quadro final de proposito: a linha anima ate a opacidade que ja e
+   dela - uma tarefa concluida chega escurecida, sem piscar clara antes. */
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* As listas rastreiam por id, entao so anima o que entrou de verdade:
+   marcar um item nao faz a lista inteira replayar. */
+.itens > .item,
+.linha__item,
+.lista > .habito,
+.semana__modelo,
+.dados__linha {
+  animation: entrar 280ms var(--curva) backwards;
+}
+
+@for $n from 2 through 12 {
+  .itens > .item:nth-child(#{$n}),
+  .linha__item:nth-child(#{$n}),
+  .lista > .habito:nth-child(#{$n}),
+  .semana__modelo:nth-child(#{$n}),
+  .dados__linha:nth-child(#{$n}) {
+    animation-delay: #{($n - 1) * 35}ms;
+  }
+}
+
+/* ----------------------------------------------------------- esqueleto */
+
+/* Aparece so depois de um instante: se os dados chegam antes disso, o
+   esqueleto nunca chega a ser visto e a tela nao pisca. */
+.esqueleto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin-top: var(--esp-6);
+  animation: aparecer 200ms 160ms var(--curva) backwards;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
+.esqueleto__cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  padding: var(--esp-4);
+  border-radius: var(--raio-cartao);
+  background: var(--cor-superficie);
+  backdrop-filter: var(--desfoque);
+  -webkit-backdrop-filter: var(--desfoque);
+  box-shadow: var(--sombra-cartao);
+}
+
+.esqueleto__item {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+}
+
+.esqueleto__textos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.esqueleto__linha,
+.esqueleto__circulo {
+  background: linear-gradient(
+    90deg,
+    var(--cor-trilho) 0%,
+    var(--cor-esqueleto-brilho) 50%,
+    var(--cor-trilho) 100%
+  );
+  background-size: 200% 100%;
+  animation: brilhar 1.4s ease-in-out infinite;
+}
+
+.esqueleto__linha {
+  height: 12px;
+  border-radius: 6px;
+
+  &--curta {
+    width: 55%;
+  }
+}
+
+.esqueleto__circulo {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+@keyframes brilhar {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* ------------------------------------------------------ troca de tela */
+
+/* A tela nova entra pelo lado da aba dela na barra; fora das abas, so sobe de
+   leve. A direcao vem de uma variavel, e nao do nome da animacao: trocar o
+   nome reiniciaria a animacao da tela que ainda esta saindo, e ela piscaria. */
+:root {
+  --entrada-x: 0px;
+  --entrada-y: 10px;
+}
+
+:root[data-direcao='avanca'] {
+  --entrada-x: 18%;
+  --entrada-y: 0px;
+}
+
+:root[data-direcao='volta'] {
+  --entrada-x: -18%;
+  --entrada-y: 0px;
+}
+
+@keyframes pagina-entrar {
+  from {
+    opacity: 0;
+    transform: translate(var(--entrada-x), var(--entrada-y));
+  }
+}
+
+/* O elemento da pagina (app-hoje, app-tarefas...) e inline por padrao, e
+   transform nao vale em elemento inline. */
+.conteudo > :not(router-outlet) {
+  display: block;
+  animation: pagina-entrar 300ms var(--curva) backwards;
+}
+
+/* O botao flutuante mora dentro da pagina e e position: fixed. Enquanto a
+   pagina anima com transform, ele passa a se posicionar a partir dela e
+   apareceria no lugar errado - entao so surge depois que a pagina assentou. */
+.adicionar {
+  animation: aparecer 200ms 300ms var(--curva) backwards;
+}
+
+/* ---------------------------------------------------- reduzir movimento */
+
+/* Quem pediu menos movimento no aparelho recebe as telas paradas: tudo que
+   anda acima chega ao estado final na hora. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

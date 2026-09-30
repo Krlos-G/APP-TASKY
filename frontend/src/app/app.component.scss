@@ -8,27 +8,83 @@
 }
 
 .conteudo {
-  padding: 1rem;
-  /* Espaco para a tab bar fixa nao cobrir o conteudo, respeitando a
-     area segura do iPhone (home indicator). */
-  padding-bottom: calc(var(--altura-tab-bar) + env(safe-area-inset-bottom) + 1rem);
+  /* O deslizar entre abas move o conteudo com left, que precisa disto. */
+  position: relative;
+  /* A tela que entra pela direita, ou que o dedo empurra, sai da largura da
+     tela por um instante. Sem cortar isso, o navegador do celular alarga a
+     pagina e a barra de abas, que e presa as laterais, estica junto. clip e
+     nao hidden: hidden faria do conteudo um conteiner de rolagem. */
+  overflow-x: clip;
+  padding: var(--esp-4);
+  /* A barra flutua sobre o conteudo: o fim da lista precisa de folga para nao
+     ficar embaixo dela, respeitando a area segura do iPhone. */
+  padding-bottom: calc(var(--altura-tab-bar) + env(safe-area-inset-bottom) + var(--esp-5));
+  /* O navegador cuida da rolagem vertical e do zoom; o gesto de lado fica
+     com o app, para trocar de aba. */
+  touch-action: pan-y pinch-zoom;
+  transition: left var(--transicao) var(--curva);
+
+  /* Sob o dedo a tela segue sem atraso; ao trocar, volta ao lugar na hora -
+     quem anima e a tela que chega. */
+  &--deslizando,
+  &--trocando {
+    transition: none;
+  }
 }
 
+/* No celular a navegacao e uma capsula de vidro solta do rodape. */
 .nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  left: var(--esp-3);
+  right: var(--esp-3);
+  bottom: calc(env(safe-area-inset-bottom) + var(--esp-2));
   z-index: 10;
-  background: var(--cor-superficie);
-  border-top: 1px solid var(--cor-borda);
-  padding-bottom: env(safe-area-inset-bottom);
+  padding: 6px;
+  border: 1px solid var(--cor-vidro-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-vidro);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: var(--sombra-flutuante);
 
   &__marca {
     display: none;
   }
 
+  /* Trilho da pilula: segura a pilula e as abas na mesma caixa, e deixa o
+     arrasto com o app em vez de rolar a pagina. */
+  &__trilho {
+    position: relative;
+    touch-action: none;
+  }
+
+  /* Uma pilula so, para ela poder escorregar de uma aba para outra - e seguir
+     o dedo, que a coloca em posicoes quebradas entre duas abas. */
+  &__pilula {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: calc(100% / var(--abas, 4));
+    border-radius: var(--raio-pilula);
+    background: var(--cor-primaria-fraca);
+    transform: translateX(calc(var(--pilula, 0) * 100%));
+    transition:
+      transform 320ms var(--curva),
+      opacity var(--transicao) var(--curva);
+    pointer-events: none;
+  }
+
+  &__trilho--arrastando &__pilula {
+    transition: opacity var(--transicao) var(--curva);
+  }
+
+  &__trilho--sem-aba &__pilula {
+    opacity: 0;
+  }
+
   &__lista {
+    position: relative;
     display: flex;
     align-items: stretch;
     margin: 0;
@@ -45,30 +101,39 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    height: var(--altura-tab-bar);
-    text-decoration: none;
+    gap: 3px;
+    padding: 7px 0 6px;
+    border-radius: var(--raio-pilula);
     color: var(--cor-texto-fraco);
-    font-size: 0.7rem;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-decoration: none;
+
+    transition: color var(--transicao) var(--curva);
 
     &--ativo {
-      color: var(--cor-primaria);
+      color: var(--cor-primaria-texto);
       font-weight: 600;
     }
   }
 
-  &__icone {
-    font-size: 1.25rem;
-    line-height: 1;
-  }
-
-  /* No celular a tab bar so tem as abas; o rodape aparece no desktop. */
+  /* No celular a barra so tem as abas; o rodape aparece no desktop. */
   &__rodape {
     display: none;
   }
 }
 
-/* Desktop: a navegacao vira uma coluna lateral fixa. */
+/* Sem vidro no navegador a barra vira superficie solida: navegar nao pode
+   depender de enfeite. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav {
+    background: var(--cor-superficie);
+    border-color: var(--cor-borda);
+  }
+}
+
+/* Desktop: a navegacao vira uma coluna lateral fixa, sem capsula nem vidro. */
 @media (min-width: 768px) {
   .app {
     display: grid;
@@ -76,7 +141,7 @@
   }
 
   .conteudo {
-    padding: 2rem;
+    padding: var(--esp-8);
   }
 
   .app--sem-nav {
@@ -86,39 +151,47 @@
   .nav {
     position: sticky;
     top: 0;
+    left: auto;
+    right: auto;
     bottom: auto;
     display: flex;
     flex-direction: column;
     height: 100dvh;
-    border-top: none;
+    padding: var(--esp-5) var(--esp-3);
+    border: none;
     border-right: 1px solid var(--cor-borda);
-    padding: 1.25rem 0.75rem;
+    border-radius: 0;
+    background: var(--cor-superficie);
+    backdrop-filter: var(--desfoque);
+    -webkit-backdrop-filter: var(--desfoque);
+    box-shadow: none;
 
     &__rodape {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.5rem;
+      gap: var(--esp-2);
       margin-top: auto;
-      padding: 0.75rem;
+      padding: var(--esp-3);
       border-top: 1px solid var(--cor-borda);
     }
 
     &__usuario {
       overflow: hidden;
-      font-size: 0.875rem;
+      font-size: var(--tam-nota);
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     &__sair {
       flex-shrink: 0;
-      padding: 0.35rem 0.7rem;
+      padding: 6px var(--esp-3);
       border: 1px solid var(--cor-borda);
-      border-radius: 8px;
+      border-radius: var(--raio-pilula);
       background: transparent;
       color: var(--cor-texto-fraco);
-      font-size: 0.8rem;
+      font-family: inherit;
+      font-size: var(--tam-legenda);
       cursor: pointer;
 
       &:hover {
@@ -128,25 +201,33 @@
 
     &__marca {
       display: block;
-      padding: 0 0.75rem 1.25rem;
-      font-size: 1.25rem;
+      padding: 0 var(--esp-3) var(--esp-5);
+      color: var(--cor-primaria-texto);
+      font-size: var(--tam-seccao);
       font-weight: 700;
-      color: var(--cor-primaria);
+      letter-spacing: var(--letra-titulo);
     }
 
     &__lista {
       flex-direction: column;
-      gap: 4px;
+      gap: var(--esp-1);
+    }
+
+    &__trilho {
+      touch-action: auto;
+    }
+
+    &__pilula {
+      display: none;
     }
 
     &__item {
       flex-direction: row;
       justify-content: flex-start;
-      gap: 0.75rem;
-      height: auto;
-      padding: 0.7rem 0.75rem;
-      border-radius: var(--raio);
-      font-size: 0.95rem;
+      gap: var(--esp-3);
+      padding: var(--esp-3);
+      border-radius: var(--raio-botao);
+      font-size: var(--tam-apoio);
 
       &--ativo {
         background: var(--cor-primaria-fraca);

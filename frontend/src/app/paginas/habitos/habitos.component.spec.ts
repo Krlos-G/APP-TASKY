@@ -6,9 +6,17 @@ import {
 } from '@angular/common/http/testing';
 import { Habitos } from './habitos.component';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
-import { Habito } from '../../core/habitos/habito.models';
+import { DiaDoHabito, Habito } from '../../core/habitos/habito.models';
 
 const HOJE = '2026-09-07';
+
+/** Os 14 dias da trilha, todos em branco salvo o que o teste pedir. */
+function janela(feitos: string[] = []): DiaDoHabito[] {
+  return Array.from({ length: 14 }, (_, i) => {
+    const dia = new Date(Date.UTC(2026, 7, 25 + i)).toISOString().slice(0, 10);
+    return { data: dia, status: feitos.includes(dia) ? 'FEITO' : null, devido: true };
+  });
+}
 
 function habito(parcial: Partial<Habito> = {}): Habito {
   return {
@@ -24,6 +32,7 @@ function habito(parcial: Partial<Habito> = {}): Habito {
     streak: 0,
     statusHoje: null,
     devidoHoje: true,
+    ultimosDias: janela(),
     ...parcial,
   };
 }
@@ -62,6 +71,12 @@ describe('Habitos', () => {
 
   function texto(fixture: ReturnType<typeof montar>): string {
     return (fixture.nativeElement as HTMLElement).textContent ?? '';
+  }
+
+  function novoHabito(fixture: ReturnType<typeof montar>): HTMLButtonElement {
+    return (fixture.nativeElement as HTMLElement).querySelector(
+      '.adicionar',
+    ) as HTMLButtonElement;
   }
 
   function botao(fixture: ReturnType<typeof montar>, rotulo: string): HTMLButtonElement {
@@ -145,10 +160,22 @@ describe('Habitos', () => {
     expect(texto(fixture)).toContain('Nenhum hábito ainda');
   });
 
+  it('habito sem nome avisa em vez de nao fazer nada', () => {
+    const fixture = montar([]);
+
+    novoHabito(fixture).click();
+    fixture.detectChanges();
+    botao(fixture, 'Salvar').click();
+    fixture.detectChanges();
+
+    http.expectNone((r) => r.method === 'POST');
+    expect(texto(fixture)).toContain('Dê um nome ao hábito.');
+  });
+
   it('nao envia habito de dias fixos sem nenhum dia escolhido', () => {
     const fixture = montar([]);
 
-    botao(fixture, 'Novo hábito').click();
+    novoHabito(fixture).click();
     fixture.detectChanges();
 
     const elemento = fixture.nativeElement as HTMLElement;
@@ -171,7 +198,7 @@ describe('Habitos', () => {
   it('cria habito de dias fixos com os dias escolhidos', () => {
     const fixture = montar([]);
 
-    botao(fixture, 'Novo hábito').click();
+    novoHabito(fixture).click();
     fixture.detectChanges();
 
     const elemento = fixture.nativeElement as HTMLElement;

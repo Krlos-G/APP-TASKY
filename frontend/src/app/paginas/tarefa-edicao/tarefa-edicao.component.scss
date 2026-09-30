@@ -1,120 +1,71 @@
 .edicao {
   max-width: 560px;
 
-  &__topo h1 {
-    margin: 0 0 1.25rem;
-    font-size: 1.5rem;
+  &__titulo {
+    margin: 0;
+    font-size: var(--tam-titulo-grande);
+    font-weight: 700;
+    letter-spacing: var(--letra-titulo);
   }
 
   &__nota {
     color: var(--cor-texto-fraco);
-    font-size: 0.9rem;
+    font-size: var(--tam-apoio);
+  }
+
+  /* Cada campo e um cartao; o grupo so os empilha com respiro entre eles. */
+  &__grupo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--esp-3);
   }
 
   &__linha {
     display: flex;
-    gap: 0.75rem;
+    gap: var(--esp-3);
 
     .campo {
       flex: 1;
+      min-width: 0;
     }
   }
 
   &__acoes {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 1.25rem;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--esp-2);
+    margin-top: var(--esp-6);
   }
 }
 
-.campo {
-  display: block;
-  margin-bottom: 0.85rem;
-
-  &__rotulo {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: var(--cor-texto-fraco);
-    font-size: 0.8rem;
-  }
-
-  &__entrada {
-    width: 100%;
-    padding: 0.55rem 0.7rem;
-    border: 1px solid var(--cor-borda);
-    border-radius: 8px;
-    background: var(--cor-fundo);
-    color: var(--cor-texto);
-    font-family: inherit;
-    font-size: 0.95rem;
-
-    &:disabled {
-      opacity: 0.5;
-    }
-  }
-
-  &__dica {
-    display: block;
-    margin-top: 0.2rem;
-    color: var(--cor-texto-fraco);
-    font-size: 0.72rem;
-  }
-}
-
-.botao {
-  padding: 0.55rem 1rem;
-  border: 1px solid var(--cor-borda);
-  border-radius: 8px;
-  background: var(--cor-superficie);
-  color: var(--cor-texto);
-  font-size: 0.9rem;
-  cursor: pointer;
-
-  &--primario {
-    border-color: var(--cor-primaria);
-    background: var(--cor-primaria);
-    color: #fff;
-    font-weight: 600;
-  }
-
-  &--perigo {
-    border-color: crimson;
-    color: crimson;
-  }
-}
-
-.link {
-  padding: 0;
-  border: 0;
-  background: none;
-  font-size: 0.82rem;
-  text-decoration: underline;
-  cursor: pointer;
-
-  &--perigo {
-    color: crimson;
-  }
-}
-
+/* Acao destrutiva em secao propria, longe de Salvar - como o iOS faz. */
 .excluir {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--cor-borda);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-3);
+  margin-top: var(--esp-8);
+  text-align: center;
 
   &__texto {
-    margin: 0 0 0.7rem;
-    font-size: 0.85rem;
+    margin: 0;
+    font-size: var(--tam-apoio);
   }
 
   &__acoes {
     display: flex;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: var(--esp-2);
+  }
+
+  .link {
+    font-size: var(--tam-corpo);
   }
 }
 
 @media (max-width: 480px) {
   .edicao__linha {
     flex-direction: column;
-    gap: 0;
   }
 }
