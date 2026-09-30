@@ -242,6 +242,25 @@ e teclado continuam funcionando como hoje; e nada disso vale com `prefers-reduce
   estados vazios ilustrados).
 - Mensagem de commit por etapa, como sempre.
 
+### Resultado (30/09)
+
+Revisadas 8 das 9 telas nas duas larguras, com varredura automática (estouro lateral, texto
+cortado, controle escondido atrás da barra ou do "+") e olho nos dois temas. O Login ficou de fora:
+com sessão aberta o guard redireciona, e ele já tinha sido conferido na Etapa 6. Três ajustes
+saíram daqui:
+
+- **Pílula fora das abas:** em Rotina e Ajustes ela ia para a posição −1 e escorregava para fora
+  da barra ao sumir. Agora some onde estava.
+- **Pílula dentro de uma tarefa:** a edição continua na seção Tarefas, como um detalhe aberto numa
+  aba do iOS. O deslizar entre abas segue valendo só nas quatro telas principais.
+- **"0/0 tarefas" no Resumo** (pendência de gosto da Fatia 6): o número do dia só aparece quando
+  existe, como as atrasadas já faziam. A outra pendência, "100% com 1 atrasada", sumiu sozinha
+  quando o cartão do dia trocou a porcentagem por segmentos.
+
+A área segura de baixo está coberta (barra, "+" e respiro do conteúdo). **Passam para a Fatia 8,
+porque só se conferem no iPhone instalado:** a área segura do topo (depende do estilo da barra de
+status), o custo do blur na rolagem e a sensação dos gestos.
+
 ---
 
 ## Ordem e pontos de parada
