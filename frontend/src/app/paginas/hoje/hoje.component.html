@@ -35,7 +35,7 @@
   }
 
   @if (carregando()) {
-    <p class="hoje__carregando">Carregando…</p>
+    <app-esqueleto tipo="lista" [quantidade]="4" />
   } @else if (dia(); as d) {
     <!-- --------------------------------------------------- atrasadas -->
     <!-- No topo e sem sumir: é o que se esquece se não estiver na cara. -->

@@ -23,7 +23,7 @@
   }
 
   @if (carregando()) {
-    <p class="tarefas__nota">Carregando…</p>
+    <app-esqueleto tipo="lista" [quantidade]="4" />
   } @else if (tarefas().length === 0) {
     <p class="tarefas__nota">{{ mensagemVazia() }}</p>
   } @else {

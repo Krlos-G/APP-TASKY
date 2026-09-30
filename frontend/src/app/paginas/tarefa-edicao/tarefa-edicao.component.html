@@ -8,7 +8,7 @@
   }
 
   @if (carregando()) {
-    <p class="edicao__nota">Carregando…</p>
+    <app-esqueleto tipo="cartoes" [quantidade]="3" />
   } @else {
     <form [formGroup]="form" (ngSubmit)="salvar()">
       <section class="secao">

@@ -13,9 +13,10 @@ import {
 import { RespostaErro } from '../../core/auth/auth.models';
 import { COR_PADRAO, CorDisponivel, CORES, coresCom } from '../../core/ui/cores';
 import { Icone } from '../../core/ui/icone.component';
+import { Esqueleto } from '../../core/ui/esqueleto.component';
 
 @Component({
-  imports: [Icone, ReactiveFormsModule],
+  imports: [Esqueleto, Icone, ReactiveFormsModule],
   selector: 'app-rotina',
   styleUrl: './rotina.component.scss',
   templateUrl: './rotina.component.html',

@@ -100,7 +100,7 @@
 
   <!-- ------------------------------------------------------------ lista -->
   @if (carregando()) {
-    <p class="habitos__carregando">Carregando…</p>
+    <app-esqueleto tipo="cartoes" [quantidade]="3" />
   } @else if (semHabitos()) {
     <div class="vazio-cartao">
       <p class="vazio-cartao__titulo">Nenhum hábito ainda</p>

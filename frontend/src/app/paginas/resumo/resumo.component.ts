@@ -7,6 +7,7 @@ import { dataDeIso, formatarDataPorExtenso, formatarStreak } from '../../core/te
 import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
 import { segmentosDe } from '../../core/ui/progresso';
+import { Esqueleto } from '../../core/ui/esqueleto.component';
 
 interface Progresso {
   feitos: number;
@@ -15,7 +16,7 @@ interface Progresso {
 }
 
 @Component({
-  imports: [Icone, RouterLink],
+  imports: [Esqueleto, Icone, RouterLink],
   selector: 'app-resumo',
   styleUrl: './resumo.component.scss',
   templateUrl: './resumo.component.html',

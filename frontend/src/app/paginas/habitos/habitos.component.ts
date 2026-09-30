@@ -9,9 +9,10 @@ import { formatarDataCurta, formatarStreak } from '../../core/tempo/formatos';
 import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
 import { COR_PADRAO, CorDisponivel, CORES, coresCom } from '../../core/ui/cores';
+import { Esqueleto } from '../../core/ui/esqueleto.component';
 
 @Component({
-  imports: [Icone, ReactiveFormsModule],
+  imports: [Esqueleto, Icone, ReactiveFormsModule],
   selector: 'app-habitos',
   styleUrl: './habitos.component.scss',
   templateUrl: './habitos.component.html',

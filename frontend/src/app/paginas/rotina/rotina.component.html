@@ -11,7 +11,7 @@
   }
 
   @if (carregando()) {
-    <p class="rotina__carregando">Carregando…</p>
+    <app-esqueleto tipo="cartoes" [quantidade]="2" />
   } @else {
     <!-- ---------------------------------------------------- modelos -->
     <section class="secao">

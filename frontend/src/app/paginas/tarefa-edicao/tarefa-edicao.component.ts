@@ -7,9 +7,10 @@ import { TarefaService } from '../../core/tarefas/tarefa.service';
 import { Prioridade, TarefaRequest } from '../../core/tarefas/tarefa.models';
 import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
+import { Esqueleto } from '../../core/ui/esqueleto.component';
 
 @Component({
-  imports: [Icone, ReactiveFormsModule],
+  imports: [Esqueleto, Icone, ReactiveFormsModule],
   selector: 'app-tarefa-edicao',
   styleUrl: './tarefa-edicao.component.scss',
   templateUrl: './tarefa-edicao.component.html',

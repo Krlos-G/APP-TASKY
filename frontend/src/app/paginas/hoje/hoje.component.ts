@@ -17,6 +17,7 @@ import { Bloco, Dia } from '../../core/rotina/rotina.models';
 import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
 import { segmentosDe } from '../../core/ui/progresso';
+import { Esqueleto } from '../../core/ui/esqueleto.component';
 
 /** Onde o momento atual cai em relação aos blocos do dia. */
 type Situacao = 'antes' | 'durante' | 'entre' | 'depois' | 'sem-blocos';
@@ -30,7 +31,7 @@ interface Agora {
 }
 
 @Component({
-  imports: [Icone, RouterLink],
+  imports: [Esqueleto, Icone, RouterLink],
   selector: 'app-hoje',
   styleUrl: './hoje.component.scss',
   templateUrl: './hoje.component.html',
