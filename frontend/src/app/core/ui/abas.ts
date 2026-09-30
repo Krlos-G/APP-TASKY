@@ -23,6 +23,15 @@ export function indiceDaAba(url: string): number {
   return ABAS.findIndex((aba) => aba.rota === caminho);
 }
 
+/**
+ * A aba da seção: a edição de uma tarefa continua dentro de Tarefas, como um
+ * detalhe aberto numa aba do iOS, que não tira a aba de selecionada.
+ */
+export function indiceDaSecao(url: string): number {
+  const caminho = url.split(/[?#]/)[0];
+  return ABAS.findIndex((aba) => caminho === aba.rota || caminho.startsWith(aba.rota + '/'));
+}
+
 /** A aba ao lado, na direção pedida - ou nula na ponta ou fora das abas. */
 export function abaVizinha(url: string, passo: 1 | -1): Aba | null {
   const indice = indiceDaAba(url);

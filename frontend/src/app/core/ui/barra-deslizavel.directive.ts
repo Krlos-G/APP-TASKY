@@ -1,4 +1,4 @@
-import { Directive, ElementRef, computed, inject, signal } from '@angular/core';
+import { Directive, ElementRef, computed, inject, linkedSignal, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   NavigationCancel,
@@ -7,7 +7,7 @@ import {
   NavigationStart,
   Router,
 } from '@angular/router';
-import { ABAS, indiceDaAba } from './abas';
+import { ABAS, indiceDaAba, indiceDaSecao } from './abas';
 import { indicePelaPosicao } from './gestos';
 
 /** O quanto o dedo anda antes de um toque virar arrasto. */
@@ -22,7 +22,7 @@ const LIMIAR_ARRASTO = 8;
 @Directive({
   selector: '[appBarraDeslizavel]',
   host: {
-    '[style.--pilula]': 'posicao()',
+    '[style.--pilula]': 'lugarDaPilula()',
     '[style.--abas]': 'total',
     '[class.nav__trilho--arrastando]': 'arrastando()',
     '[class.nav__trilho--sem-aba]': 'posicao() < 0',
@@ -37,11 +37,16 @@ export class BarraDeslizavel {
   private readonly elemento = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
   protected readonly total = ABAS.length;
-  private readonly ativa = signal(indiceDaAba(this.router.url));
+  private readonly ativa = signal(indiceDaSecao(this.router.url));
   /** Vale enquanto o dedo arrasta, e até a navegação escolhida terminar. */
   private readonly sobrescrita = signal<number | null>(null);
   protected readonly arrastando = signal(false);
   protected readonly posicao = computed(() => this.sobrescrita() ?? this.ativa());
+  /** Fora das abas a pílula some onde estava, em vez de escorregar para fora da barra. */
+  protected readonly lugarDaPilula = linkedSignal<number, number>({
+    source: this.posicao,
+    computation: (posicao, anterior) => (posicao >= 0 ? posicao : (anterior?.value ?? 0)),
+  });
 
   private inicioX: number | null = null;
   private engolirClique = false;
@@ -50,14 +55,14 @@ export class BarraDeslizavel {
     this.router.events.pipe(takeUntilDestroyed()).subscribe((evento) => {
       if (evento instanceof NavigationStart && !this.arrastando()) {
         // A pílula anda já no toque, sem esperar a tela nova carregar.
-        const destino = indiceDaAba(evento.url);
+        const destino = indiceDaSecao(evento.url);
         this.sobrescrita.set(destino >= 0 ? destino : null);
       } else if (
         evento instanceof NavigationEnd ||
         evento instanceof NavigationCancel ||
         evento instanceof NavigationError
       ) {
-        this.ativa.set(indiceDaAba(this.router.url));
+        this.ativa.set(indiceDaSecao(this.router.url));
         this.sobrescrita.set(null);
       }
     });
@@ -110,7 +115,7 @@ export class BarraDeslizavel {
     setTimeout(() => (this.engolirClique = false));
 
     const destino = Math.round(this.sobrescrita() ?? this.ativa());
-    if (destino === this.ativa()) {
+    if (destino === indiceDaAba(this.router.url)) {
       this.sobrescrita.set(null);
       return;
     }

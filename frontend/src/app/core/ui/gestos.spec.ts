@@ -1,4 +1,4 @@
-import { abaVizinha, direcaoEntre, indiceDaAba } from './abas';
+import { abaVizinha, direcaoEntre, indiceDaAba, indiceDaSecao } from './abas';
 import { decidirEixo, deveTrocar, indicePelaPosicao } from './gestos';
 
 describe('abas', () => {
@@ -10,6 +10,13 @@ describe('abas', () => {
   it('telas fora da barra nao sao abas', () => {
     expect(indiceDaAba('/rotina')).toBe(-1);
     expect(indiceDaAba('/tarefas/nova')).toBe(-1);
+  });
+
+  it('dentro de uma tarefa a secao continua sendo Tarefas', () => {
+    expect(indiceDaSecao('/tarefas/15?origem=%2Ftarefas')).toBe(3);
+    expect(indiceDaSecao('/tarefas/nova')).toBe(3);
+    expect(indiceDaSecao('/rotina')).toBe(-1);
+    expect(indiceDaSecao('/hojex')).toBe(-1);
   });
 
   it('a vizinha para nas pontas em vez de dar a volta', () => {
