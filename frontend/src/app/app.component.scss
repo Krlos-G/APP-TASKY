@@ -7,6 +7,35 @@
   padding: 0;
 }
 
+/* Aviso de deploy novo: vidro no topo, acima de tudo, sem empurrar a tela. */
+.versao {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + var(--esp-2));
+  left: var(--esp-3);
+  right: var(--esp-3);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  max-width: 420px;
+  margin-inline: auto;
+  padding: 6px 6px 6px var(--esp-4);
+  border: 1px solid var(--cor-vidro-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-vidro);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: var(--sombra-flutuante);
+  font-size: var(--tam-nota);
+  font-weight: 500;
+  animation: aparecer 240ms var(--curva) backwards;
+
+  .botao {
+    border-radius: var(--raio-pilula);
+  }
+}
+
 .conteudo {
   /* O deslizar entre abas move o conteudo com left, que precisa disto. */
   position: relative;
@@ -16,6 +45,7 @@
      nao hidden: hidden faria do conteudo um conteiner de rolagem. */
   overflow-x: clip;
   padding: var(--esp-4);
+  padding-top: calc(env(safe-area-inset-top) + var(--esp-4));
   /* A barra flutua sobre o conteudo: o fim da lista precisa de folga para nao
      ficar embaixo dela, respeitando a area segura do iPhone. */
   padding-bottom: calc(var(--altura-tab-bar) + env(safe-area-inset-bottom) + var(--esp-5));

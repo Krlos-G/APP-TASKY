@@ -18,8 +18,8 @@ pontualidade do Web Push no iOS.
 **Critério de pronto:**
 
 1. O Tasky responde em HTTPS no Railway, e um push na `main` só vira deploy com o CI verde.
-2. Instalado pelo Safari, abre em tela cheia, com o ícone do Tasky e o gradiente passando por baixo
-   do relógio.
+2. Instalado pelo Safari, abre em tela cheia, com o ícone do Tasky e a faixa do relógio na cor do
+   fundo do app, legível nos dois temas.
 3. O "enviar teste" dos Ajustes chega no iPhone, e um lembrete de hábito chega no horário com o app
    fechado.
 4. Marco um item no PC e ele aparece marcado no iPhone, e o contrário.
@@ -101,11 +101,11 @@ Tudo no backend, testável sem Railway.
 - **Manifesto:** `theme_color` e `background_color` do gradiente (hoje é o roxo antigo `#4f46e5`),
   e ícones com `purpose` separado — `"maskable any"` no mesmo arquivo corta a arte em um dos dois
   usos.
-- **Barra de status:** `black-translucent`, para o gradiente passar por baixo do relógio como num
-  app nativo. O conteúdo ganha `env(safe-area-inset-top)` no topo. **Risco a conferir no aparelho:**
-  nesse modo o relógio é sempre branco, e no tema claro o topo do gradiente é azul-claro. Se ficar
-  ilegível, voltamos para `default`.
-- `theme-color` separado para claro e escuro no `index.html`.
+- **Barra de status:** ~~`black-translucent`~~ **`default`, com `theme-color` igual ao fundo do app
+  em cada tema** (decidido na implementação, 01/10). No `black-translucent` o relógio é sempre
+  branco, e sobre o azul-claro do topo do tema claro ele sumiria — não precisava do aparelho para
+  saber. O conteúdo ganhou `env(safe-area-inset-top)` no topo mesmo assim: não custa nada no modo
+  `default` e já fica pronto se um dia trocarmos. O iPhone confirma se a faixa sai na cor certa.
 - **Aviso de nova versão (`SwUpdate`):** quando o service worker baixa uma versão nova, aparece um
   aviso "Nova versão disponível · Atualizar". E o app **procura versão nova sempre que volta para a
   frente** — no iPhone ele fica suspenso por dias sem recarregar, e só a checagem na abertura não

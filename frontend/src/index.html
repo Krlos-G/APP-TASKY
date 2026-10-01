@@ -6,10 +6,14 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="Rotina, hábitos e tarefas do dia." />
-    <meta name="theme-color" content="#4f46e5" />
+    <!-- A faixa do relogio na cor do fundo do app, em cada tema. -->
+    <meta name="theme-color" content="#eef2fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#070912" media="(prefers-color-scheme: dark)" />
 
     <!-- iOS: necessario para o app abrir em tela cheia quando adicionado a tela de inicio. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- "default", e nao "black-translucent": neste o relogio e sempre branco, e
+         sumiria sobre o azul-claro do topo no tema claro. -->
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Tasky" />
     <link rel="apple-touch-icon" href="icons/icon-192x192.png" />

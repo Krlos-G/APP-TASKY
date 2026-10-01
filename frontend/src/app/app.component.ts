@@ -2,6 +2,7 @@ import { Component, effect, inject } from '@angular/core';
 import { NavigationStart, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from './core/auth/auth.service';
+import { AtualizacaoDoApp } from './core/pwa/atualizacao';
 import { Icone } from './core/ui/icone.component';
 import { ABAS, direcaoEntre } from './core/ui/abas';
 import { BarraDeslizavel } from './core/ui/barra-deslizavel.directive';
@@ -18,6 +19,7 @@ export class App {
   private readonly auth = inject(AuthService);
   private readonly usuarioService = inject(UsuarioService);
   private readonly router = inject(Router);
+  protected readonly atualizacao = inject(AtualizacaoDoApp);
 
   private fusoSincronizado = false;
 
