@@ -1,0 +1,18 @@
+# O que nao entra no contexto do build.
+#
+# Segredos primeiro: sem esta linha o .env local iria parar dentro da imagem.
+.env
+.env.*
+
+.git
+.github
+.idea
+.vscode
+.claude
+docs
+
+**/node_modules
+**/target
+frontend/dist
+frontend/.angular
+frontend/coverage

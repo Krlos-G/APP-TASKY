@@ -85,6 +85,13 @@ Tudo no backend, testável sem Railway.
 
 **Ponto de parada:** se a imagem roda local, o deploy vira configuração.
 
+**Resultado (01/10):** imagem de 442 MB, sobe em ~15 s e fica em **~325 MB em repouso** (banco:
+~85 MB). Isso põe a estimativa de custo perto dos US$ 5 inclusos. O manifesto virou
+`manifest.json`: nem o Spring nem o Tomcat conhecem a extensão `.webmanifest`, que saía como
+`application/octet-stream`, e o Spring 7 não repassa tipos novos ao servidor de arquivos. Com
+`.json` sai `application/json`, que os navegadores aceitam, sem código no backend.
+
+
 ## Etapa 3 — O PWA de verdade
 
 - **Ícone do Tasky.** Hoje é o logo padrão do Angular, com fundo transparente, que o iOS pinta de
