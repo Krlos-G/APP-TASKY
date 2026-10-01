@@ -41,9 +41,11 @@ management:
     health:
       show-details: never
 
-# Necessario atras do proxy da hospedagem: sem isto o IP do cliente chega como
-# o do balanceador e o rate limit do login trataria todo mundo como um so.
 server:
+  # A hospedagem escolhe a porta e avisa pela variavel PORT.
+  port: ${PORT:8080}
+  # Necessario atras do proxy da hospedagem: sem isto o IP do cliente chega como
+  # o do balanceador e o rate limit do login trataria todo mundo como um so.
   forward-headers-strategy: framework
 
 tasky:
