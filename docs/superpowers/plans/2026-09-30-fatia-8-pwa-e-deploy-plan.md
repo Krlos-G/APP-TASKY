@@ -111,6 +111,13 @@ Tudo no backend, testável sem Railway.
   frente** — no iPhone ele fica suspenso por dias sem recarregar, e só a checagem na abertura não
   bastaria. Teste unitário com um `SwUpdate` falso.
 
+**Resultado do ícone (02/10):** o Carlos combinou duas opções — o T de segmentos (a barra de
+progresso do Hoje virando letra, com o terceiro segmento "em andamento") sobre o cartão de vidro e
+as esferas do fundo do app; o T no gradiente do botão principal. Os SVGs-fonte e o script que gera
+todos os tamanhos ficam em `frontend/icones/`, fora do que é publicado. O favicon tem desenho
+próprio, sem o cartão: em 16 px o T dentro dele sumia. App instalado pelo Safari não tem ícone
+escuro — isso o iOS só faz para app nativo.
+
 ## Etapa 4 — Railway (a parte feita com você no painel)
 
 Criar a conta, colocar o cartão e colar os segredos são ações suas; eu preparo tudo e te guio passo
