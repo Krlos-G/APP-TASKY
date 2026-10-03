@@ -91,6 +91,38 @@ describe('Ajustes', () => {
     ).not.toContain('Ativar notificações');
   });
 
+  describe('no iPhone', () => {
+    const IPHONE =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 26_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1';
+
+    beforeEach(() => {
+      Object.defineProperty(navigator, 'userAgent', { value: IPHONE, configurable: true });
+    });
+
+    afterEach(() => {
+      delete (navigator as { userAgent?: string }).userAgent;
+      delete (window as { PushManager?: unknown }).PushManager;
+    });
+
+    it('aberto no Safari, sem push, pede para instalar', () => {
+      configurar({ isEnabled: true, subscription: of(null) });
+      const fixture = montar();
+
+      expect(texto(fixture)).toContain('só funcionam com o Tasky instalado');
+    });
+
+    it('aberto pela tela de inicio, com push, deixa ativar mesmo sem o iOS dizer que e app', () => {
+      // O iOS 26 nao garante navigator.standalone nem display-mode no app da
+      // tela de inicio. O que importa e o push existir.
+      (window as { PushManager?: unknown }).PushManager = function PushManager() {};
+      configurar({ isEnabled: true, subscription: of(null) });
+      const fixture = montar();
+
+      expect(texto(fixture)).not.toContain('só funcionam com o Tasky instalado');
+      expect(texto(fixture)).toContain('Ativar notificações');
+    });
+  });
+
   it('servidor sem chaves esconde a ativacao', () => {
     configurar({ isEnabled: true, subscription: of(null) });
     const fixture = montar({ habilitado: false });

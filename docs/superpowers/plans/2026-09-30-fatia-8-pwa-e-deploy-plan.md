@@ -123,8 +123,14 @@ escuro — isso o iOS só faz para app nativo.
 Criar a conta, colocar o cartão e colar os segredos são ações suas; eu preparo tudo e te guio passo
 a passo.
 
-- **`railway.json` no repositório:** build pelo `Dockerfile`, healthcheck em `/actuator/health`,
-  reinício em falha. A configuração fica versionada, não só no painel.
+- ~~**`railway.json` no repositório**~~ **Configuração no painel, documentada no README**
+  (decidido em 03/10). O Railway descontinuou o `railway.json`: para de funcionar em 01/12/2026.
+  O substituto (`.railway/railway.ts`) não é lido a cada deploy — exige o CLI do Railway com
+  credenciais rodando `railway config apply`. Para um serviço com quatro ajustes (região,
+  healthcheck, reinício, branch), o painel mais uma seção no README sai mais barato.
+- **Teste grátis primeiro** (decidido em 03/10): US$ 5 por 30 dias, sem cartão, conta ligada ao
+  GitHub. Durante o teste o Railway publica direto da branch da fatia; depois do merge, passa a
+  publicar da `main` com "Wait for CI".
 - **Projeto no Railway:** serviço Postgres 18 + serviço do app ligado ao GitHub, conversando pela
   rede privada. **App sempre ligado** (o modo que adormece mataria o agendador de lembretes).
   "Wait for CI" ligado: o deploy espera o CI da `main` passar.
@@ -136,7 +142,16 @@ a passo.
 - **Antes do primeiro deploy:** o PR da fatia de design precisa estar na `main`, e esta fatia
   também — o Railway publica o que está lá.
 
-## Etapa 5 — No iPhone: instalar e provar
+## ~~Etapa 5 — No iPhone: instalar e provar~~ — substituída pela Fatia 9
+
+**03/10:** com o backend no ar, o Carlos instalou pela tela de início e decidiu que o app "tem que
+ser instalado de verdade, não adianta abrir como página web". O iPhone passa a ser um app nativo
+(Capacitor + Codemagic + TestFlight) — ver `2026-10-03-fatia-9-app-iphone-plan.md`. O PWA continua
+valendo para o PC. O que esta etapa mediria (pontualidade dos lembretes) passa para lá, e o fecho
+desta fatia (Etapa 6) vira a Etapa 0 de lá.
+
+<details><summary>O plano original desta etapa</summary>
+
 
 A etapa que responde se o projeto funciona. O que é seu e o que é meu:
 
@@ -157,6 +172,8 @@ A etapa que responde se o projeto funciona. O que é seu e o que é meu:
 
 Sem Mac não há inspetor do Safari para o iPhone. Quando algo der errado só no aparelho, a
 investigação é pelos logs do Railway e pelos seus prints.
+
+</details>
 
 ## Etapa 6 — Fechamento
 
