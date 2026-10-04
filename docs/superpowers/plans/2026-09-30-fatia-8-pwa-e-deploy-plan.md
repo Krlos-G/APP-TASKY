@@ -155,7 +155,9 @@ plano B.
 app parecer cortado em cima. O Carlos pediu tela cheia: `black-translucent`, com o fundo passando
 por baixo do relógio — que nesse modo é sempre branco. No tema escuro, que é o que ele usa, fica
 perfeito; no claro o relógio perde contraste sobre o azul-claro, e ele preferiu assim a um véu
-escuro no topo.
+escuro no topo. Os `theme-color` do `index.html` saíram: só serviam para pintar a faixa do modo
+`default`. Trocar o estilo da barra exige **reinstalar o app** — o iOS guarda o estilo na
+instalação, e o service worker do Safari pode servir a página antiga ao "Adicionar à Tela de Início".
 
 **Antes de medir pontualidade:** os lembretes precisam ser gerados ao salvar (achado em 03/10 —
 hoje um lembrete criado antes da próxima rodada "xx:05" chega até 30 min atrasado ou não chega).
