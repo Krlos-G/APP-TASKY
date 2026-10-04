@@ -16,6 +16,7 @@ import br.com.tasky.web.dto.DiaDoHabitoResponse;
 import br.com.tasky.web.dto.HabitoRequest;
 import br.com.tasky.web.dto.HabitoResponse;
 import br.com.tasky.web.dto.MarcacaoResponse;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,19 +53,22 @@ public class HabitoService {
     private final DataDoUsuario dataDoUsuario;
     private final UsuarioAtual usuarioAtual;
     private final Clock clock;
+    private final ApplicationEventPublisher eventos;
 
     public HabitoService(HabitoRepository habitoRepository,
                          RegistroHabitoRepository registroRepository,
                          StreakCalculator streakCalculator,
                          DataDoUsuario dataDoUsuario,
                          UsuarioAtual usuarioAtual,
-                         Clock clock) {
+                         Clock clock,
+                         ApplicationEventPublisher eventos) {
         this.habitoRepository = habitoRepository;
         this.registroRepository = registroRepository;
         this.streakCalculator = streakCalculator;
         this.dataDoUsuario = dataDoUsuario;
         this.usuarioAtual = usuarioAtual;
         this.clock = clock;
+        this.eventos = eventos;
     }
 
     @Transactional(readOnly = true)
@@ -85,6 +89,7 @@ public class HabitoService {
         var habito = new Habito();
         habito.setUsuario(usuario);
         aplicar(pedido, habito);
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
 
         return montarUm(habitoRepository.save(habito), usuario);
     }
@@ -94,6 +99,7 @@ public class HabitoService {
         Usuario usuario = usuarioAtual.obrigatorio();
         Habito habito = buscar(id, usuario.getId());
         aplicar(pedido, habito);
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
 
         return montarUm(habitoRepository.save(habito), usuario);
     }
@@ -104,6 +110,7 @@ public class HabitoService {
         Habito habito = buscar(id, usuario.getId());
 
         habito.setArquivadoEm(arquivado ? clock.instant() : null);
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
 
         return montarUm(habitoRepository.save(habito), usuario);
     }
@@ -111,7 +118,9 @@ public class HabitoService {
     /** Apaga o habito e, por cascata no banco, todo o historico dele. */
     @Transactional
     public void apagar(Long id) {
-        habitoRepository.delete(buscar(id, usuarioAtual.idObrigatorio()));
+        Long usuarioId = usuarioAtual.idObrigatorio();
+        habitoRepository.delete(buscar(id, usuarioId));
+        eventos.publishEvent(new AgendaAlterada(usuarioId));
     }
 
     // -------------------------------------------------------------- marcacoes

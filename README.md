@@ -11,6 +11,7 @@ PC, sincronizados. Nasceu para ajudar a montar e, principalmente, a **seguir** u
 | Back | Spring Boot 4.1.1, Java 21, Maven |
 | Banco | PostgreSQL 18.6, migrações com Flyway |
 | Notificações | Web Push (VAPID) |
+| Hospedagem | Railway: app e API num contêiner só, mais o PostgreSQL |
 
 ## Pré-requisitos
 
@@ -84,9 +85,93 @@ Os testes do backend sobem um PostgreSQL real via Testcontainers — o Docker pr
 | `docker compose down` | Para tudo, preservando os dados |
 | `docker compose down -v` | Para tudo e **apaga** os dados (recria o schema do zero na próxima subida) |
 | `cd frontend && npm run build` | Build de produção em `frontend/dist/` |
+| `sh frontend/icones/gerar.sh` | Regera os ícones do PWA a partir dos SVGs (precisa do ImageMagick) |
 
 Com o backend no ar, a documentação da API fica em <http://localhost:8080/swagger-ui.html> e o
 health check em <http://localhost:8080/actuator/health>.
+
+## Produção
+
+O Tasky roda no **Railway**, em <https://app-tasky-production.up.railway.app>. Um contêiner só
+serve o app e a API no mesmo endereço — de propósito: o Safari bloqueia cookie de terceiro, e o
+cookie de renovação da sessão viraria um se o app e a API morassem em domínios diferentes.
+
+**Deploy:** o Railway constrói o `Dockerfile` da raiz a cada push na `main`, depois que o CI passa
+("Wait for CI"). O front é compilado dentro da imagem e servido pelo Spring.
+
+**Ensaio local da imagem**, antes de mexer em algo de infraestrutura:
+
+```
+docker build -t tasky .
+docker run --rm -p 8090:8080 --network app-iphone_default --env-file .env -e SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/tasky tasky
+```
+
+Abra <http://localhost:8090> — app e API numa porta só, como em produção.
+
+### Configuração no painel do Railway
+
+Fica no painel, e não em arquivo: o `railway.json` foi descontinuado (para de funcionar em
+01/12/2026), e o substituto exige o CLI do Railway com credenciais a cada mudança.
+
+| Serviço | Ajuste |
+|---|---|
+| `Postgres` | Região US East (Virginia) |
+| app | Região US East; branch `main` com *Wait for CI*; healthcheck em `/actuator/health`; reinício *On Failure*; **Serverless desligado** — app adormecido não dispara lembrete; domínio na porta 8080 |
+
+### Variáveis de produção (serviço do app)
+
+| Variável | Valor |
+|---|---|
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}` |
+| `SPRING_DATASOURCE_USERNAME` | `${{Postgres.PGUSER}}` |
+| `SPRING_DATASOURCE_PASSWORD` | `${{Postgres.PGPASSWORD}}` |
+| `TASKY_JWT_SECRET` | segredo próprio de produção, 48 bytes aleatórios |
+| `TASKY_VAPID_PUBLICA` / `TASKY_VAPID_PRIVADA` | par próprio de produção (as chaves de desenvolvimento nunca vão para lá) |
+| `TASKY_VAPID_ASSUNTO` | `https://app-tasky-production.up.railway.app` |
+| `TASKY_COOKIE_SECURE` | `true` |
+| `TASKY_COOKIE_SAMESITE` | `Lax` |
+| `SPRINGDOC_API_DOCS_ENABLED` / `SPRINGDOC_SWAGGER_UI_ENABLED` | `false` |
+| `TASKY_CODIGO_CONVITE` | **ausente** — só existe enquanto se cria uma conta |
+
+Gerar o segredo JWT e o par VAPID, sem baixar nada:
+
+```
+node -e "const c=require('crypto');const e=c.createECDH('prime256v1');e.generateKeys();console.log('TASKY_JWT_SECRET='+c.randomBytes(48).toString('base64'));console.log('TASKY_VAPID_PUBLICA='+e.getPublicKey('base64url'));console.log('TASKY_VAPID_PRIVADA='+e.getPrivateKey('base64url'))"
+```
+
+Trocar o par VAPID invalida as inscrições dos aparelhos: cada um precisa ativar as notificações de
+novo.
+
+### Criar uma conta
+
+Não há tela de cadastro — o app é pessoal. Defina `TASKY_CODIGO_CONVITE` no Railway, faça o
+deploy, cadastre pela API e **apague a variável** em seguida, o que fecha o cadastro:
+
+```
+curl -X POST https://app-tasky-production.up.railway.app/api/v1/auth/registrar -H "Content-Type: application/json" -d '{"email":"voce@exemplo.com","senha":"no minimo 12 caracteres","nomeExibicao":"Seu nome","codigoConvite":"o-codigo","fusoHorario":"America/Sao_Paulo"}'
+```
+
+### Backup manual do banco
+
+O plano Hobby do Railway não faz backup automático do volume. Para uma cópia: no serviço
+`Postgres`, ligue *Public Networking*, copie a `DATABASE_PUBLIC_URL` e rode
+
+```
+docker run --rm -v "${PWD}:/backup" postgres:18-alpine pg_dump "<DATABASE_PUBLIC_URL>" -Fc -f /backup/tasky-AAAA-MM-DD.dump
+```
+
+(O arquivo é gravado pela pasta montada, e não com `>`: no PowerShell o redirecionamento
+corrompe saída binária.)
+
+e **desligue o Public Networking** de novo — o banco não deve ficar exposto. Restaurar é o
+caminho inverso, com `pg_restore`.
+
+### iPhone
+
+Instalar pelo **Safari** → Compartilhar → Adicionar à Tela de Início, com **Abrir como App Web**
+ligado. Mudança no `index.html` que o iOS lê na instalação (como o estilo da barra de status) só
+aparece reinstalando — e limpando antes os dados do site no Safari (Ajustes → Apps → Safari →
+Avançado → Dados dos Sites), porque o service worker pode servir a página antiga.
 
 ## Estrutura
 
@@ -103,13 +188,15 @@ health check em <http://localhost:8080/actuator/health>.
 │        ├─ application.yml
 │        └─ db/migration/       migrações Flyway
 ├─ frontend/                    Angular PWA
+│  ├─ icones/                   SVGs dos ícones e o script que gera os PNGs
 │  └─ src/app/
 │     ├─ paginas/               uma pasta por tela
 │     └─ app.routes.ts
 ├─ docs/superpowers/
 │  ├─ specs/                    documento de design
 │  └─ plans/                    planos de implementação por fatia
-└─ docker-compose.yml           PostgreSQL de desenvolvimento
+├─ Dockerfile                   imagem de produção: app e API num processo só
+└─ docker-compose.yml           PostgreSQL e backend de desenvolvimento
 ```
 
 ## Convenções
@@ -124,11 +211,13 @@ health check em <http://localhost:8080/actuator/health>.
   divergência entre entidade e tabela derruba a aplicação na subida — de propósito.
 - **Nada de `Instant.now()` solto.** Tudo que precisa da hora atual recebe o bean `Clock` injetado,
   o que torna testáveis a virada de dia, o disparo de lembretes e o cálculo de `streak`.
-- Enquanto não houver banco em produção, a migração `V1` pode ser editada livremente (basta
-  recriar o volume). Depois do primeiro deploy, toda mudança vira `V2`, `V3`, …
+- **Há banco em produção desde 03/10/2026: migração aplicada não se edita.** Toda mudança de schema
+  vira uma migração nova (`V2`, `V3`, …). Editar uma já aplicada faz o Flyway recusar a subida em
+  produção.
 
 ## Documentação
 
 - [Documento de design](docs/superpowers/specs/2026-08-30-app-rotina-pessoal-design.md) — decisões
   de arquitetura, modelo de dados, telas, notificações e escopo do MVP
-- [Plano da Fatia 1](docs/superpowers/plans/2026-08-31-fatia-1-fundacao-plan.md) — fundação
+- [Planos de implementação](docs/superpowers/plans/) — um por fatia, com as decisões tomadas no
+  caminho

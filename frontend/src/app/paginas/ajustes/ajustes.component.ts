@@ -37,8 +37,12 @@ export class Ajustes implements OnInit {
   /**
    * No iPhone, Web Push só funciona com o app na tela de início. Sem este
    * aviso, o botão simplesmente não faz nada e ninguém entende por quê.
+   *
+   * Testa se o push existe, e não se o iOS diz estar "em modo app": o iOS 26
+   * não garante navigator.standalone nem display-mode no app da tela de
+   * início, e o Safari comum simplesmente não tem PushManager.
    */
-  protected readonly precisaInstalar = ehIphone() && !estaInstalado();
+  protected readonly precisaInstalar = ehIphone() && !('PushManager' in window);
 
   ngOnInit(): void {
     this.usuarioService.perfil().subscribe({
@@ -194,11 +198,4 @@ function mensagemDoTeste(resultado: TesteEnvio): string {
 
 function ehIphone(): boolean {
   return /iPhone|iPad|iPod/.test(navigator.userAgent);
-}
-
-function estaInstalado(): boolean {
-  const comoApp = window.matchMedia?.('(display-mode: standalone)').matches ?? false;
-  // O Safari do iOS não implementa display-mode e usa esta propriedade própria.
-  const noIos = (navigator as { standalone?: boolean }).standalone === true;
-  return comoApp || noIos;
 }

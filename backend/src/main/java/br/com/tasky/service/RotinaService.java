@@ -13,6 +13,7 @@ import br.com.tasky.web.ApiException;
 import br.com.tasky.web.dto.BlocoRequest;
 import br.com.tasky.web.dto.ModeloDiaRequest;
 import br.com.tasky.web.dto.SemanaRequest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,15 +36,18 @@ public class RotinaService {
     private final BlocoModeloRepository blocoRepository;
     private final AtribuicaoDiaRepository atribuicaoRepository;
     private final UsuarioAtual usuarioAtual;
+    private final ApplicationEventPublisher eventos;
 
     public RotinaService(ModeloDiaRepository modeloRepository,
                          BlocoModeloRepository blocoRepository,
                          AtribuicaoDiaRepository atribuicaoRepository,
-                         UsuarioAtual usuarioAtual) {
+                         UsuarioAtual usuarioAtual,
+                         ApplicationEventPublisher eventos) {
         this.modeloRepository = modeloRepository;
         this.blocoRepository = blocoRepository;
         this.atribuicaoRepository = atribuicaoRepository;
         this.usuarioAtual = usuarioAtual;
+        this.eventos = eventos;
     }
 
     // ---------------------------------------------------------------- modelos
@@ -71,6 +75,7 @@ public class RotinaService {
         if (pedido.padrao()) {
             desmarcarPadraoAtual(usuario.getId());
         }
+        agendaMudou();
         return modeloRepository.save(modelo);
     }
 
@@ -83,6 +88,7 @@ public class RotinaService {
             desmarcarPadraoAtual(modelo.getUsuario().getId());
         }
         modelo.setPadrao(pedido.padrao());
+        agendaMudou();
         return modelo;
     }
 
@@ -104,6 +110,7 @@ public class RotinaService {
         }
 
         modeloRepository.delete(modelo);
+        agendaMudou();
     }
 
     // ----------------------------------------------------------------- blocos
@@ -119,6 +126,7 @@ public class RotinaService {
         bloco.setOrdem(modelo.getBlocos().size());
 
         modelo.getBlocos().add(bloco);
+        agendaMudou();
         return modelo;
     }
 
@@ -140,6 +148,7 @@ public class RotinaService {
                 .orElseThrow(() -> ApiException.naoEncontrado("Bloco"));
 
         aplicar(pedido, bloco);
+        agendaMudou();
 
         return modeloRepository
                 .findByIdAndUsuarioId(bloco.getModeloDia().getId(), usuarioId)
@@ -154,6 +163,7 @@ public class RotinaService {
 
         // Remover pela colecao do modelo, para o orphanRemoval agir.
         bloco.getModeloDia().getBlocos().remove(bloco);
+        agendaMudou();
     }
 
     // ----------------------------------------------------------------- semana
@@ -198,8 +208,14 @@ public class RotinaService {
         // Sem o flush, o INSERT poderia chegar antes do DELETE e esbarrar no
         // unique de (usuario_id, dia_semana).
         atribuicaoRepository.flush();
+        agendaMudou();
 
         return atribuicaoRepository.saveAll(novas);
+    }
+
+    /** A rotina do dia decide os lembretes dos blocos: mudou a rotina, regera. */
+    private void agendaMudou() {
+        eventos.publishEvent(new AgendaAlterada(usuarioAtual.idObrigatorio()));
     }
 
     /** Qual modelo vale neste dia da semana, se houver. */

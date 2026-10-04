@@ -215,6 +215,85 @@ class FluxoLembretesTests {
         assertThat(canal.enviadas).hasSize(1);
     }
 
+    // ------------------------------------------------------- gerados ao salvar
+    //
+    // Nenhum teste daqui chama o job da hora em hora: o lembrete tem de existir
+    // so por ter sido salvo. Antes, um lembrete para antes da proxima rodada
+    // ("xx:05") chegava atrasado ou nao chegava.
+
+    @Test
+    @DisplayName("lembrete criado em cima da hora chega na hora, sem esperar a rodada")
+    void emCimaDaHoraChegaNaHora() throws Exception {
+        inscreverAparelho();
+        criarHabitoComLembrete("Alongar", "08:10:00");
+
+        agoraE("2026-09-28T11:10:00Z");
+        despacho.despachar();
+
+        assertThat(canal.enviadas).singleElement()
+                .satisfies(n -> assertThat(n.titulo()).isEqualTo("Alongar"));
+    }
+
+    @Test
+    @DisplayName("tarefa com lembrete gera na hora, e concluir antes cancela")
+    void tarefaGeraEConcluirCancela() throws Exception {
+        var resultado = mockMvc.perform(autenticado(post("/api/v1/tarefas"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of(
+                                "titulo", "Pagar a conta",
+                                "dataPlanejada", "2026-09-28",
+                                "horaLembrete", "08:30:00"))))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long tarefa = json.readTree(resultado.getResponse().getContentAsString()).get("id").asLong();
+
+        assertThat(lembreteDeHoje().getStatus()).isEqualTo(StatusLembrete.PENDENTE);
+
+        mockMvc.perform(autenticado(put("/api/v1/tarefas/" + tarefa + "/conclusao")))
+                .andExpect(status().isOk());
+
+        assertThat(lembreteDeHoje().getStatus()).isEqualTo(StatusLembrete.CANCELADO);
+    }
+
+    @Test
+    @DisplayName("bloco novo na rotina do dia ja ganha o lembrete")
+    void blocoDaRotinaGeraNaHora() throws Exception {
+        var modelo = mockMvc.perform(autenticado(post("/api/v1/rotina/modelos"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nome\":\"Dia de trabalho\",\"padrao\":false}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long modeloId = json.readTree(modelo.getResponse().getContentAsString()).get("id").asLong();
+
+        mockMvc.perform(autenticado(put("/api/v1/rotina/semana"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"modeloPorDia\":{\"SEG\":" + modeloId + "}}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(autenticado(post("/api/v1/rotina/modelos/" + modeloId + "/blocos"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of(
+                                "titulo", "Estudo",
+                                "horaInicio", "19:00:00",
+                                "horaFim", "20:00:00",
+                                "minutosAntecedenciaLembrete", 10))))
+                .andExpect(status().isCreated());
+
+        // 18:50 em Sao Paulo: dez minutos antes do bloco.
+        assertThat(lembreteDeHoje().getDispararEm()).isEqualTo(Instant.parse("2026-09-28T21:50:00Z"));
+    }
+
+    @Test
+    @DisplayName("ligar o resumo do dia ja agenda o de hoje")
+    void resumoDoDiaGeraNaHora() throws Exception {
+        mockMvc.perform(autenticado(put("/api/v1/usuarios/eu/resumo-diario"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"hora\":\"21:00:00\"}"))
+                .andExpect(status().isNoContent());
+
+        assertThat(lembreteDeHoje().getDispararEm()).isEqualTo(Instant.parse("2026-09-29T00:00:00Z"));
+    }
+
     // ------------------------------------------------------------------ apoio
 
     private MockHttpServletRequestBuilder autenticado(MockHttpServletRequestBuilder req) {

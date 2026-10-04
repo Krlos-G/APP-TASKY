@@ -4,6 +4,7 @@ import br.com.tasky.entity.Usuario;
 import br.com.tasky.repository.UsuarioRepository;
 import br.com.tasky.security.UsuarioAtual;
 import br.com.tasky.web.dto.PerfilResponse;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,10 +15,13 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioAtual usuarioAtual;
+    private final ApplicationEventPublisher eventos;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioAtual usuarioAtual) {
+    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioAtual usuarioAtual,
+                          ApplicationEventPublisher eventos) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioAtual = usuarioAtual;
+        this.eventos = eventos;
     }
 
     @Transactional(readOnly = true)
@@ -31,6 +35,7 @@ public class UsuarioService {
         Usuario usuario = usuarioAtual.obrigatorio();
         usuario.setHoraResumoDiario(hora);
         usuarioRepository.save(usuario);
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
     }
 
     /**
@@ -48,5 +53,6 @@ public class UsuarioService {
 
         usuario.setFusoHorario(fuso);
         usuarioRepository.save(usuario);
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
     }
 }

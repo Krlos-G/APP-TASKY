@@ -70,7 +70,10 @@ public class SecurityConfig {
                         // O preflight nao carrega credenciais e precisa passar
                         // antes de qualquer requisicao autenticada cross-origin.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/**", "/actuator/**").authenticated()
+                        // O resto e o proprio app (arquivos e rotas do Angular), que o
+                        // navegador precisa baixar antes de existir qualquer login.
+                        .anyRequest().permitAll())
 
                 // O rate limit vem primeiro: barrar forca bruta nao deve custar
                 // nem o trabalho de validar token ou header.

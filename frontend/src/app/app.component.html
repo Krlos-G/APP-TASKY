@@ -1,4 +1,13 @@
 <div class="app" [class.app--sem-nav]="!autenticado()">
+  @if (atualizacao.disponivel()) {
+    <div class="versao" role="status">
+      <span>Nova versão disponível</span>
+      <button class="botao botao--primario botao--curto" type="button" (click)="atualizacao.recarregar()">
+        Atualizar
+      </button>
+    </div>
+  }
+
   @if (autenticado()) {
     <nav class="nav" aria-label="Navegação principal">
       <span class="nav__marca">Tasky</span>

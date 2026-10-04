@@ -5,18 +5,36 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { SwUpdate, VersionEvent } from '@angular/service-worker';
+import { Subject } from 'rxjs';
 import { App } from './app.component';
 import { routes } from './app.routes';
 import { AuthService } from './core/auth/auth.service';
+import { AtualizacaoDoApp } from './core/pwa/atualizacao';
 
 describe('App', () => {
   let http: HttpTestingController;
   let auth: AuthService;
+  let versoes: Subject<VersionEvent>;
 
   beforeEach(async () => {
+    versoes = new Subject();
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: SwUpdate,
+          useValue: {
+            isEnabled: true,
+            versionUpdates: versoes,
+            unrecoverable: new Subject(),
+            checkForUpdate: () => Promise.resolve(false),
+          },
+        },
+      ],
     }).compileComponents();
 
     http = TestBed.inject(HttpTestingController);
@@ -98,5 +116,26 @@ describe('App', () => {
     // A navegacao segue de pe e nenhum aviso de erro foi parar no shell.
     expect(rotulos(fixture.nativeElement).length).toBe(4);
     expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Marte');
+  });
+
+  it('avisa quando ha versao nova, e atualizar recarrega o app', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const elemento = fixture.nativeElement as HTMLElement;
+    expect(elemento.querySelector('.versao')).toBeNull();
+
+    versoes.next({
+      type: 'VERSION_READY',
+      currentVersion: { hash: 'a' },
+      latestVersion: { hash: 'b' },
+    });
+    fixture.detectChanges();
+
+    expect(elemento.querySelector('.versao')?.textContent).toContain('Nova versão disponível');
+    const recarregar = vi
+      .spyOn(TestBed.inject(AtualizacaoDoApp), 'recarregar')
+      .mockImplementation(() => undefined);
+    elemento.querySelector<HTMLButtonElement>('.versao button')!.click();
+    expect(recarregar).toHaveBeenCalled();
   });
 });

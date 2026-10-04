@@ -7,8 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:ci": "ng test --watch=false",
-    "servir:build": "node scripts/servir-build.mjs"
+    "test:ci": "ng test --watch=false"
   },
   "private": true,
   "packageManager": "npm@11.19.0",
