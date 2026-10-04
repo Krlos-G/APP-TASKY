@@ -12,6 +12,16 @@ body {
   margin: 0;
 }
 
+/* Instalado no iPhone, com o app por baixo do relogio, o iOS mede 100%, dvh e
+   svh descontando a area do relogio, e sobrava uma faixa no rodape ate a primeira
+   rolagem. lvh e a tela fisica. So no app instalado: na aba do Safari o certo e
+   acompanhar as barras do navegador. */
+@media (display-mode: standalone) {
+  html {
+    height: 100lvh;
+  }
+}
+
 body {
   background: var(--cor-fundo);
   color: var(--cor-texto);
@@ -32,6 +42,14 @@ body::before {
   z-index: -1;
   background: var(--fundo-app);
   pointer-events: none;
+}
+
+/* Se o iOS ainda entregar a tela curta, o gradiente desce a altura que falta: a
+   sobra fica fora da tela quando a medida esta certa. */
+@media (display-mode: standalone) {
+  body::before {
+    bottom: calc(-1 * env(safe-area-inset-top));
+  }
 }
 
 :focus-visible {
