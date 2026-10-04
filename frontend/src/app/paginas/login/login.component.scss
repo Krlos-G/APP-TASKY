@@ -4,6 +4,7 @@
   justify-content: center;
   min-height: 100dvh;
   padding: var(--esp-6) var(--esp-4);
+  padding-top: calc(env(safe-area-inset-top) + var(--esp-6));
 
   /* O cartao de vidro sobre o gradiente e a primeira coisa que o app mostra. */
   &__cartao {

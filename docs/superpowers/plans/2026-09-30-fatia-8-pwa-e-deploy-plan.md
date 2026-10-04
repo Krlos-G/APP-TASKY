@@ -142,15 +142,26 @@ a passo.
 - **Antes do primeiro deploy:** o PR da fatia de design precisa estar na `main`, e esta fatia
   também — o Railway publica o que está lá.
 
-## ~~Etapa 5 — No iPhone: instalar e provar~~ — substituída pela Fatia 9
+## Etapa 5 — No iPhone: instalar e provar
 
-**03/10:** com o backend no ar, o Carlos instalou pela tela de início e decidiu que o app "tem que
-ser instalado de verdade, não adianta abrir como página web". O iPhone passa a ser um app nativo
-(Capacitor + Codemagic + TestFlight) — ver `2026-10-03-fatia-9-app-iphone-plan.md`. O PWA continua
-valendo para o PC. O que esta etapa mediria (pontualidade dos lembretes) passa para lá, e o fecho
-desta fatia (Etapa 6) vira a Etapa 0 de lá.
+**Idas e vindas (03–04/10):** na primeira instalação os Ajustes diziam que o app não estava
+instalado, e o Carlos decidiu ir para app nativo (`2026-10-03-fatia-9-app-iphone-plan.md`). O
+problema era nosso: a tela perguntava ao iOS "está em modo app?" (`navigator.standalone`,
+`display-mode`), e o iOS 26 não garante essas respostas. Corrigido para testar se o push existe
+(`PushManager`). No dia seguinte o Tasky abriu como app, e o plano nativo ficou arquivado como
+plano B.
 
-<details><summary>O plano original desta etapa</summary>
+**Barra de status, de novo (04/10):** com o app instalado, a faixa lisa do modo `default` fazia o
+app parecer cortado em cima. O Carlos pediu tela cheia: `black-translucent`, com o fundo passando
+por baixo do relógio — que nesse modo é sempre branco. No tema escuro, que é o que ele usa, fica
+perfeito; no claro o relógio perde contraste sobre o azul-claro, e ele preferiu assim a um véu
+escuro no topo.
+
+**Antes de medir pontualidade:** os lembretes precisam ser gerados ao salvar (achado em 03/10 —
+hoje um lembrete criado antes da próxima rodada "xx:05" chega até 30 min atrasado ou não chega).
+Aprovado no plano da Fatia 9; vem para cá.
+
+<details><summary>O roteiro desta etapa</summary>
 
 
 A etapa que responde se o projeto funciona. O que é seu e o que é meu:
