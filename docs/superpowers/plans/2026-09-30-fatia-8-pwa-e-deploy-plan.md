@@ -172,6 +172,12 @@ A rodada continua existindo para encher a janela de amanhã e para a virada do d
 Fica para decidir: um lembrete cancelado não volta se a regra voltar (concluir uma tarefa por
 engano e desfazer deixa o lembrete dela cancelado). Já era assim na Fatia 7.
 
+**Provado no iPhone (04/10):** o "enviar teste" chegou, e um lembrete criado para dali a poucos
+minutos chegou com o app fechado, cerca de 1 min depois da hora. **O risco guardado desde o início
+do projeto — a pontualidade do Web Push no iOS — está retirado**; o plano nativo fica na gaveta.
+O minuto vem do despacho, que confere os vencidos a cada 60 s, e não da Apple; baixar para 15 s é
+uma linha, se um dia incomodar.
+
 <details><summary>O roteiro desta etapa</summary>
 
 
