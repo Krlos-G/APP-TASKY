@@ -163,6 +163,15 @@ instalação, e o service worker do Safari pode servir a página antiga ao "Adic
 hoje um lembrete criado antes da próxima rodada "xx:05" chega até 30 min atrasado ou não chega).
 Aprovado no plano da Fatia 9; vem para cá.
 
+**Feito (04/10):** salvar tarefa, hábito, rotina, horário do resumo ou fuso publica
+`AgendaAlterada`; o `LembretesAoSalvar` gera os lembretes daquele usuário **depois do commit**,
+numa transação nova — sem ela a geração roda e não grava nada, o que um teste provou. Falha na
+geração é registrada e engolida: o que foi salvo já está gravado, e a rodada de hora em hora corrige.
+A rodada continua existindo para encher a janela de amanhã e para a virada do dia.
+
+Fica para decidir: um lembrete cancelado não volta se a regra voltar (concluir uma tarefa por
+engano e desfazer deixa o lembrete dela cancelado). Já era assim na Fatia 7.
+
 <details><summary>O roteiro desta etapa</summary>
 
 

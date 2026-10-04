@@ -8,6 +8,7 @@ import br.com.tasky.security.UsuarioAtual;
 import br.com.tasky.web.ApiException;
 import br.com.tasky.web.dto.TarefaRequest;
 import br.com.tasky.web.dto.TarefaResponse;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,13 +36,15 @@ public class TarefaService {
     private final DataDoUsuario dataDoUsuario;
     private final UsuarioAtual usuarioAtual;
     private final Clock clock;
+    private final ApplicationEventPublisher eventos;
 
     public TarefaService(TarefaRepository tarefaRepository, DataDoUsuario dataDoUsuario,
-                         UsuarioAtual usuarioAtual, Clock clock) {
+                         UsuarioAtual usuarioAtual, Clock clock, ApplicationEventPublisher eventos) {
         this.tarefaRepository = tarefaRepository;
         this.dataDoUsuario = dataDoUsuario;
         this.usuarioAtual = usuarioAtual;
         this.clock = clock;
+        this.eventos = eventos;
     }
 
     @Transactional(readOnly = true)
@@ -99,6 +102,7 @@ public class TarefaService {
         var tarefa = new Tarefa();
         tarefa.setUsuario(usuario);
         aplicar(pedido, tarefa);
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
 
         return TarefaResponse.de(tarefaRepository.save(tarefa), dataDoUsuario.hoje(usuario));
     }
@@ -108,6 +112,7 @@ public class TarefaService {
         Usuario usuario = usuarioAtual.obrigatorio();
         Tarefa tarefa = daConta(id, usuario);
         aplicar(pedido, tarefa);
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
 
         return TarefaResponse.de(tarefaRepository.save(tarefa), dataDoUsuario.hoje(usuario));
     }
@@ -116,6 +121,7 @@ public class TarefaService {
     public void apagar(Long id) {
         Usuario usuario = usuarioAtual.obrigatorio();
         tarefaRepository.delete(daConta(id, usuario));
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
     }
 
     /** Idempotente: concluir de novo nao sobrescreve o momento da primeira conclusao. */
@@ -128,6 +134,7 @@ public class TarefaService {
             tarefa.setStatus(FEITA);
             tarefa.setConcluidoEm(clock.instant());
         }
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
 
         return TarefaResponse.de(tarefa, dataDoUsuario.hoje(usuario));
     }
@@ -139,6 +146,7 @@ public class TarefaService {
 
         tarefa.setStatus(A_FAZER);
         tarefa.setConcluidoEm(null);
+        eventos.publishEvent(new AgendaAlterada(usuario.getId()));
 
         return TarefaResponse.de(tarefa, dataDoUsuario.hoje(usuario));
     }
