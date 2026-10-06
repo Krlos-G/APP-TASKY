@@ -60,6 +60,8 @@ public class TarefaService {
                     tarefaRepository.findByUsuarioIdAndStatusAndDataPlanejadaAfter(id, A_FAZER, hoje)), hoje);
             case SEM_DATA -> responder(ordenar(
                     tarefaRepository.findByUsuarioIdAndStatusAndDataPlanejadaIsNull(id, A_FAZER)), hoje);
+            case PENDENTES -> responder(ordenar(
+                    tarefaRepository.findByUsuarioIdAndStatus(id, A_FAZER)), hoje);
             case CONCLUIDAS -> responder(
                     tarefaRepository.findByUsuarioIdAndStatusOrderByConcluidoEmDesc(id, FEITA), hoje);
         };

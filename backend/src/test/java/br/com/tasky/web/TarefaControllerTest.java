@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -195,6 +196,22 @@ class TarefaControllerTest {
                 .andExpect(jsonPath("$[0].titulo").value("Algum dia"));
         listar("CONCLUIDAS").andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].titulo").value("Feita"));
+    }
+
+    @Test
+    @DisplayName("pendentes traz todas as a fazer, por dia, sem data no fim")
+    void pendentes() throws Exception {
+        criar(tokenCarlos, Map.of("titulo", "Algum dia"));
+        criar(tokenCarlos, Map.of("titulo", "Ano que vem", "dataPlanejada", "2027-01-05"));
+        criar(tokenCarlos, Map.of("titulo", "Amanha", "dataPlanejada", "2026-09-17"));
+        criar(tokenCarlos, Map.of("titulo", "Hoje", "dataPlanejada", "2026-09-16"));
+        criar(tokenCarlos, Map.of("titulo", "Ontem", "dataPlanejada", "2026-09-15"));
+        long feita = idDe(criar(tokenCarlos, Map.of("titulo", "Feita", "dataPlanejada", "2026-09-16")));
+        concluir(feita).andExpect(status().isOk());
+        criar(tokenOutro, Map.of("titulo", "Alheia", "dataPlanejada", "2026-09-16"));
+
+        listar("PENDENTES").andExpect(jsonPath("$[*].titulo")
+                .value(contains("Ontem", "Hoje", "Amanha", "Ano que vem", "Algum dia")));
     }
 
     @Test
