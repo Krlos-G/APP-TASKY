@@ -1,7 +1,5 @@
 :host {
   display: block;
-  /* A rolagem e o zoom ficam com o navegador; o gesto de lado é do app. */
-  touch-action: pan-y pinch-zoom;
 }
 
 /* As abas de fora continuam com caixa, só invisíveis e sem altura. Com
@@ -30,6 +28,10 @@
   bottom: 0;
   z-index: 1;
   overflow: hidden;
+  /* Andando, cada cartão de vidro refaria o blur a cada quadro, nas três
+     abas — era o que travava o gesto no iPhone. O fundo é feito de degradês
+     suaves, e no movimento a diferença quase não aparece. */
+  --desfoque: none;
 }
 
 .trilha__aba--quadro {
@@ -37,6 +39,10 @@
   inset: 0;
   height: auto;
   visibility: visible;
+  /* Cada quadro numa camada própria desde o início, e o que acontece dentro
+     dele não obriga o resto da página a se redesenhar. */
+  will-change: transform;
+  contain: layout paint;
 
   > .trilha__pagina {
     position: absolute;

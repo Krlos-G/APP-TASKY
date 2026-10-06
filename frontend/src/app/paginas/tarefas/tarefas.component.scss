@@ -8,50 +8,70 @@
     letter-spacing: var(--letra-titulo);
   }
 
-  &__nota {
-    margin: var(--esp-6) 0 0;
-    color: var(--cor-texto-fraco);
-    font-size: var(--tam-apoio);
-    text-align: center;
-  }
-
-  .itens {
-    margin-top: var(--esp-5);
+  &__vazio {
+    margin-top: var(--esp-6);
   }
 }
 
-/* Segmented control, o controle que o iOS usa para alternar vistas de uma
-   mesma lista. Os segmentos dividem a largura por igual. */
-.abas {
-  display: flex;
-  margin-top: var(--esp-4);
-  padding: 2px;
-  border-radius: 9px;
-  background: var(--cor-segmentado);
+/* A linha que abre as concluídas tem a cara dos atalhos do Resumo: nome à
+   esquerda, seta à direita - que gira para baixo quando a lista está aberta. */
+.concluidas {
+  &__alternar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--esp-3);
+    width: 100%;
+    min-height: var(--toque);
+    padding: var(--esp-2) var(--esp-4);
+    border: 0;
+    background: none;
+    color: var(--cor-texto-fraco);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
 
-  &__item {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    /* Cinco segmentos num iPhone de 375px deixam ~68px cada, e "Concluidas"
-       no SF Pro a 13px nao cabe: 12px e sem padding lateral da folga real. */
-    padding: 6px 0;
-    border-radius: 7px;
-    color: var(--cor-texto);
-    font-size: var(--tam-legenda);
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    text-align: center;
-    text-decoration: none;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  &__seta {
+    color: var(--cor-texto-fraco);
+    transition: transform var(--transicao) var(--curva);
 
-    &--ativa {
-      background: var(--cor-segmentado-ativo);
-      box-shadow:
-        0 3px 8px rgba(0, 0, 0, 0.12),
-        0 3px 1px rgba(0, 0, 0, 0.04);
-      font-weight: 600;
+    &--aberta {
+      transform: rotate(90deg);
     }
+  }
+
+  /* Abrir e fechar deslizam: a gaveta anima a altura da linha do grid, de 0fr
+     a 1fr - o jeito de animar até a altura do conteúdo que funciona no Safari. */
+  &__gaveta {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 320ms var(--curva),
+      opacity var(--transicao) var(--curva);
+
+    &--aberta {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+  }
+
+  &__dentro {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__lista {
+    margin-top: var(--esp-3);
+  }
+}
+
+/* Na primeira abertura a gaveta nasce já aberta: sem isto, ela apareceria
+   pronta em vez de deslizar. */
+@starting-style {
+  .concluidas__gaveta--aberta {
+    grid-template-rows: 0fr;
+    opacity: 0;
   }
 }

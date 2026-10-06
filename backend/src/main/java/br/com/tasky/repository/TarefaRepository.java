@@ -26,6 +26,8 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
 
     List<Tarefa> findByUsuarioIdAndStatusAndDataPlanejadaIsNull(Long usuarioId, StatusTarefa status);
 
+    List<Tarefa> findByUsuarioIdAndStatus(Long usuarioId, StatusTarefa status);
+
     List<Tarefa> findByUsuarioIdAndStatusOrderByConcluidoEmDesc(Long usuarioId, StatusTarefa status);
 
     List<Tarefa> findByUsuarioIdAndStatusAndDataPlanejadaBetween(

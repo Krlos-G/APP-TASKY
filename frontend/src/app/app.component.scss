@@ -1,4 +1,6 @@
 .app {
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
 }
 
@@ -37,6 +39,9 @@
 }
 
 .conteudo {
+  /* Ocupa a tela toda mesmo numa aba curta: o gesto entre abas e ouvido
+     aqui, e o dedo na parte vazia tambem tem de trocar de aba. */
+  flex: 1 0 auto;
   /* Nada pode alargar a pagina no celular: a barra de abas, presa as
      laterais, esticaria junto. clip e nao hidden: hidden faria do conteudo um
      conteiner de rolagem. */

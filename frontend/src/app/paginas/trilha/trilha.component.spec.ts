@@ -30,6 +30,9 @@ class HabitosFalsa {
   }
 }
 
+@Component({ selector: 'app-rotina-falsa', template: 'tela rotina' })
+class RotinaFalsa {}
+
 @Component({ selector: 'app-tarefas', template: 'tela tarefas' })
 class TarefasFalsa {
   constructor() {
@@ -44,7 +47,12 @@ describe('Trilha', () => {
   beforeEach(async () => {
     criadas = { hoje: 0, resumo: 0, habitos: 0, tarefas: 0 };
     TestBed.configureTestingModule({
-      providers: [provideRouter([{ matcher: casarAba, component: Trilha }])],
+      providers: [
+        provideRouter([
+          { matcher: casarAba, component: Trilha },
+          { path: 'rotina', component: RotinaFalsa },
+        ]),
+      ],
     });
     TestBed.overrideComponent(Trilha, {
       set: { imports: [HojeFalsa, ResumoFalso, HabitosFalsa, TarefasFalsa] },
@@ -124,7 +132,7 @@ describe('Trilha', () => {
   });
 
   describe('o gesto', () => {
-    // A tela de teste tem 1024 px de largura: um quarto dela são 256 px.
+    // A tela de teste tem 1024 px de largura: um quinto dela são 205 px.
     let agora: number;
 
     beforeEach(() => {
@@ -132,16 +140,18 @@ describe('Trilha', () => {
       vi.spyOn(performance, 'now').mockImplementation(() => agora);
     });
 
-    function dedo(tipo: string, x: number, y: number, extra: Record<string, unknown> = {}): Event {
-      const evento = new Event(tipo, { bubbles: true });
+    function toque(tipo: string, x: number, y: number, dedos = 1): Event {
+      const evento = new Event(tipo, { bubbles: true, cancelable: true });
+      const ponto = { identifier: 1, clientX: x, clientY: y };
+      const naTela = Array.from({ length: dedos }, (_, i) => ({ ...ponto, identifier: i + 1 }));
       return Object.assign(evento, {
-        clientX: x,
-        clientY: y,
-        pointerId: 1,
-        pointerType: 'touch',
-        isPrimary: true,
-        ...extra,
+        touches: tipo === 'touchend' || tipo === 'touchcancel' ? [] : naTela,
+        changedTouches: [ponto],
       });
+    }
+
+    function abaVisivel(): HTMLElement {
+      return (harness.routeNativeElement as HTMLElement).querySelector('.trilha__aba--visivel')!;
     }
 
     /** O dedo encosta, anda de x em x ao longo do tempo e solta. */
@@ -149,16 +159,16 @@ describe('Trilha', () => {
       caminho: { x: number; y?: number; ms: number }[],
       alvo?: Element,
     ): Promise<void> {
-      const onde = alvo ?? (harness.routeNativeElement as HTMLElement).querySelector('.trilha__aba--visivel')!;
+      const onde = alvo ?? abaVisivel();
       const [inicio, ...resto] = caminho;
       agora = inicio.ms;
-      onde.dispatchEvent(dedo('pointerdown', inicio.x, inicio.y ?? 400));
+      onde.dispatchEvent(toque('touchstart', inicio.x, inicio.y ?? 400));
       for (const ponto of resto) {
         agora = ponto.ms;
-        onde.dispatchEvent(dedo('pointermove', ponto.x, ponto.y ?? 400));
+        onde.dispatchEvent(toque('touchmove', ponto.x, ponto.y ?? 400));
       }
       const fim = caminho[caminho.length - 1];
-      onde.dispatchEvent(dedo('pointerup', fim.x, fim.y ?? 400));
+      onde.dispatchEvent(toque('touchend', fim.x, fim.y ?? 400));
       await new Promise((pronto) => setTimeout(pronto));
       harness.detectChanges();
     }
@@ -178,6 +188,40 @@ describe('Trilha', () => {
 
       expect(rota()).toBe('/resumo');
       expect(visiveis()).toEqual(['tela resumo']);
+    });
+
+    it('vale tambem na area vazia abaixo de uma aba curta', async () => {
+      await ir('/hoje');
+      // O toque cai fora da trilha: na área do conteúdo que a aba não ocupa.
+      const areaVazia = (harness.routeNativeElement as HTMLElement).parentElement!;
+
+      await deslizar(
+        [
+          { x: 600, ms: 0 },
+          { x: 580, ms: 100 },
+          { x: 300, ms: 800 },
+        ],
+        areaVazia,
+      );
+
+      expect(rota()).toBe('/resumo');
+    });
+
+    it('fora das abas o gesto se desliga: deslizar em Rotina nao navega', async () => {
+      await ir('/hoje');
+      const area = (harness.routeNativeElement as HTMLElement).parentElement!;
+
+      await ir('/rotina');
+      await deslizar(
+        [
+          { x: 600, ms: 0 },
+          { x: 580, ms: 100 },
+          { x: 300, ms: 800 },
+        ],
+        area,
+      );
+
+      expect(rota()).toBe('/rotina');
     });
 
     it('deslizar para a direita volta para a aba anterior', async () => {
@@ -242,14 +286,36 @@ describe('Trilha', () => {
       expect(rota()).toBe('/hoje');
     });
 
-    it('o mouse nao arrasta a tela, para nao brigar com a selecao de texto', async () => {
+    it('o deslize de lado e do app: a pagina nao rola junto', async () => {
       await ir('/hoje');
-      const aba = (harness.routeNativeElement as HTMLElement).querySelector('.trilha__aba--visivel')!;
+      abaVisivel().dispatchEvent(toque('touchstart', 600, 400));
 
-      aba.dispatchEvent(dedo('pointerdown', 600, 400, { pointerType: 'mouse' }));
-      aba.dispatchEvent(dedo('pointermove', 580, 400, { pointerType: 'mouse' }));
-      aba.dispatchEvent(dedo('pointermove', 200, 400, { pointerType: 'mouse' }));
-      aba.dispatchEvent(dedo('pointerup', 200, 400, { pointerType: 'mouse' }));
+      // Inclinado, mas mais de lado que de pe: antes o iPhone virava isto em rolagem.
+      const inclinado = toque('touchmove', 590, 393);
+      abaVisivel().dispatchEvent(inclinado);
+
+      expect(inclinado.defaultPrevented).toBe(true);
+      abaVisivel().dispatchEvent(toque('touchend', 590, 393));
+    });
+
+    it('o arrasto vertical continua sendo rolagem da pagina', async () => {
+      await ir('/hoje');
+      abaVisivel().dispatchEvent(toque('touchstart', 600, 400));
+
+      const vertical = toque('touchmove', 596, 380);
+      abaVisivel().dispatchEvent(vertical);
+
+      expect(vertical.defaultPrevented).toBe(false);
+      abaVisivel().dispatchEvent(toque('touchend', 596, 380));
+    });
+
+    it('dois dedos sao pinca, nao arrastam a tela', async () => {
+      await ir('/hoje');
+
+      abaVisivel().dispatchEvent(toque('touchstart', 600, 400, 2));
+      abaVisivel().dispatchEvent(toque('touchmove', 580, 400, 2));
+      abaVisivel().dispatchEvent(toque('touchmove', 200, 400, 2));
+      abaVisivel().dispatchEvent(toque('touchend', 200, 400));
       await new Promise((pronto) => setTimeout(pronto));
 
       expect(rota()).toBe('/hoje');

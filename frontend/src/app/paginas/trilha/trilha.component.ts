@@ -1,8 +1,10 @@
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   ElementRef,
   NgZone,
+  afterNextRender,
   inject,
   signal,
   viewChildren,
@@ -12,7 +14,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AbaVisivel } from '../../core/ui/aba-visivel';
 import { ABAS, indiceDaAba } from '../../core/ui/abas';
-import { Eixo, decidirEixo, deveTrocar } from '../../core/ui/gestos';
+import { Amostra, Eixo, decidirEixo, deveTrocar, velocidadeRecente } from '../../core/ui/gestos';
 import { PilulaDaBarra } from '../../core/ui/pilula-da-barra';
 import { Habitos } from '../habitos/habitos.component';
 import { Hoje } from '../hoje/hoje.component';
@@ -32,16 +34,15 @@ interface Movimento {
 }
 
 interface Gesto {
-  pointerId: number;
+  /** O dedo que começou o gesto, entre os que estiverem na tela. */
+  dedo: number;
   inicioX: number;
   inicioY: number;
   eixo: Eixo | null;
   dx: number;
   /** O quanto as abas andaram de fato: igual ao dx, menos nas pontas. */
   deslocamento: number;
-  ultimoX: number;
-  ultimoT: number;
-  velocidade: number;
+  amostras: Amostra[];
   largura: number;
   quadros: number[];
   pedido: number | null;
@@ -86,25 +87,49 @@ export class Trilha {
       .url.pipe(takeUntilDestroyed())
       .subscribe((segmentos) => this.abrir(indiceDaAba('/' + (segmentos[0]?.path ?? ''))));
 
-    // O dedo fica fora do Angular: a cada movimento ele conferiria o app
-    // inteiro, e era isso que deixava o gesto pesado no iPhone.
+    // O gesto vale na área inteira do conteúdo, e não só na trilha: numa aba
+    // curta, a trilha acaba no meio da tela, e o dedo abaixo dela não era
+    // ouvido. Por isso escuta o pai - que só existe depois do primeiro desenho.
+    const destruir = inject(DestroyRef);
+    afterNextRender(() => destruir.onDestroy(this.ouvir(this.palco.parentElement ?? this.palco)));
+  }
+
+  /**
+   * O dedo fica fora do Angular: a cada movimento ele conferiria o app
+   * inteiro, e era isso que deixava o gesto pesado no iPhone. Eventos de
+   * toque, e não de ponteiro: só com eles dá para impedir a rolagem quando o
+   * dedo se decide pelo lado - e o move não pode ser passivo para isso.
+   *
+   * @returns quem desliga tudo, quando a trilha sair da tela
+   */
+  private ouvir(area: HTMLElement): () => void {
+    const comecar = (evento: TouchEvent) => this.comecar(evento);
+    const mover = (evento: TouchEvent) => this.mover(evento);
+    const soltar = (evento: TouchEvent) => this.soltar(evento);
+    const cancelar = (evento: TouchEvent) => this.soltar(evento, true);
+    // O dedo solta sobre um link depois de arrastar; o clique dele não vale.
+    const clicar = (evento: MouseEvent) => {
+      if (this.engolirClique) {
+        evento.preventDefault();
+        evento.stopPropagation();
+      }
+    };
+
     this.zona.runOutsideAngular(() => {
-      this.palco.addEventListener('pointerdown', (evento) => this.comecar(evento));
-      this.palco.addEventListener('pointermove', (evento) => this.mover(evento));
-      this.palco.addEventListener('pointerup', (evento) => this.soltar(evento));
-      this.palco.addEventListener('pointercancel', (evento) => this.soltar(evento, true));
-      // O dedo solta sobre um link depois de arrastar; o clique dele não vale.
-      this.palco.addEventListener(
-        'click',
-        (evento) => {
-          if (this.engolirClique) {
-            evento.preventDefault();
-            evento.stopPropagation();
-          }
-        },
-        true,
-      );
+      area.addEventListener('touchstart', comecar, { passive: true });
+      area.addEventListener('touchmove', mover, { passive: false });
+      area.addEventListener('touchend', soltar);
+      area.addEventListener('touchcancel', cancelar);
+      area.addEventListener('click', clicar, true);
     });
+
+    return () => {
+      area.removeEventListener('touchstart', comecar);
+      area.removeEventListener('touchmove', mover);
+      area.removeEventListener('touchend', soltar);
+      area.removeEventListener('touchcancel', cancelar);
+      area.removeEventListener('click', clicar, true);
+    };
   }
 
   // --------------------------------------------------------- troca pela URL
@@ -154,43 +179,48 @@ export class Trilha {
 
   // ---------------------------------------------------------------- o dedo
 
-  private comecar(evento: PointerEvent): void {
-    // Só o dedo desliza (o mouse seleciona texto), e nunca a partir de um
-    // campo: lá o gesto é editar, não trocar de aba.
+  private comecar(evento: TouchEvent): void {
+    // Um segundo dedo é pinça: o gesto em curso desiste.
+    if (evento.touches.length !== 1) {
+      if (this.gesto?.eixo === 'horizontal') {
+        this.soltar(evento, true);
+      }
+      this.gesto = null;
+      return;
+    }
+    // Nunca a partir de um campo: lá o gesto é editar, não trocar de aba.
     if (
-      evento.pointerType === 'mouse' ||
-      !evento.isPrimary ||
       this.animacoes.length > 0 ||
       this.visivel() < 0 ||
       (evento.target as Element).closest('form, input, textarea, select')
     ) {
       return;
     }
+    const toque = evento.touches[0];
     this.gesto = {
-      pointerId: evento.pointerId,
-      inicioX: evento.clientX,
-      inicioY: evento.clientY,
+      dedo: toque.identifier,
+      inicioX: toque.clientX,
+      inicioY: toque.clientY,
       eixo: null,
       dx: 0,
       deslocamento: 0,
-      ultimoX: evento.clientX,
-      ultimoT: performance.now(),
-      velocidade: 0,
+      amostras: [{ t: performance.now(), x: toque.clientX }],
       largura: 0,
       quadros: [],
       pedido: null,
     };
   }
 
-  private mover(evento: PointerEvent): void {
+  private mover(evento: TouchEvent): void {
     const gesto = this.gesto;
-    if (!gesto || evento.pointerId !== gesto.pointerId) {
+    const toque = gesto && acharDedo(evento.touches, gesto.dedo);
+    if (!gesto || !toque) {
       return;
     }
-    const dx = evento.clientX - gesto.inicioX;
+    const dx = toque.clientX - gesto.inicioX;
 
     if (gesto.eixo === null) {
-      gesto.eixo = decidirEixo(dx, evento.clientY - gesto.inicioY);
+      gesto.eixo = decidirEixo(dx, toque.clientY - gesto.inicioY);
       if (gesto.eixo === 'vertical') {
         this.gesto = null;
         return;
@@ -201,10 +231,12 @@ export class Trilha {
       this.pegar(gesto);
     }
 
-    const agora = performance.now();
-    gesto.velocidade = (evento.clientX - gesto.ultimoX) / Math.max(1, agora - gesto.ultimoT);
-    gesto.ultimoX = evento.clientX;
-    gesto.ultimoT = agora;
+    // O gesto agora é do app: sem isto, o iPhone transformaria um arrasto um
+    // pouco inclinado em rolagem e cancelaria a troca de aba no meio.
+    if (evento.cancelable) {
+      evento.preventDefault();
+    }
+    registrar(gesto, toque.clientX);
     gesto.dx = dx;
 
     // Um desenho por quadro da tela, por mais eventos que o dedo mande.
@@ -219,12 +251,6 @@ export class Trilha {
     const atual = this.visivel();
     gesto.quadros = [atual - 1, atual, atual + 1].filter((i) => i >= 0 && i < ABAS.length);
     gesto.largura = this.montarPalco(atual, gesto.quadros);
-    try {
-      this.palco.setPointerCapture?.(gesto.pointerId);
-    } catch {
-      // O ponteiro já não está ativo (o navegador assumiu o toque): o gesto
-      // segue sem a captura, e o pointercancel que vem a seguir desfaz tudo.
-    }
   }
 
   private seguirDedo(gesto: Gesto): void {
@@ -240,9 +266,10 @@ export class Trilha {
     this.pilula.mover(Math.min(ABAS.length - 1, Math.max(0, naBarra)));
   }
 
-  private soltar(evento: PointerEvent, cancelado = false): void {
+  private soltar(evento: TouchEvent, cancelado = false): void {
     const gesto = this.gesto;
-    if (!gesto || evento.pointerId !== gesto.pointerId) {
+    const toque = gesto && acharDedo(evento.changedTouches, gesto.dedo);
+    if (!gesto || (!toque && !cancelado)) {
       return;
     }
     this.gesto = null;
@@ -251,6 +278,10 @@ export class Trilha {
     }
     if (gesto.pedido !== null) {
       cancelAnimationFrame(gesto.pedido);
+    }
+    if (toque) {
+      registrar(gesto, toque.clientX);
+      gesto.dx = toque.clientX - gesto.inicioX;
     }
     this.seguirDedo(gesto);
 
@@ -263,7 +294,7 @@ export class Trilha {
       !cancelado &&
       vizinha >= 0 &&
       vizinha < ABAS.length &&
-      deveTrocar(gesto.dx, gesto.largura, gesto.velocidade);
+      deveTrocar(gesto.dx, gesto.largura, velocidadeRecente(gesto.amostras, performance.now()));
 
     this.enfileirar(() => this.assentar(gesto, troca ? vizinha : atual));
   }
@@ -373,6 +404,24 @@ export class Trilha {
 
   private elementos(): HTMLElement[] {
     return this.abas().map((aba) => aba.nativeElement);
+  }
+}
+
+function acharDedo(toques: TouchList, dedo: number): Touch | null {
+  for (let i = 0; i < toques.length; i++) {
+    if (toques[i].identifier === dedo) {
+      return toques[i];
+    }
+  }
+  return null;
+}
+
+/** Guarda só o fim do caminho: a velocidade usa os últimos 100 ms. */
+function registrar(gesto: Gesto, x: number): void {
+  const agora = performance.now();
+  gesto.amostras.push({ t: agora, x });
+  while (gesto.amostras.length > 2 && gesto.amostras[0].t < agora - 200) {
+    gesto.amostras.shift();
   }
 }
 

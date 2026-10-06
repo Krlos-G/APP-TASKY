@@ -3,73 +3,117 @@
     <h1 class="tarefas__titulo">Tarefas</h1>
   </header>
 
-  <!-- O filtro continua morando na URL; o segmented control e so a cara dele. -->
-  <nav class="abas" aria-label="Filtros de tarefa">
-    @for (f of filtros; track f.valor) {
-      <a
-        class="abas__item"
-        routerLink="/tarefas"
-        [queryParams]="{ filtro: f.valor }"
-        [class.abas__item--ativa]="filtro() === f.valor"
-        [attr.aria-current]="filtro() === f.valor ? 'page' : null"
-      >
-        {{ f.rotulo }}
-      </a>
-    }
-  </nav>
-
   @if (erro()) {
     <p class="alerta" role="alert">{{ erro() }}</p>
   }
 
   @if (carregando()) {
     <app-esqueleto tipo="lista" [quantidade]="4" />
-  } @else if (tarefas().length === 0) {
-    <p class="tarefas__nota">{{ mensagemVazia() }}</p>
   } @else {
-    <ul class="itens">
-      @for (tarefa of tarefas(); track tarefa.id) {
-        <li class="item" [class.item--resolvido]="tarefa.status === 'FEITA'">
-          <button
-            class="item__marca"
-            type="button"
-            [class.item__marca--feito]="tarefa.status === 'FEITA'"
-            [attr.aria-pressed]="tarefa.status === 'FEITA'"
-            [attr.aria-label]="
-              (tarefa.status === 'FEITA' ? 'Desfazer ' : 'Concluir ') + tarefa.titulo
-            "
-            (click)="alternar(tarefa)"
-          >
-            @if (tarefa.status === 'FEITA') {
-              <app-icone nome="check" [tamanho]="15" />
-            }
-          </button>
-
-          <a
-            class="item__corpo"
-            [routerLink]="['/tarefas', tarefa.id]"
-            [queryParams]="{ origem: origem() }"
-          >
-            <span class="item__nome">{{ tarefa.titulo }}</span>
-            @if (detalhe(tarefa)) {
-              <span class="item__detalhe">{{ detalhe(tarefa) }}</span>
-            }
-          </a>
-
-          @if (tarefa.vencida) {
-            <span class="selo">vencida</span>
+    @if (pendentes().length === 0) {
+      <div class="vazio-cartao tarefas__vazio">
+        <p class="vazio-cartao__titulo">Nada por fazer</p>
+        <p class="vazio-cartao__nota">
+          @if (concluidas().length > 0) {
+            Tudo em dia. As concluídas estão logo abaixo.
+          } @else {
+            Toque no + para anotar a primeira tarefa.
           }
-        </li>
-      }
-    </ul>
+        </p>
+      </div>
+    }
+
+    @for (secao of secoes(); track secao.chave) {
+      <section class="secao">
+        <h2 class="secao__titulo" [class.secao__titulo--alerta]="secao.alerta">
+          {{ secao.titulo }}
+        </h2>
+        <ul class="itens">
+          @for (tarefa of secao.tarefas; track tarefa.id) {
+            <ng-container *ngTemplateOutlet="linha; context: { $implicit: tarefa }" />
+          }
+        </ul>
+      </section>
+    }
+
+    @if (concluidas().length > 0) {
+      <section class="secao concluidas">
+        <ul class="itens">
+          <li class="item item--simples item--link">
+            <button
+              class="concluidas__alternar"
+              type="button"
+              [attr.aria-expanded]="mostrandoConcluidas()"
+              (click)="alternarConcluidas()"
+            >
+              <span class="item__nome">Concluídas ({{ concluidas().length }})</span>
+              <app-icone
+                class="concluidas__seta"
+                [class.concluidas__seta--aberta]="mostrandoConcluidas()"
+                nome="chevron"
+                [tamanho]="18"
+              />
+            </button>
+          </li>
+        </ul>
+
+        @if (concluidasJaAbertas()) {
+          <div
+            class="concluidas__gaveta"
+            [class.concluidas__gaveta--aberta]="mostrandoConcluidas()"
+            [attr.inert]="mostrandoConcluidas() ? null : ''"
+          >
+            <div class="concluidas__dentro">
+              <ul class="itens concluidas__lista">
+                @for (tarefa of concluidas(); track tarefa.id) {
+                  <ng-container *ngTemplateOutlet="linha; context: { $implicit: tarefa }" />
+                }
+              </ul>
+            </div>
+          </div>
+        }
+      </section>
+    }
   }
 
   <a
     class="adicionar"
     routerLink="/tarefas/nova"
-    [queryParams]="{ origem: origem() }"
+    [queryParams]="{ origem: '/tarefas' }"
     aria-label="Nova tarefa"
   >
     <app-icone nome="mais" [tamanho]="26" />
   </a>
 </section>
+
+<ng-template #linha let-tarefa>
+  <li class="item" [class.item--resolvido]="tarefa.status === 'FEITA'">
+    <button
+      class="item__marca"
+      type="button"
+      [class.item__marca--feito]="tarefa.status === 'FEITA'"
+      [attr.aria-pressed]="tarefa.status === 'FEITA'"
+      [attr.aria-label]="(tarefa.status === 'FEITA' ? 'Desfazer ' : 'Concluir ') + tarefa.titulo"
+      (click)="alternar(tarefa)"
+    >
+      @if (tarefa.status === 'FEITA') {
+        <app-icone nome="check" [tamanho]="15" />
+      }
+    </button>
+
+    <a
+      class="item__corpo"
+      [routerLink]="['/tarefas', tarefa.id]"
+      [queryParams]="{ origem: '/tarefas' }"
+    >
+      <span class="item__nome">{{ tarefa.titulo }}</span>
+      @if (detalhe(tarefa)) {
+        <span class="item__detalhe">{{ detalhe(tarefa) }}</span>
+      }
+    </a>
+
+    @if (tarefa.vencida) {
+      <span class="selo">vencida</span>
+    }
+  </li>
+</ng-template>

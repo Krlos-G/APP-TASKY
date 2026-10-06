@@ -97,7 +97,9 @@
   gap: var(--esp-3);
   width: 100%;
   min-height: var(--toque);
-  padding: var(--esp-2) 0;
+  /* A linha-link não tem padding próprio (vai para dentro do <a>): sem o
+     lateral aqui, o ícone encostava na borda do cartão. */
+  padding: var(--esp-2) var(--esp-4);
   color: inherit;
   text-decoration: none;
 
