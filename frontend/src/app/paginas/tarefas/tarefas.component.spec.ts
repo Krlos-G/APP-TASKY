@@ -7,9 +7,13 @@ import {
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { Tarefas } from './tarefas.component';
+import { Tarefa } from '../../core/tarefas/tarefa.models';
+import { TimeProvider } from '../../core/tempo/time-provider.service';
 import { AbaVisivel } from '../../core/ui/aba-visivel';
 import { casarAba } from '../../core/ui/abas';
-import { Tarefa } from '../../core/tarefas/tarefa.models';
+
+/** Quarta-feira. */
+const HOJE = '2026-09-16';
 
 function tarefa(parcial: Partial<Tarefa> = {}): Tarefa {
   return {
@@ -19,7 +23,7 @@ function tarefa(parcial: Partial<Tarefa> = {}): Tarefa {
     prioridade: 'MEDIA',
     minutosEstimados: null,
     dataLimite: null,
-    dataPlanejada: '2026-09-16',
+    dataPlanejada: HOJE,
     horaPlanejada: null,
     horaLembrete: null,
     status: 'A_FAZER',
@@ -40,6 +44,7 @@ describe('Tarefas', () => {
         provideRouter([{ matcher: casarAba, component: Tarefas }]),
         provideHttpClient(),
         provideHttpClientTesting(),
+        { provide: TimeProvider, useValue: { hojeIso: () => HOJE } },
       ],
     });
     http = TestBed.inject(HttpTestingController);
@@ -47,88 +52,111 @@ describe('Tarefas', () => {
 
   afterEach(() => http.verify());
 
-  async function abrir(url: string, filtroEsperado: string, lista: Tarefa[]) {
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl(url);
+  function responder(pendentes: Tarefa[], concluidas: Tarefa[] = []): void {
     http
-      .expectOne((r) => r.url === '/api/v1/tarefas' && r.params.get('filtro') === filtroEsperado)
-      .flush(lista);
-    harness.detectChanges();
-    return harness;
+      .expectOne((r) => r.url === '/api/v1/tarefas' && r.params.get('filtro') === 'PENDENTES')
+      .flush(pendentes);
+    http
+      .expectOne((r) => r.url === '/api/v1/tarefas' && r.params.get('filtro') === 'CONCLUIDAS')
+      .flush(concluidas);
   }
 
-  function texto(harness: RouterTestingHarness): string {
-    return harness.routeNativeElement?.textContent ?? '';
+  async function abrir(pendentes: Tarefa[], concluidas: Tarefa[] = []) {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/tarefas');
+    responder(pendentes, concluidas);
+    harness.detectChanges();
+    return harness;
   }
 
   function elemento(harness: RouterTestingHarness): HTMLElement {
     return harness.routeNativeElement as HTMLElement;
   }
 
-  it('nascendo escondida na trilha, ja carrega o filtro padrao', async () => {
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/hoje');
+  function texto(harness: RouterTestingHarness): string {
+    return elemento(harness).textContent ?? '';
+  }
 
-    http
-      .expectOne((r) => r.url === '/api/v1/tarefas' && r.params.get('filtro') === 'HOJE')
-      .flush([]);
-  });
+  function titulos(harness: RouterTestingHarness): string[] {
+    return Array.from(elemento(harness).querySelectorAll('.secao__titulo')).map(
+      (titulo) => titulo.textContent?.trim() ?? '',
+    );
+  }
 
-  it('viva e escondida na trilha, nao reage a URL das outras abas', async () => {
-    const harness = await abrir('/tarefas?filtro=ATRASADAS', 'ATRASADAS', []);
-
-    await harness.navigateByUrl('/hoje');
-
-    http.expectNone((r) => r.url === '/api/v1/tarefas');
-  });
-
-  it('ao voltar a ficar visivel, atualiza o mesmo filtro sem esqueleto', async () => {
-    const harness = await abrir('/tarefas?filtro=ATRASADAS', 'ATRASADAS', [tarefa()]);
-
-    TestBed.inject(AbaVisivel).avisar('/tarefas');
-    harness.detectChanges();
-    expect(elemento(harness).querySelector('app-esqueleto')).toBeNull();
-
-    http
-      .expectOne((r) => r.url === '/api/v1/tarefas' && r.params.get('filtro') === 'ATRASADAS')
-      .flush([tarefa({ titulo: 'Pagar a conta' })]);
-    harness.detectChanges();
-
-    expect(texto(harness)).toContain('Pagar a conta');
-  });
-
-  it('sem filtro na URL, abre na aba Hoje', async () => {
-    const harness = await abrir('/tarefas', 'HOJE', []);
-
-    expect(texto(harness)).toContain('Nada planejado para hoje.');
-    expect(elemento(harness).querySelector('.abas__item--ativa')?.textContent).toContain('Hoje');
-  });
-
-  it('o filtro vem da URL', async () => {
-    const harness = await abrir('/tarefas?filtro=ATRASADAS', 'ATRASADAS', [
-      tarefa({ dataPlanejada: '2026-09-15', horaPlanejada: '09:00:00', atrasada: true }),
+  it('mostra as tarefas por quando, com as atrasadas em alerta', async () => {
+    const harness = await abrir([
+      tarefa({ id: 1, titulo: 'Velha', dataPlanejada: '2026-09-10', atrasada: true }),
+      tarefa({ id: 2, titulo: 'De hoje', horaPlanejada: '14:30:00' }),
+      tarefa({ id: 3, titulo: 'De amanha', dataPlanejada: '2026-09-17' }),
+      tarefa({ id: 4, titulo: 'Algum dia', dataPlanejada: null }),
     ]);
 
-    expect(elemento(harness).querySelector('.abas__item--ativa')?.textContent).toContain(
+    expect(titulos(harness)).toEqual(['Atrasadas', 'Hoje', 'Amanhã', 'Sem data']);
+    expect(elemento(harness).querySelector('.secao__titulo--alerta')?.textContent).toContain(
       'Atrasadas',
     );
-    // Fora da aba Hoje, a data precisa aparecer.
-    expect(texto(harness)).toContain('15/09 09:00');
-  });
-
-  it('filtro desconhecido na URL cai em Hoje em vez de ir ao servidor', async () => {
-    await abrir('/tarefas?filtro=TODAS', 'HOJE', []);
-  });
-
-  it('na aba Hoje mostra so o horario, sem repetir a data', async () => {
-    const harness = await abrir('/tarefas', 'HOJE', [tarefa({ horaPlanejada: '14:30:00' })]);
-
+    // A atrasada diz de quando era; a de hoje, só o horário.
+    expect(texto(harness)).toContain('de 10/09');
     expect(texto(harness)).toContain('14:30');
     expect(texto(harness)).not.toContain('16/09');
   });
 
-  it('concluir troca a tarefa no lugar, sem tira-la da lista', async () => {
-    const harness = await abrir('/tarefas?filtro=ATRASADAS', 'ATRASADAS', [tarefa()]);
+  it('sem nada por fazer, a tela convida a criar a primeira', async () => {
+    const harness = await abrir([]);
+
+    expect(texto(harness)).toContain('Nada por fazer');
+    expect(texto(harness)).toContain('Toque no + para anotar a primeira tarefa.');
+  });
+
+  it('concluidas ficam recolhidas no fim, com a contagem', async () => {
+    const harness = await abrir(
+      [tarefa()],
+      [
+        tarefa({ id: 8, titulo: 'Feita ontem', status: 'FEITA' }),
+        tarefa({ id: 9, titulo: 'Feita antes', status: 'FEITA' }),
+      ],
+    );
+    const alternar = elemento(harness).querySelector('.concluidas__alternar') as HTMLButtonElement;
+
+    expect(alternar.textContent).toContain('Concluídas (2)');
+    expect(alternar.getAttribute('aria-expanded')).toBe('false');
+    expect(texto(harness)).not.toContain('Feita ontem');
+
+    alternar.click();
+    harness.detectChanges();
+
+    expect(alternar.getAttribute('aria-expanded')).toBe('true');
+    expect(texto(harness)).toContain('Feita ontem');
+  });
+
+  it('fechar recolhe as concluidas, e o que ficou escondido nao e alcancavel', async () => {
+    const harness = await abrir([tarefa()], [tarefa({ id: 8, titulo: 'Feita', status: 'FEITA' })]);
+    const alternar = elemento(harness).querySelector('.concluidas__alternar') as HTMLButtonElement;
+
+    alternar.click();
+    harness.detectChanges();
+    const gaveta = elemento(harness).querySelector('.concluidas__gaveta') as HTMLElement;
+    expect(gaveta.classList).toContain('concluidas__gaveta--aberta');
+    expect(gaveta.hasAttribute('inert')).toBe(false);
+
+    alternar.click();
+    harness.detectChanges();
+
+    // A lista fica, para a gaveta poder fechar deslizando - mas sem alcance.
+    expect(alternar.getAttribute('aria-expanded')).toBe('false');
+    expect(gaveta.classList).not.toContain('concluidas__gaveta--aberta');
+    expect(gaveta.hasAttribute('inert')).toBe(true);
+  });
+
+  it('com tudo feito, avisa e deixa as concluidas logo abaixo', async () => {
+    const harness = await abrir([], [tarefa({ status: 'FEITA' })]);
+
+    expect(texto(harness)).toContain('Tudo em dia');
+    expect(elemento(harness).querySelector('.concluidas__alternar')).not.toBeNull();
+  });
+
+  it('concluir deixa a tarefa no lugar, marcada', async () => {
+    const harness = await abrir([tarefa()]);
 
     (elemento(harness).querySelector('.item__marca') as HTMLButtonElement).click();
 
@@ -142,10 +170,10 @@ describe('Tarefas', () => {
     expect(itens[0].classList).toContain('item--resolvido');
   });
 
-  it('desfazer envia o DELETE da conclusao', async () => {
-    const harness = await abrir('/tarefas?filtro=CONCLUIDAS', 'CONCLUIDAS', [
-      tarefa({ status: 'FEITA' }),
-    ]);
+  it('desfazer uma concluida envia o DELETE da conclusao', async () => {
+    const harness = await abrir([], [tarefa({ status: 'FEITA' })]);
+    (elemento(harness).querySelector('.concluidas__alternar') as HTMLButtonElement).click();
+    harness.detectChanges();
 
     (elemento(harness).querySelector('.item__marca') as HTMLButtonElement).click();
 
@@ -155,7 +183,7 @@ describe('Tarefas', () => {
   });
 
   it('tarefa vencida ganha o selo; prazo futuro aparece no detalhe', async () => {
-    const harness = await abrir('/tarefas?filtro=PROXIMAS', 'PROXIMAS', [
+    const harness = await abrir([
       tarefa({ id: 1, titulo: 'Vencida', dataLimite: '2026-09-15', vencida: true }),
       tarefa({ id: 2, titulo: 'No prazo', dataLimite: '2026-09-20', prioridade: 'ALTA' }),
     ]);
@@ -163,5 +191,40 @@ describe('Tarefas', () => {
     expect(elemento(harness).querySelectorAll('.selo').length).toBe(1);
     expect(texto(harness)).toContain('prazo 20/09');
     expect(texto(harness)).toContain('prioridade alta');
+  });
+
+  it('a edicao volta para a lista', async () => {
+    const harness = await abrir([tarefa()]);
+
+    const link = elemento(harness).querySelector('.item__corpo') as HTMLAnchorElement;
+    expect(decodeURIComponent(link.getAttribute('href') ?? '')).toBe('/tarefas/1?origem=/tarefas');
+  });
+
+  it('ao voltar a ficar visivel, atualiza sem esqueleto', async () => {
+    const harness = await abrir([tarefa()]);
+
+    TestBed.inject(AbaVisivel).avisar('/tarefas');
+    harness.detectChanges();
+    expect(elemento(harness).querySelector('app-esqueleto')).toBeNull();
+
+    responder([tarefa({ titulo: 'Pagar a conta' })]);
+    harness.detectChanges();
+
+    expect(texto(harness)).toContain('Pagar a conta');
+  });
+
+  it('nascendo escondida na trilha, ja carrega a lista', async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/hoje');
+
+    responder([]);
+  });
+
+  it('trocar de aba nao busca de novo: quem atualiza e o aviso de visivel', async () => {
+    const harness = await abrir([tarefa()]);
+
+    await harness.navigateByUrl('/hoje');
+
+    http.expectNone((r) => r.url === '/api/v1/tarefas');
   });
 });

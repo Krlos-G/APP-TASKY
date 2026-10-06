@@ -60,6 +60,19 @@ Concluídas (12) ▾  ← recolhidas no fim, abrem com um toque
 - Sai o seletor de filtros e o filtro da URL; os links de edição passam a voltar para `/tarefas`.
 - Testes da tela atualizados.
 
+**Resultado (06/10):** conferido no navegador, claro e escuro, com tarefas de teste no banco
+local: Atrasadas (com "de 25/09"), Hoje, Amanhã, "sexta, 9 de outubro", "terça, 5 de janeiro de
+2027" e Sem data, e "Concluídas (9)" no fim, abrindo com a seta girando. Um achado: a linha de
+atalho do Resumo (Rotina, Ajustes), de onde o estilo da linha de concluídas foi copiado, tinha o
+ícone encostado na borda do cartão (0 px, contra 16 px das outras linhas) desde a fatia de design.
+Corrigido nos dois.
+
+**Pedido do Carlos antes do PR: animar o recolher das concluídas.** A lista fica numa gaveta que
+anima a linha do grid de `0fr` a `1fr` (o jeito de animar até a altura do conteúdo que funciona no
+Safari), com `@starting-style` para a primeira abertura também deslizar. A lista só é criada na
+primeira abertura — as concluídas acumulam — e depois fica, `inert` quando fechada, para o fechar
+também deslizar. Medido no navegador: abre 0 → 409 → 462 → 475 px; fecha 475 → 96 → 19 → 0.
+
 ## Etapa 3 — Conferência
 
 No navegador (claro, escuro, celular e desktop) e depois no seu iPhone.
