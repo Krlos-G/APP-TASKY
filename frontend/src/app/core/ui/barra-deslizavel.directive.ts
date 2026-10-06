@@ -1,4 +1,4 @@
-import { Directive, ElementRef, computed, inject, linkedSignal, signal } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, computed, inject, linkedSignal, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   NavigationCancel,
@@ -9,6 +9,7 @@ import {
 } from '@angular/router';
 import { ABAS, indiceDaAba, indiceDaSecao } from './abas';
 import { indicePelaPosicao } from './gestos';
+import { PilulaDaBarra } from './pilula-da-barra';
 
 /** O quanto o dedo anda antes de um toque virar arrasto. */
 const LIMIAR_ARRASTO = 8;
@@ -66,6 +67,22 @@ export class BarraDeslizavel {
         this.sobrescrita.set(null);
       }
     });
+
+    // O dedo arrastando a tela leva a pilula junto, escrevendo direto no
+    // elemento: o Angular so volta a mandar nela quando a navegacao comecar.
+    const desconectar = inject(PilulaDaBarra).conectar({
+      mover: (posicao) => {
+        this.elemento.classList.add('nav__trilho--arrastando');
+        this.elemento.style.setProperty('--pilula', String(posicao));
+      },
+      soltar: (destino) => {
+        // Sem a classe, a transicao volta: a pilula desliza de onde o dedo
+        // largou ate a aba escolhida.
+        this.elemento.classList.remove('nav__trilho--arrastando');
+        this.elemento.style.setProperty('--pilula', String(destino));
+      },
+    });
+    inject(DestroyRef).onDestroy(desconectar);
 
     // O arrasto termina com o dedo sobre um link; sem isto o clique dele
     // navegaria de novo. Captura, porque o link recebe o clique antes da barra.

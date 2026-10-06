@@ -84,6 +84,14 @@ trocar de aba é só pela barra.
   ela acabar.
 - A pílula da barra acompanha o dedo; "reduzir movimento" troca sem animar.
 
+**Resultado (06/10):** conferido no navegador com toques sintéticos. No meio de um arrasto de
+100 px, as três abas andam juntas (a vizinha já aparece entrando) e a pílula vai a 1,27, a caminho
+da aba seguinte. Ao soltar, a URL troca na hora e as abas terminam o movimento de onde o dedo
+largou. Arrasto curto e lento desiste e devolve a rolagem; peteleco troca; nas pontas a tela anda
+um quarto do dedo; arrasto vertical não monta quadro. A pílula recebe o arrasto direto no
+elemento (`PilulaDaBarra`), sem passar pelo Angular. Um achado: `setPointerCapture` lança erro se
+o navegador já assumiu o toque, e isso interrompia o movimento — agora o gesto segue sem a captura.
+
 ## Etapa 3 — No iPhone
 
 Você testa no dia a dia; ajustamos sensibilidade e duração com base no que sentir.

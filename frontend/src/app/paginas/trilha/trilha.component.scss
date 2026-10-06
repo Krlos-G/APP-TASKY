@@ -1,5 +1,7 @@
 :host {
   display: block;
+  /* A rolagem e o zoom ficam com o navegador; o gesto de lado é do app. */
+  touch-action: pan-y pinch-zoom;
 }
 
 /* As abas de fora continuam com caixa, só invisíveis e sem altura. Com
@@ -21,14 +23,13 @@
 }
 
 /* Durante o movimento a trilha vira um palco fixo sobre a coluna do
-   conteúdo, e as duas abas que se movem viram quadros do tamanho dele. */
+   conteúdo, e as abas que se movem viram quadros do tamanho dele. */
 :host(.trilha--movendo) {
   position: fixed;
   top: 0;
   bottom: 0;
   z-index: 1;
   overflow: hidden;
-  pointer-events: none;
 }
 
 .trilha__aba--quadro {
