@@ -1,3 +1,4 @@
+import { UrlMatcher } from '@angular/router';
 import { NomeIcone } from './icone.component';
 
 export interface Aba {
@@ -24,6 +25,15 @@ export function indiceDaAba(url: string): number {
 }
 
 /**
+ * Uma rota só para as quatro abas: trocar de aba reaproveita a trilha, em vez
+ * de destruir uma tela e criar outra.
+ */
+export const casarAba: UrlMatcher = (segmentos) =>
+  segmentos.length === 1 && indiceDaAba('/' + segmentos[0].path) >= 0
+    ? { consumed: segmentos }
+    : null;
+
+/**
  * A aba da seção: a edição de uma tarefa continua dentro de Tarefas, como um
  * detalhe aberto numa aba do iOS, que não tira a aba de selecionada.
  */
@@ -36,17 +46,4 @@ export function indiceDaSecao(url: string): number {
 export function abaVizinha(url: string, passo: 1 | -1): Aba | null {
   const indice = indiceDaAba(url);
   return indice < 0 ? null : (ABAS[indice + passo] ?? null);
-}
-
-/**
- * De que lado a tela nova entra: pelo lado em que a aba dela fica na barra.
- * Nula quando uma das pontas não é aba - aí a tela só aparece.
- */
-export function direcaoEntre(de: string, para: string): 'avanca' | 'volta' | null {
-  const origem = indiceDaAba(de);
-  const destino = indiceDaAba(para);
-  if (origem < 0 || destino < 0 || origem === destino) {
-    return null;
-  }
-  return destino > origem ? 'avanca' : 'volta';
 }

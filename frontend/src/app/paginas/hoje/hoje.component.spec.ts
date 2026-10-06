@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { Hoje } from './hoje.component';
+import { AbaVisivel } from '../../core/ui/aba-visivel';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
 import { Bloco, Dia } from '../../core/rotina/rotina.models';
 import { HabitoDoDia } from '../../core/habitos/habito.models';
@@ -185,6 +186,33 @@ describe('Hoje', () => {
     // Montar a data com numeros, e nao com new Date('2026-09-02'), evita o
     // parse em UTC que jogaria o dia para tras em fuso negativo.
     expect(texto(fixture)).toContain('2 de setembro');
+  });
+
+  describe('aba que volta a ficar visivel', () => {
+    it('atualiza o dia sem trocar a tela pelo esqueleto', () => {
+      comHora(10, 0);
+      const fixture = montar(DIA_COM_ROTINA);
+
+      TestBed.inject(AbaVisivel).avisar('/hoje');
+      fixture.detectChanges();
+      expect((fixture.nativeElement as HTMLElement).querySelector('app-esqueleto')).toBeNull();
+
+      http
+        .expectOne((r) => r.url === '/api/v1/dia')
+        .flush({ ...DIA_COM_ROTINA, habitos: [habito(1, 'Ler', 'FEITO', 1)] });
+      fixture.detectChanges();
+
+      expect(texto(fixture)).toContain('Ler');
+    });
+
+    it('aviso de outra aba nao recarrega', () => {
+      comHora(10, 0);
+      montar(DIA_COM_ROTINA);
+
+      TestBed.inject(AbaVisivel).avisar('/tarefas');
+
+      http.expectNone((r) => r.url === '/api/v1/dia');
+    });
   });
 
   describe('habitos', () => {

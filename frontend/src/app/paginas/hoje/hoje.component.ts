@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { DiaService } from '../../core/rotina/dia.service';
@@ -18,6 +19,7 @@ import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
 import { segmentosDe } from '../../core/ui/progresso';
 import { Esqueleto } from '../../core/ui/esqueleto.component';
+import { AbaVisivel } from '../../core/ui/aba-visivel';
 
 /** Onde o momento atual cai em relação aos blocos do dia. */
 type Situacao = 'antes' | 'durante' | 'entre' | 'depois' | 'sem-blocos';
@@ -127,13 +129,28 @@ export class Hoje implements OnInit {
     return data ? formatarDataPorExtenso(data) : '';
   });
 
+  constructor() {
+    inject(AbaVisivel)
+      .voltou('/hoje')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.carregar({ silencioso: true }));
+  }
+
   ngOnInit(): void {
+    this.carregar();
+  }
+
+  /** Silencioso: a tela segue mostrando o que tinha, e uma falha não a troca por um erro. */
+  private carregar({ silencioso = false } = {}): void {
     this.diaService.buscar().subscribe({
       next: (dia) => {
         this.dia.set(dia);
         this.carregando.set(false);
       },
       error: (falha: HttpErrorResponse) => {
+        if (silencioso) {
+          return;
+        }
         this.carregando.set(false);
         const corpo = falha.error as RespostaErro | null;
         this.erro.set(corpo?.erro ?? 'Não foi possível carregar o dia.');

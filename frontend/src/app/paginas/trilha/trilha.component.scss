@@ -1,0 +1,43 @@
+:host {
+  display: block;
+}
+
+/* As abas de fora continuam com caixa, só invisíveis e sem altura. Com
+   display: none, as animações de entrada das listas e do botão "+"
+   recomeçariam toda vez que a aba voltasse. */
+.trilha__aba {
+  position: absolute;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.trilha__aba--visivel {
+  position: static;
+  height: auto;
+  overflow: visible;
+  visibility: visible;
+}
+
+/* Durante o movimento a trilha vira um palco fixo sobre a coluna do
+   conteúdo, e as duas abas que se movem viram quadros do tamanho dele. */
+:host(.trilha--movendo) {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.trilha__aba--quadro {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  visibility: visible;
+
+  > .trilha__pagina {
+    position: absolute;
+  }
+}

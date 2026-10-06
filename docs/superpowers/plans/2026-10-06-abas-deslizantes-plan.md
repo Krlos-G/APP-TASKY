@@ -1,0 +1,100 @@
+# Plano — Abas que deslizam como num app nativo
+
+- **Data:** 2026-10-06
+- **Projeto:** Tasky — https://github.com/Krlos-G/APP-TASKY
+- **Depende de:** Fatia 8 (concluída). Entra antes da Fatia 9.
+- **Status:** aprovado em 06/10, mantendo o "toque no relógio sobe ao topo"
+
+---
+
+## O problema
+
+Depois de uns dias de uso no iPhone, o relato do Carlos: a navegação por gestos está **lenta, às
+vezes bugando**, e o gesto de voltar ou avançar **às vezes quebra a passagem de uma tela para a
+outra**.
+
+## O que o código mostra
+
+1. **Cada troca de aba destrói a tela e cria outra do zero.** A aba nova busca os dados no
+   servidor (o Railway fica nos EUA, ~230 ms), mostra o esqueleto, depois o conteúdo, depois a
+   animação de entrada das listas. Num app nativo as abas continuam vivas.
+2. **Ao soltar o dedo, a tela atual volta ao centro na hora, e só depois a nova entra.** Se o
+   código da aba ou os dados demoram, a tela velha parece desistir do gesto e a nova aparece um
+   instante depois. É a explicação mais provável para a "quebra".
+3. **Durante o arrasto só a tela atual se mexe**, e ao lado dela não há nada: a aba vizinha ainda
+   não existe. No Instagram, a próxima tela vem junto com o dedo.
+4. **Cada movimento do dedo faz o Angular conferir o app inteiro** (zone.js) e move a tela com
+   `left`, o que obriga o navegador a refazer o layout e o blur dos cartões a cada quadro. No
+   iPhone isso pesa: é a lentidão.
+5. Um gesto feito durante uma troca ainda em andamento calcula a vizinha a partir da tela antiga.
+
+---
+
+## A proposta: as quatro abas vivas, lado a lado
+
+- **Uma trilha** com Hoje, Resumo, Hábitos e Tarefas lado a lado, todas montadas. O dedo arrasta a
+  trilha, e a vizinha aparece junto. Ao soltar, a trilha **termina o movimento** até a aba certa —
+  sem voltar ao centro, sem tela em branco.
+- **As abas continuam vivas:** trocar não busca do zero nem mostra esqueleto. Quando uma aba fica
+  visível, ela atualiza os dados por baixo, mantendo o que já mostra até a resposta chegar —
+  marcar um hábito no Hoje e ir para Hábitos mostra o hábito marcado.
+- **Cada aba guarda a própria rolagem.**
+- **O arrasto roda fora do Angular**, com `transform` e um quadro por vez (`requestAnimationFrame`):
+  enquanto o dedo se move, o Angular nem fica sabendo.
+- A pílula da barra acompanha o arrasto da tela; tocar numa aba da barra desliza a trilha até ela.
+- **A URL continua a mesma** (`/hoje`, `/tarefas?filtro=…`): voltar da edição reabre a aba certa.
+
+## Decisões
+
+| Decisão | Escolha | Por quê |
+|---|---|---|
+| Rolagem | **A da página inteira, com a posição guardada por aba** | O Carlos quer manter o "toque no relógio sobe ao topo", que no iOS só funciona na rolagem da página. Em repouso, só a aba visível está na página. **Durante o movimento** (arrasto ou deslize), a aba atual e a vizinha viram "quadros" fixos na tela, cada um deslocado para cima pela própria rolagem; ao terminar, a aba de destino volta à página e a rolagem dela é restaurada. |
+| Botão "+" | **Continua `position: fixed`, sem mudança** | O quadro é o elemento que se move com `transform`, e ele tem o tamanho da tela: o "+" passa a se posicionar por ele e anda junto no gesto, como num app nativo. O deslocamento vertical do quadro é feito com `top`, não com `transform`, para o "+" não se posicionar pela página inteira. Foi esse cuidado que faltou ao gesto atual, que por isso usava `left`. |
+| Carregamento | **As quatro abas num pacote só** | Hoje cada uma é baixada na primeira visita. São poucos KB a mais na abertura, e o service worker já guarda tudo. |
+| Desktop | **A mesma trilha, sem gesto** | Clicar na lateral desliza para a aba. |
+| Telas fora das abas | **Como hoje** | Rotina, Ajustes e edição de tarefa não mudam. |
+| O que sai | **A diretiva atual do deslizar e a animação de entrada entre abas** | A própria trilha passa a ser a animação. |
+
+
+
+---
+
+## Etapa 1 — A trilha, sem gesto
+
+- Uma rota só para as quatro abas, que reaproveita o mesmo componente ao trocar de aba.
+- O componente da trilha: as quatro telas montadas, só a aba da URL na página, troca pela barra
+  deslizando entre os dois quadros, rolagem guardada e restaurada por aba.
+- Atualizar ao ficar visível, sem esqueleto quando já há dados.
+- Testes: trocar de aba não recria a tela; voltar a uma aba atualiza os dados; a URL acompanha a
+  aba; o filtro de Tarefas continua vindo da URL.
+
+**Resultado (06/10):** conferido no navegador. As quatro abas nascem montadas e carregam juntas.
+Tocar na barra desliza os dois quadros: a aba que sai segue mostrando o ponto onde estava rolada, e
+o "+" anda junto. No fim, a aba nova volta à página na rolagem dela — Hoje voltou nos 120 px em
+que tinha ficado — e as voltas atualizam em silêncio, sem esqueleto. No desktop o palco cobre só a
+coluna do conteúdo. Um achado no caminho: Tarefas, por só ouvir a URL dela, nascia vazia quando o
+app abria em outra aba; agora carrega o filtro padrão ao nascer. Sem o gesto antigo, até a Etapa 2
+trocar de aba é só pela barra.
+
+## Etapa 2 — O gesto
+
+- Arrasto fora do Angular, com `transform` e `requestAnimationFrame`. Reaproveita as contas de
+  `gestos.ts` (decidir o eixo; soltar decide se troca) — elas já têm testes.
+- Ao soltar, a trilha termina o movimento com a curva do iOS; um gesto durante a animação espera
+  ela acabar.
+- A pílula da barra acompanha o dedo; "reduzir movimento" troca sem animar.
+
+## Etapa 3 — No iPhone
+
+Você testa no dia a dia; ajustamos sensibilidade e duração com base no que sentir.
+
+---
+
+## Riscos
+
+| Risco | Como trato |
+|---|---|
+| A fluidez só se julga no iPhone | Cada etapa vai ao ar sozinha; o veredito é seu. |
+| O blur dos cartões custa GPU enquanto a trilha se move | Se engasgar, desligamos o blur só durante o arrasto (conferindo se pisca na volta). |
+| Rolagem dentro da aba com o teclado do iOS (Hábitos tem formulário) | Conferir no aparelho na Etapa 3. |
+| Mexe nas quatro telas principais | Os testes delas vão acusar o que mudar no carregamento. |

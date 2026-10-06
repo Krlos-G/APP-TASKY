@@ -1,0 +1,12 @@
+<div class="trilha__aba" [class.trilha__aba--visivel]="visivel() === 0" #aba>
+  <div class="trilha__pagina"><app-hoje /></div>
+</div>
+<div class="trilha__aba" [class.trilha__aba--visivel]="visivel() === 1" #aba>
+  <div class="trilha__pagina"><app-resumo /></div>
+</div>
+<div class="trilha__aba" [class.trilha__aba--visivel]="visivel() === 2" #aba>
+  <div class="trilha__pagina"><app-habitos /></div>
+</div>
+<div class="trilha__aba" [class.trilha__aba--visivel]="visivel() === 3" #aba>
+  <div class="trilha__pagina"><app-tarefas /></div>
+</div>

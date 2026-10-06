@@ -7,6 +7,8 @@ import {
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { Tarefas } from './tarefas.component';
+import { AbaVisivel } from '../../core/ui/aba-visivel';
+import { casarAba } from '../../core/ui/abas';
 import { Tarefa } from '../../core/tarefas/tarefa.models';
 
 function tarefa(parcial: Partial<Tarefa> = {}): Tarefa {
@@ -34,7 +36,8 @@ describe('Tarefas', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideRouter([{ path: 'tarefas', component: Tarefas }]),
+        // A rota da trilha: ir para /hoje deixa a tela viva e escondida, como no app.
+        provideRouter([{ matcher: casarAba, component: Tarefas }]),
         provideHttpClient(),
         provideHttpClientTesting(),
       ],
@@ -61,6 +64,38 @@ describe('Tarefas', () => {
   function elemento(harness: RouterTestingHarness): HTMLElement {
     return harness.routeNativeElement as HTMLElement;
   }
+
+  it('nascendo escondida na trilha, ja carrega o filtro padrao', async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/hoje');
+
+    http
+      .expectOne((r) => r.url === '/api/v1/tarefas' && r.params.get('filtro') === 'HOJE')
+      .flush([]);
+  });
+
+  it('viva e escondida na trilha, nao reage a URL das outras abas', async () => {
+    const harness = await abrir('/tarefas?filtro=ATRASADAS', 'ATRASADAS', []);
+
+    await harness.navigateByUrl('/hoje');
+
+    http.expectNone((r) => r.url === '/api/v1/tarefas');
+  });
+
+  it('ao voltar a ficar visivel, atualiza o mesmo filtro sem esqueleto', async () => {
+    const harness = await abrir('/tarefas?filtro=ATRASADAS', 'ATRASADAS', [tarefa()]);
+
+    TestBed.inject(AbaVisivel).avisar('/tarefas');
+    harness.detectChanges();
+    expect(elemento(harness).querySelector('app-esqueleto')).toBeNull();
+
+    http
+      .expectOne((r) => r.url === '/api/v1/tarefas' && r.params.get('filtro') === 'ATRASADAS')
+      .flush([tarefa({ titulo: 'Pagar a conta' })]);
+    harness.detectChanges();
+
+    expect(texto(harness)).toContain('Pagar a conta');
+  });
 
   it('sem filtro na URL, abre na aba Hoje', async () => {
     const harness = await abrir('/tarefas', 'HOJE', []);
