@@ -96,6 +96,32 @@ o navegador já assumiu o toque, e isso interrompia o movimento — agora o gest
 
 Você testa no dia a dia; ajustamos sensibilidade e duração com base no que sentir.
 
+**Primeira rodada (06/10): "falta fluidez e a sensibilidade requer esforço demais".** O que o
+código explicava, e o que mudou:
+
+- **O iPhone roubava o gesto.** Com `touch-action: pan-y` e eventos de ponteiro, um arrasto um
+  pouco inclinado virava rolagem, o iPhone cancelava o gesto e a tela voltava — só funcionava um
+  traço perfeitamente reto. Agora a trilha ouve **eventos de toque**, com o `touchmove` não passivo,
+  decide o lado em 6 px (antes da folga do iPhone para começar a rolar) e, decidido, chama
+  `preventDefault`: o gesto é do app.
+- **Lado vale até 45° de inclinação** (antes o lado tinha de vencer o vertical por 20%).
+- **O peteleco quase nunca contava:** a velocidade vinha só dos dois últimos movimentos, e o dedo
+  desacelera ao levantar. Agora é medida nos últimos 100 ms. Limites afrouxados: um quinto da tela
+  ou 0,3 px/ms com 20 px.
+- **Fluidez:** enquanto as abas se movem, o blur dos cartões fica desligado (`--desfoque: none` no
+  palco) — andando, cada cartão refaria o blur a cada quadro, nas três abas. Os quadros ganharam
+  camada própria (`will-change`) e `contain: layout paint`.
+
+Conferido no navegador com eventos de toque: deslize inclinado de ~31° troca; peteleco de 52 px
+que freia no fim troca; arrasto curto e lento volta; o blur some no movimento e volta igual.
+
+**Segunda observação (06/10): "em Tarefas › Hoje, da metade da tela para baixo o gesto não
+funciona".** O gesto era ouvido só na trilha, que tem a altura do conteúdo: numa aba curta, o dedo
+na parte vazia caía fora dela. Agora a trilha ouve a área inteira do conteúdo (o `main`), que
+passou a ocupar a tela toda (`.app` em coluna flexível, `.conteudo` com `flex: 1`). Como escuta um
+elemento que não é dela, a trilha se desliga ao sair da tela — um teste provou que, sem isso,
+deslizar em Rotina navegava sozinho.
+
 ---
 
 ## Riscos
