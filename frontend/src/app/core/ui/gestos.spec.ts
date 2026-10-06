@@ -1,4 +1,5 @@
-import { abaVizinha, direcaoEntre, indiceDaAba, indiceDaSecao } from './abas';
+import { UrlSegment } from '@angular/router';
+import { abaVizinha, casarAba, indiceDaAba, indiceDaSecao } from './abas';
 import { decidirEixo, deveTrocar, indicePelaPosicao } from './gestos';
 
 describe('abas', () => {
@@ -26,15 +27,21 @@ describe('abas', () => {
     expect(abaVizinha('/tarefas', 1)).toBeNull();
     expect(abaVizinha('/ajustes', 1)).toBeNull();
   });
+});
 
-  it('a tela nova entra pelo lado da aba dela na barra', () => {
-    expect(direcaoEntre('/hoje', '/habitos')).toBe('avanca');
-    expect(direcaoEntre('/tarefas?filtro=HOJE', '/resumo')).toBe('volta');
+describe('rota das abas', () => {
+  const casar = (...caminho: string[]) =>
+    casarAba(caminho.map((p) => new UrlSegment(p, {})), null!, null!);
+
+  it('as quatro abas caem na mesma rota', () => {
+    expect(casar('hoje')?.consumed.map((s) => s.path)).toEqual(['hoje']);
+    expect(casar('tarefas')).not.toBeNull();
   });
 
-  it('fora das abas, ou na mesma aba, nao ha lado', () => {
-    expect(direcaoEntre('/hoje', '/rotina')).toBeNull();
-    expect(direcaoEntre('/tarefas?filtro=HOJE', '/tarefas?filtro=ATRASADAS')).toBeNull();
+  it('o resto segue para as rotas de sempre', () => {
+    expect(casar('rotina')).toBeNull();
+    expect(casar('tarefas', 'nova')).toBeNull();
+    expect(casar('tarefas', '15')).toBeNull();
   });
 });
 

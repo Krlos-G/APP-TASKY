@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { Resumo } from './resumo.component';
+import { AbaVisivel } from '../../core/ui/aba-visivel';
 import { Resumo as ResumoDoDia } from '../../core/resumo/resumo.models';
 
 function resumo(parcial: Partial<ResumoDoDia> = {}): ResumoDoDia {
@@ -119,6 +120,19 @@ describe('Resumo', () => {
       r.textContent?.trim(),
     );
     expect(rotulosDoDia).toEqual(['hábitos']);
+  });
+
+  it('ao voltar a ficar visivel, atualiza sem trocar a tela pelo esqueleto', () => {
+    const fixture = montar(resumo());
+
+    TestBed.inject(AbaVisivel).avisar('/resumo');
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-esqueleto')).toBeNull();
+
+    http.expectOne('/api/v1/resumo').flush(resumo({ semana: { ...resumo().semana, tarefasConcluidas: 9 } }));
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('9');
   });
 
   it('o periodo da semana sai por extenso, sem repetir o mes', () => {

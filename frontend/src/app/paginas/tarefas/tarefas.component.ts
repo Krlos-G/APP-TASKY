@@ -1,14 +1,25 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { catchError, map, of, switchMap, tap } from 'rxjs';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
+import {
+  catchError,
+  distinctUntilChanged,
+  filter,
+  map,
+  merge,
+  of,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { TarefaService } from '../../core/tarefas/tarefa.service';
 import { FILTROS_TAREFA, FiltroTarefa, Tarefa } from '../../core/tarefas/tarefa.models';
 import { formatarDataCurta, formatarDuracao } from '../../core/tempo/formatos';
 import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
 import { Esqueleto } from '../../core/ui/esqueleto.component';
+import { AbaVisivel } from '../../core/ui/aba-visivel';
 
 @Component({
   imports: [Esqueleto, Icone, RouterLink],
@@ -18,7 +29,7 @@ import { Esqueleto } from '../../core/ui/esqueleto.component';
 })
 export class Tarefas {
   private readonly tarefaService = inject(TarefaService);
-  private readonly rota = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   protected readonly filtros = FILTROS_TAREFA;
   protected readonly filtro = signal<FiltroTarefa>('HOJE');
@@ -35,18 +46,41 @@ export class Tarefas {
 
   constructor() {
     // O filtro mora na URL: voltar da edição reabre a aba em que se estava.
-    // O switchMap descarta a resposta de uma aba que já foi trocada.
-    this.rota.queryParamMap
+    // Viva na trilha, a tela continua ouvindo a URL mesmo escondida - e a das
+    // outras abas não tem filtro. Por isso só vale a URL que é dela. Nascendo
+    // escondida, carrega o filtro padrão: deslizar até ela já mostra a lista.
+    const rota = inject(ActivatedRoute).snapshot;
+    const filtroInicial = filtroValido(
+      rota.url[0]?.path === 'tarefas' ? rota.queryParamMap.get('filtro') : null,
+    );
+    const filtroDaUrl = this.router.events.pipe(
+      filter((evento) => evento instanceof NavigationEnd),
+      filter(() => this.router.url.split(/[?#]/)[0] === '/tarefas'),
+      map(() => filtroValido(this.router.parseUrl(this.router.url).queryParamMap.get('filtro'))),
+      startWith(filtroInicial),
+      distinctUntilChanged(),
+    );
+
+    // O switchMap descarta a resposta de um filtro que já foi trocado.
+    merge(
+      filtroDaUrl.pipe(map((filtro) => ({ filtro, silencioso: false }))),
+      inject(AbaVisivel)
+        .voltou('/tarefas')
+        .pipe(map(() => ({ filtro: this.filtro(), silencioso: true }))),
+    )
       .pipe(
-        map((parametros) => filtroValido(parametros.get('filtro'))),
-        tap((filtro) => {
+        tap(({ filtro, silencioso }) => {
           this.filtro.set(filtro);
-          this.carregando.set(true);
+          if (!silencioso) {
+            this.carregando.set(true);
+          }
         }),
-        switchMap((filtro) =>
+        switchMap(({ filtro, silencioso }) =>
           this.tarefaService.listar(filtro).pipe(
             catchError((falha: HttpErrorResponse) => {
-              this.falhar(falha);
+              if (!silencioso) {
+                this.falhar(falha);
+              }
               return of(null);
             }),
           ),

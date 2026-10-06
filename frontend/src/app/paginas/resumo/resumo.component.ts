@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { ResumoService } from '../../core/resumo/resumo.service';
@@ -8,6 +9,7 @@ import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
 import { segmentosDe } from '../../core/ui/progresso';
 import { Esqueleto } from '../../core/ui/esqueleto.component';
+import { AbaVisivel } from '../../core/ui/aba-visivel';
 
 interface Progresso {
   feitos: number;
@@ -58,13 +60,28 @@ export class Resumo implements OnInit {
     return semana ? progresso(semana.habitosFeitos, semana.habitosCobrados) : null;
   });
 
+  constructor() {
+    inject(AbaVisivel)
+      .voltou('/resumo')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.carregar({ silencioso: true }));
+  }
+
   ngOnInit(): void {
+    this.carregar();
+  }
+
+  /** Silencioso: a tela segue mostrando o que tinha, e uma falha não a troca por um erro. */
+  private carregar({ silencioso = false } = {}): void {
     this.resumoService.ver().subscribe({
       next: (resumo) => {
         this.resumo.set(resumo);
         this.carregando.set(false);
       },
       error: (falha: HttpErrorResponse) => {
+        if (silencioso) {
+          return;
+        }
         this.carregando.set(false);
         const corpo = falha.error as RespostaErro | null;
         this.erro.set(corpo?.erro ?? 'Não foi possível carregar o resumo.');

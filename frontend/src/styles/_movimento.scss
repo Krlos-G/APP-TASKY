@@ -173,28 +173,12 @@
 
 /* ------------------------------------------------------ troca de tela */
 
-/* A tela nova entra pelo lado da aba dela na barra; fora das abas, so sobe de
-   leve. A direcao vem de uma variavel, e nao do nome da animacao: trocar o
-   nome reiniciaria a animacao da tela que ainda esta saindo, e ela piscaria. */
-:root {
-  --entrada-x: 0px;
-  --entrada-y: 10px;
-}
-
-:root[data-direcao='avanca'] {
-  --entrada-x: 18%;
-  --entrada-y: 0px;
-}
-
-:root[data-direcao='volta'] {
-  --entrada-x: -18%;
-  --entrada-y: 0px;
-}
-
+/* A tela nova sobe de leve ao entrar. Entre as quatro abas quem anima e a
+   trilha, que desliza de uma para a outra. */
 @keyframes pagina-entrar {
   from {
     opacity: 0;
-    transform: translate(var(--entrada-x), var(--entrada-y));
+    transform: translateY(10px);
   }
 }
 

@@ -1,16 +1,14 @@
 import { Component, effect, inject } from '@angular/core';
-import { NavigationStart, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
 import { AtualizacaoDoApp } from './core/pwa/atualizacao';
 import { Icone } from './core/ui/icone.component';
-import { ABAS, direcaoEntre } from './core/ui/abas';
+import { ABAS } from './core/ui/abas';
 import { BarraDeslizavel } from './core/ui/barra-deslizavel.directive';
-import { DeslizarEntreAbas } from './core/ui/deslizar-entre-abas.directive';
 import { UsuarioService } from './core/usuario/usuario.service';
 
 @Component({
-  imports: [BarraDeslizavel, DeslizarEntreAbas, Icone, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [BarraDeslizavel, Icone, RouterOutlet, RouterLink, RouterLinkActive],
   selector: 'app-root',
   styleUrl: './app.component.scss',
   templateUrl: './app.component.html',
@@ -35,20 +33,6 @@ export class App {
   protected readonly itens = ABAS;
 
   constructor() {
-    // A tela nova entra pelo lado da aba dela - marcado no começo de toda
-    // navegação, venha ela de um toque, do arrasto na barra ou do deslizar.
-    this.router.events.pipe(takeUntilDestroyed()).subscribe((evento) => {
-      if (!(evento instanceof NavigationStart)) {
-        return;
-      }
-      const direcao = direcaoEntre(this.router.url, evento.url);
-      if (direcao) {
-        document.documentElement.dataset['direcao'] = direcao;
-      } else {
-        delete document.documentElement.dataset['direcao'];
-      }
-    });
-
     // O servidor precisa do fuso gravado para disparar lembrete quando
     // ninguem esta com o app aberto - por isso o aparelho conta o dele a cada
     // sessao, em vez de a tela perguntar.

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { autenticacaoGuard, visitanteGuard } from './core/auth/auth.guard';
+import { casarAba } from './core/ui/abas';
 
 /**
  * As quatro abas principais. Rotina e Ajustes ficam acessiveis a partir do
@@ -14,34 +15,17 @@ export const routes: Routes = [
     loadComponent: () => import('./paginas/login/login.component').then((m) => m.Login),
   },
   {
-    path: 'hoje',
+    // As quatro abas numa rota só: trocar de aba reaproveita a trilha. O título
+    // de cada uma quem põe é a própria trilha.
+    matcher: casarAba,
     canActivate: [autenticacaoGuard],
-    title: 'Hoje · Tasky',
-    loadComponent: () => import('./paginas/hoje/hoje.component').then((m) => m.Hoje),
+    loadComponent: () => import('./paginas/trilha/trilha.component').then((m) => m.Trilha),
   },
   {
     path: 'rotina',
     canActivate: [autenticacaoGuard],
     title: 'Rotina · Tasky',
     loadComponent: () => import('./paginas/rotina/rotina.component').then((m) => m.Rotina),
-  },
-  {
-    path: 'resumo',
-    canActivate: [autenticacaoGuard],
-    title: 'Resumo · Tasky',
-    loadComponent: () => import('./paginas/resumo/resumo.component').then((m) => m.Resumo),
-  },
-  {
-    path: 'habitos',
-    canActivate: [autenticacaoGuard],
-    title: 'Hábitos · Tasky',
-    loadComponent: () => import('./paginas/habitos/habitos.component').then((m) => m.Habitos),
-  },
-  {
-    path: 'tarefas',
-    canActivate: [autenticacaoGuard],
-    title: 'Tarefas · Tasky',
-    loadComponent: () => import('./paginas/tarefas/tarefas.component').then((m) => m.Tarefas),
   },
   {
     path: 'ajustes',

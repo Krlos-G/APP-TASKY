@@ -5,6 +5,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { Habitos } from './habitos.component';
+import { AbaVisivel } from '../../core/ui/aba-visivel';
 import { TimeProvider } from '../../core/tempo/time-provider.service';
 import { DiaDoHabito, Habito } from '../../core/habitos/habito.models';
 
@@ -94,6 +95,21 @@ describe('Habitos', () => {
     const fixture = montar([]);
 
     expect(texto(fixture)).toContain('Nenhum hábito ainda');
+  });
+
+  it('ao voltar a ficar visivel, atualiza sem trocar a tela pelo esqueleto', () => {
+    const fixture = montar([habito({ streak: 1 })]);
+
+    TestBed.inject(AbaVisivel).avisar('/habitos');
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-esqueleto')).toBeNull();
+
+    http
+      .expectOne((r) => r.url.endsWith('/habitos') && r.method === 'GET')
+      .flush([habito({ streak: 4 })]);
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('4 dias seguidos');
   });
 
   it('mostra a agenda por extenso e a sequencia', () => {

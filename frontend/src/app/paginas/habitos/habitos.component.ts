@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HabitoService } from '../../core/habitos/habito.service';
@@ -10,6 +11,7 @@ import { RespostaErro } from '../../core/auth/auth.models';
 import { Icone } from '../../core/ui/icone.component';
 import { COR_PADRAO, CorDisponivel, CORES, coresCom } from '../../core/ui/cores';
 import { Esqueleto } from '../../core/ui/esqueleto.component';
+import { AbaVisivel } from '../../core/ui/aba-visivel';
 
 @Component({
   imports: [Esqueleto, Icone, ReactiveFormsModule],
@@ -50,19 +52,33 @@ export class Habitos implements OnInit {
     cor: [COR_PADRAO],
   });
 
+  constructor() {
+    inject(AbaVisivel)
+      .voltou('/habitos')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.carregar({ silencioso: true }));
+  }
+
   ngOnInit(): void {
     this.carregar();
   }
 
-  protected carregar(): void {
-    this.carregando.set(true);
+  /** Silencioso: a tela segue mostrando o que tinha, e uma falha não a troca por um erro. */
+  protected carregar({ silencioso = false } = {}): void {
+    if (!silencioso) {
+      this.carregando.set(true);
+    }
     this.habitoService.listar(this.mostrarArquivados()).subscribe({
       next: (habitos) => {
         this.habitos.set(habitos);
         this.carregando.set(false);
         this.erro.set(null);
       },
-      error: (e) => this.falhar(e),
+      error: (e) => {
+        if (!silencioso) {
+          this.falhar(e);
+        }
+      },
     });
   }
 
