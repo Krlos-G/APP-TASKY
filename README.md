@@ -3,6 +3,11 @@
 App pessoal de rotina, hábitos e tarefas — usado no iPhone (PWA instalado na tela de início) e no
 PC, sincronizados. Nasceu para ajudar a montar e, principalmente, a **seguir** uma rotina.
 
+> **Status (novembro de 2026):** o app está fora do ar. Ele rodou no Railway de 03/10 até o fim
+> do período grátis, e está sendo migrado para uma máquina Always Free da Oracle Cloud. O roteiro
+> está em [`docs/superpowers/plans/2026-11-09-migracao-oracle-roteiro.md`](docs/superpowers/plans/2026-11-09-migracao-oracle-roteiro.md),
+> e o que vem depois, no [ROADMAP](ROADMAP.md).
+
 ## Stack
 
 | Camada | Tecnologia |
@@ -11,7 +16,7 @@ PC, sincronizados. Nasceu para ajudar a montar e, principalmente, a **seguir** u
 | Back | Spring Boot 4.1.1, Java 21, Maven |
 | Banco | PostgreSQL 18.6, migrações com Flyway |
 | Notificações | Web Push (VAPID) |
-| Hospedagem | Railway: app e API num contêiner só, mais o PostgreSQL |
+| Hospedagem | Contêiner único (app e API) + PostgreSQL; migrando do Railway para a Oracle Cloud |
 
 ## Pré-requisitos
 
@@ -92,7 +97,11 @@ health check em <http://localhost:8080/actuator/health>.
 
 ## Produção
 
-O Tasky roda no **Railway**, em <https://app-tasky-production.up.railway.app>. Um contêiner só
+> As instruções abaixo descrevem o deploy no **Railway**, onde o Tasky rodou até novembro de 2026.
+> Elas ficam aqui como referência até a migração para a Oracle Cloud terminar; depois, esta seção
+> será reescrita para o novo servidor (com `docker-compose.prod.yml` e Caddy na frente).
+
+O Tasky rodava no **Railway**, em <https://app-tasky-production.up.railway.app>. Um contêiner só
 serve o app e a API no mesmo endereço — de propósito: o Safari bloqueia cookie de terceiro, e o
 cookie de renovação da sessão viraria um se o app e a API morassem em domínios diferentes.
 
@@ -217,6 +226,7 @@ Avançado → Dados dos Sites), porque o service worker pode servir a página an
 
 ## Documentação
 
+- [ROADMAP](ROADMAP.md) — o que está em andamento e o que vem a seguir
 - [Documento de design](docs/superpowers/specs/2026-08-30-app-rotina-pessoal-design.md) — decisões
   de arquitetura, modelo de dados, telas, notificações e escopo do MVP
 - [Planos de implementação](docs/superpowers/plans/) — um por fatia, com as decisões tomadas no
